@@ -18,8 +18,10 @@ metaReactive <- function(expr, label = NULL, domain = getDefaultReactiveDomain()
 
   this_env <- environment()
 
-  # This is definitely wrong, metaExpr may not be visible
-  expr <- rlang::expr(shinymeta:::metaExpr(!!expr))
+  # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
+  # so, because we want to keep any `!!` contained in expr intact (i.e. too
+  # early to perform expansion of expr here).
+  expr <- wrapExpr(shinymeta, metaExpr, expr, env, private = TRUE)
 
   r_meta <- reactive(expr, env = env, quoted = TRUE, domain = domain)
   r_normal <- reactive(expr, env = env, quoted = TRUE, domain = domain)
@@ -32,6 +34,7 @@ metaReactive <- function(expr, label = NULL, domain = getDefaultReactiveDomain()
     }
   }
 }
+
 
 #' @export
 metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
@@ -77,11 +80,15 @@ withMetaMode <- function(expr, mode = TRUE) {
   force(expr)
 }
 
-metaExpr <- function(x) {
+#' @export
+metaExpr <- function(x, env) {
   dynvars <- as.list(dynamicVars)
-  env <- environment()
-  x <- rlang::eval_tidy(quote(rlang::enquo(x)), dynvars, env)
-  # x <- rlang::enquo(x)
+  # x <- rlang::eval_tidy(quote(rlang::enquo(x)), dynvars, env)
+  x <- substitute(x)
+  # if (metaMode()) browser()
+  x <- expandExpr(x, dynvars, env)
+  x <- rlang::new_quosure(x, env)
+
   if (metaMode())
     rlang::quo_get_expr(x)
   else
