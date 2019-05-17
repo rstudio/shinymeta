@@ -9,22 +9,22 @@
 #' stack), instead of executing the code and returning the value, it returns the
 #' code expression.
 #' @export
-metaReactive <- function(expr, label = NULL, domain = getDefaultReactiveDomain()) {
+metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NULL, domain = getDefaultReactiveDomain()) {
 
   #expr <- rlang::enquo(expr)
   #env <- rlang::quo_get_env(expr)
-  expr <- substitute(expr)
-  env <- parent.frame()
-
-  this_env <- environment()
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
 
   # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
   # so, because we want to keep any `!!` contained in expr intact (i.e. too
   # early to perform expansion of expr here).
   expr <- wrapExpr(shinymeta, metaExpr, expr, env, private = TRUE)
 
-  r_meta <- reactive(expr, env = env, quoted = TRUE, domain = domain)
-  r_normal <- reactive(expr, env = env, quoted = TRUE, domain = domain)
+  r_meta <- reactive(expr, env = env, quoted = quoted, domain = domain)
+  r_normal <- reactive(expr, env = env, quoted = quoted, domain = domain)
 
   function() {
     if (metaMode()) {
@@ -58,6 +58,24 @@ metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
 }
 
 #' @export
+metaAction <- function(expr, env = parent.frame(), quoted = FALSE) {
+
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
+
+  # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
+  # so, because we want to keep any `!!` contained in expr intact (i.e. too
+  # early to perform expansion of expr here).
+  expr <- wrapExpr(shinymeta, metaExpr, expr, env, private = TRUE)
+
+  function() {
+    rlang::eval_tidy(expr, NULL, env)
+  }
+}
+
+#' @export
 metaMode <- local({
   isMetaMode <- FALSE
   function(value) {
@@ -81,7 +99,7 @@ withMetaMode <- function(expr, mode = TRUE) {
 }
 
 #' @export
-metaExpr <- function(x, env) {
+metaExpr <- function(x, env = parent.frame()) {
   dynvars <- as.list(dynamicVars)
   # x <- rlang::eval_tidy(quote(rlang::enquo(x)), dynvars, env)
   x <- substitute(x)

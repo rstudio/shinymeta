@@ -1,0 +1,288 @@
+---
+title: "Introduction to shinymeta"
+author: "Vignette Author"
+date: "2019-05-17"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to shinymeta}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "#>")
+options(shiny.suppressMissingContextError=TRUE)
+library(shiny)
+library(shinymeta)
+
+library(sourcetools)
+library(dplyr)
+library(styler)
+
+deparse_flatten <- function(expr, width.cutoff = 500L) {
+  if (is.call(expr) && length(expr) > 1 && identical(expr[[1]], quote(`{`))) {
+    unlist(lapply(expr[-1], deparse_flatten))
+  } else {
+    deparse(expr, width.cutoff = width.cutoff)
+  }
+}
+
+# Neither deparse() nor styler will go out of their way to break on %>%, and
+# deparse will break on other random operators instead. This function inserts
+# newlines after %>%, and replaces newlines that follow operators or commas with
+# a single space. The resulting code string will not contain indentation, and
+# must be processed further to be considered readable.
+rebreak <- function(str) {
+  if (typeof(str) == "language" || typeof(str) == "symbol") {
+    str <- deparse_flatten(str)
+  }
+  str <- paste(str, collapse = "\n")
+  tokens <- tokenize_string(str)
+  tokens$value <- paste0(tokens$value, ifelse(tokens$type == "operator" & tokens$value == "%>%", "\n", ""))
+  operator_newline <- grepl("\n", tokens$value) & tokens$type == "whitespace" & c(FALSE, head(tokens$type %in% c("comma", "operator"), -1))
+  tokens$value[operator_newline] <- " "
+  new_str <- paste(tokens$value, collapse = "")
+  gsub("\\s*\\r?\\n\\s*", "\n", new_str)
+}
+
+format_tidy_code <- function(code_str) {
+  code_str %>% rebreak() %>% style_text() %>% paste(collapse = "\n")
+}
+
+`knit_print.{` <- knit_print.call <- knit_print.name <-
+  function(x, ...) {
+    cat(format_tidy_code(x))
+  }
+```
+
+## Motivation
+
+Fundamental tension between interactive processes and reproducibility. One solution is to use interactive processes to generate a reproducible artifact. (Doesn't solve the problem of “how you got there” though.)
+
+## Other approaches (scriptgloss, phyloseq)
+
+Tradeoffs exist between ease-of-use and quality/clarity of code. All existing approaches are far from perfect IMHO, including the one I am presenting today.
+
+## Demo
+
+I can use this Shiny app interactively, there's a code preview window, and I can click this button to download a source .R or .Rmd.
+
+## Code
+
+As you can see, the code is all relatively concise, but it does involve some weird syntax. Not your typical Shiny reactives.
+
+Now let's talk about what these pieces are, and how to put them together.
+
+## Metaprogramming with Shiny
+
+Regular programming is writing code that generates actions and results.
+
+Metaprogramming is writing code that generates code.
+
+```
+regular_function() => data frame, model object, plotting to graphics device
+meta_function() => code
+```
+
+By "code" I don't mean a string, but rather, R's built-in data type for code (expressions).
+
+```
+Characters =parse()=> Expressions =eval()=> Results
+```
+
+**Hypothesis:** Let Shiny app authors write logic that is suitable for both execution (for interactive use) and exporting (for generating reproducible artifacts).
+
+### Quoting/unquoting
+
+In general terms, “quoting” is how we tell the compiler/interpreter “don’t evaluate this!”
+
+```{r}
+# This is a comment
+"# This is not a comment, because quotes"
+```
+
+The preceding is an example of string quoting--that’s what double-quote and single-quote characters do.
+
+The equivalent for metaprogramming is quoting code; instead of using double-quotes to mark a sequence of characters as a string, we use `quote()` (or `rlang::expr()`, if you prefer) to mark an expression as code.
+
+`str(cars)` will cause the structure of cars to be printed, but `quote(str(cars))` will just return the _code_ for `str(cars)`.
+
+```{r}
+str(cars)
+quote(str(cars))
+```
+
+(to be continued)
+
+## Specifics of metaprogramming with Shiny
+
+There are several types of code in Shiny that you might want to export.
+
+1. **Top-level functions:** write these in a separate file (functions.R)
+2. **Reactive expressions:** use metaReactive or metaReactive2
+3. **Observers and outputs:** extract bodies into metaAction
+4. **eventReactive/observeEvent:** ??? Probably will need metaEventReactive, that in meta mode only returns the body? For now just use regular metaReactive2 with isolate
+
+### Using `metaReactive`
+
+A `metaReactive` is like a regular reactive expression, except for two differences.
+
+First, a `metaReactive` can be called in two ways. If you call it the normal way, it calculates and returns a result as usual. But if you call it inside `withMetaMode(...)`, then instead of returning a result, it returns code.
+
+```{r}
+input <- list(
+  url = "https://raw.githubusercontent.com/rstudio/gt/master/data-raw/sza.csv",
+  rows = 5
+)
+
+r <- metaReactive({
+  read.csv(input$url) %>%
+    head(input$rows)
+})
+```
+
+If you call `r()` normally, it returns a data frame:
+```{r}
+r()
+```
+
+But if you use `withMetaMode(r())`, it returns code:
+```{r}
+withMetaMode(r())
+```
+
+Second, metaReactives are tidyeval aware, and use this capability to let you, the app author, perform some customization as to how the code should be rendered. Specifically, you can decide what parts of your code should appear in the output code verbatim, and which parts you want to replace with the value.
+
+For example, in the previous example, do you want the output code to contain `input$url` and `input$rows`? Probably not, you want the actual values instead. In that case, you need to unquote `input$url` by changing it to `!!input$url`. This doesn’t result in any different behavior when calling the metaReactive normally, but when called inside `withMetaMode`, the code will have `input$url` replaced with its value.
+
+```{r}
+r <- metaReactive({
+  read.csv(!!input$url) %>%
+    head(!!input$rows)
+})
+
+r()
+
+withMetaMode(r())
+```
+
+Now, the actual URL and number of rows have been inserted into the code.
+
+### Using metaReactive2
+
+metaReactive is used when the entire body of code in the metaReactive should be exported. But what if you want just a subset of the code to be exported, i.e. some of the code is only for interactive use?
+
+```{r}
+time <- metaReactive({
+  invalidateLater(1000)
+  Sys.time()
+})
+
+withMetaMode(time())
+```
+
+The output code contains `invalidateLater(1000); Sys.time()`. Even though we need `invalidateLater(1000)` for runtime purposes, we don't want it to be in our reproducible script, only `Sys.time()`. We can use `metaReactive2` (note: function name is subject to change!) instead:
+
+```{r}
+time <- metaReactive2({
+  invalidateLater(1000)
+  metaExpr({
+    Sys.time()
+  })
+})
+
+withMetaMode(time())
+```
+
+When using `metaReactive2`, you wrap the code you care about in `metaExpr()` and return the result. (Exercise: What if you want the output code to contain the actual time, instead of a call to Sys.time()?)
+
+### metaReactives calling metaReactives
+
+Just as reactive expressions can call reactive expressions, metaReactives can call metaReactives.
+
+```{r}
+time <- metaReactive2({
+  invalidateLater(1000)
+  metaExpr(Sys.time())
+})
+
+tomorrow <- metaReactive({
+  !!time() + (60 * 60 * 24)
+})
+
+withMetaMode(tomorrow())
+```
+
+In this example, the tomorrow metaReactive calls the time metaReactive. Just like a regular reactive expression, we have to call time like a function.
+
+Notice that calling `!!time()` turned into the code `Sys.time()`, instead of a value like <code>`r Sys.time()`</code>. This may be surprising, because in the case of `!!input$url`, it turned into a value; why doesn't `!!time()` do the same? The answer is, `time` is a metaReactive, and it too is being invoked inside of `withMetaMode` (albeit indirectly). And whenever a metaReactive is called within a `withMetaMode`, its return value is code. So `!!time()` _does_ insert the "value", so to speak, of `time`; it just so happens that, because we're in `withMetaMode`, that value happens to be code.
+
+## Combining multiple code objects into one code block
+
+Is this the best way?
+
+```{r}
+a <- quote(foo %>% bar())
+b <- quote(baz <- qux)
+
+rlang::expr({
+  !!a
+  !!b
+})
+```
+
+An alternative:
+
+```{r}
+join_code <- function(...) {
+  as.call(c(list(quote(`{`)), list(...)))
+}
+
+join_code(a, b)
+```
+
+## Reducing code duplication
+
+```{r}
+input <- list(dataset = "pressure")
+
+df <- metaReactive(
+  get(!!input$dataset, "package:datasets")
+)
+
+first <- metaReactive(!!df() %>% head(1L))
+last <- metaReactive(!!df() %>% tail(1L))
+
+withMetaMode(rlang::expr({
+  first <- !!first()
+  last <- !!last()
+}))
+```
+
+This duplication of the `get()` wouldn't pass code review, can we extract it into a variable instead?
+
+```{r}
+# TODO: I was forced to redefine first/last because the
+# copies in the last code chunk have already cached their
+# inputs, so withDynamicScope has no effect. Consider not
+# caching metaReactives at all in meta mode?
+first <- metaReactive(!!df() %>% head(1L))
+last <- metaReactive(!!df() %>% tail(1L))
+
+withDynamicScope(
+  df = constf(quote(df)),
+  {
+    withMetaMode(rlang::expr({
+      df <- !!df()
+      first <- !!first()
+      last <- !!last()
+    }))
+  }
+)
+```
+
+## Prettifying code
+## Turning code into outputs
+### Code preview pane
+### R scripts
+### Rmd reports

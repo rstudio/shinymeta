@@ -23,8 +23,12 @@ server <- function(input, output, session) {
     !!df() %>% tail(!!input$n)
   )
 
+  summarize <- metaAction({
+    summary(!!filtered())
+  })
+
   output$text <- renderPrint({
-    summary(filtered())
+    summarize()
   })
 
   output$plot <- renderPlot({
@@ -32,13 +36,21 @@ server <- function(input, output, session) {
   })
 
   output$code <- renderPrint({
-    withDynamicScope(df = constf(quote(df)), {
-      exp <- withMetaMode(rlang::expr({
-        df <- !!df()
-        top <- !!filtered()
-        bottom <- !!filtered2()
-      }))
-    })
+    exp <- withDynamicScope(
+
+      df = constf(quote(df)),
+      filtered = constf(quote(top)),
+
+      withMetaMode({
+        rlang::expr({
+          df <- !!df()
+          top <- !!filtered()
+          bottom <- !!filtered2()
+          !!summarize()
+        })
+      })
+    )
+
     styler::style_text(capture.output(print(exp)))
   })
 }
