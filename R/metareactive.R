@@ -103,8 +103,10 @@ metaExpr <- function(x, env = parent.frame()) {
   dynvars <- as.list(dynamicVars)
   # x <- rlang::eval_tidy(quote(rlang::enquo(x)), dynvars, env)
   x <- substitute(x)
-  # if (metaMode()) browser()
-  x <- expandExpr(x, dynvars, env)
+  # This line can error out in non-meta mode because dynamicVars
+  # contains symbols that are only defined in the expression
+  # provided to withMetaMode()
+  x <- expandExpr(x, if (metaMode()) dynvars else list(), env)
   x <- rlang::new_quosure(x, env)
 
   if (metaMode())
