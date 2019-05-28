@@ -6,7 +6,6 @@ constf <- function(value) {
   }
 }
 
-#' @export
 replaceInExpr <- function(expr, target, replacement) {
   if (identical(expr, target)) {
     return(replacement)

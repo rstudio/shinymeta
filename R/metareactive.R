@@ -1,3 +1,6 @@
+.globals <- new.env(parent = emptyenv())
+.globals$dynamicVars <- list()
+
 #' Create a meta-reactive expression
 #'
 #' Create a reactive that operates in one of two modes, depending on how it is
@@ -100,11 +103,10 @@ withMetaMode <- function(expr, mode = TRUE) {
 
 #' @export
 metaExpr <- function(x, env = parent.frame()) {
-  dynvars <- as.list(dynamicVars)
   # x <- rlang::eval_tidy(quote(rlang::enquo(x)), dynvars, env)
   x <- substitute(x)
   # if (metaMode()) browser()
-  x <- expandExpr(x, dynvars, env)
+  x <- expandExpr(x, .globals$dynamicVars, env)
   x <- rlang::new_quosure(x, env)
 
   if (metaMode())
@@ -113,18 +115,35 @@ metaExpr <- function(x, env = parent.frame()) {
     rlang::eval_tidy(x)
 }
 
-dynamicVars <- new.env(parent = emptyenv())
+withDynamicScope <- function(expr, ..., .list = list(...)) {
+  if (length(.list) > 0) {
+    if (is.null(names(.list)) || !all(nzchar(names(.list)))) {
+      stop("withDynamicScope invoked with unnamed vars; all vars must be named")
+    }
 
-#' @export
-withDynamicScope <- function(expr, ...) {
-  vars <- list(...)
-  mapply(function(key, val) {
-    dynamicVars[[key]] <- val
-    NULL
-  }, names(vars), vars)
+    oldVars <- .globals$dynamicVars
+    .globals$dynamicVars <- c(oldVars[setdiff(names(oldVars), names(.list))], .list)
+    on.exit(.globals$dynamicVars <- oldVars)
+  }
 
   expr
-
-  # TODO undo changes to dynamicVars
   # TODO use promise domain
+}
+
+#' @export
+expandCode <- function(expr, patchCalls = list(), indent = 0) {
+  quosure <- withMetaMode(
+    withDynamicScope(
+      {
+        rlang::enquo(expr)
+      },
+      .list = lapply(patchCalls, constf)
+    )
+  )
+
+  rlang::quo_get_expr(quosure)
+}
+
+quotedList <- function(...) {
+  enquote(...)
 }

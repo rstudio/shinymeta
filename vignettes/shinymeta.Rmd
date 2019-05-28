@@ -269,15 +269,15 @@ This duplication of the `get()` wouldn't pass code review, can we extract it int
 first <- metaReactive(!!df() %>% head(1L))
 last <- metaReactive(!!df() %>% tail(1L))
 
-withDynamicScope(
-  df = constf(quote(df)),
+expandCode(
   {
-    withMetaMode(rlang::expr({
-      df <- !!df()
-      first <- !!first()
-      last <- !!last()
-    }))
-  }
+    mydata <- !!df()
+    first <- !!first()
+    last <- !!last()
+  },
+  patchCalls = list(
+    df = quote(mydata)
+  )
 )
 ```
 
