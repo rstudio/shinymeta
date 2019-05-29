@@ -20,16 +20,11 @@ replaceInExpr <- function(expr, target, replacement) {
   expr
 }
 
-wrapExpr <- function(namespace, func, ..., private = FALSE) {
-  namespace <- substitute(namespace)
+wrapExpr <- function(func, ...) {
   func <- substitute(func)
 
   as.call(list(
-    as.call(list(
-      if (private) quote(`:::`) else quote(`::`),
-      namespace,
-      func
-    )),
+    as.call(func),
     ...
   ))
 }
@@ -39,7 +34,7 @@ wrapExpr <- function(namespace, func, ..., private = FALSE) {
 # quoted, and 2) you can specify the data/env from which !! should be
 # resolved.
 expandExpr <- function(expr, data, env) {
-  wrappedExpr <- wrapExpr(rlang, quo, expr)
+  wrappedExpr <- wrapExpr(rlang::quo, expr)
   rlang::quo_get_expr(eval(wrappedExpr, data, env))
 }
 
@@ -106,4 +101,25 @@ comment_identifier_remove <- function(x) {
   txt <- sub(paste0('^"', comment_start), "", txt)
   txt <- sub(paste0(comment_end, '"$'), "", txt)
   paste(txt, collapse = "\n")
+}
+
+reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domain = getDefaultReactiveDomain()) {
+  map <- fastmap::fastmap()
+
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
+
+  force(env)
+  force(quoted)
+  force(domain)
+
+  function(...) {
+    hash <- isolate(digest::digest(list(...), algo = "sha1"))
+    if (!map$has(hash)) {
+      map$set(hash, shiny::reactive(expr, env = env, quoted = quoted, domain = domain))
+    }
+    map$get(hash)()
+  }
 }

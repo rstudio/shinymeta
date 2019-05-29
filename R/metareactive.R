@@ -14,8 +14,6 @@
 #' @export
 metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NULL, domain = shiny::getDefaultReactiveDomain()) {
 
-  #expr <- rlang::enquo(expr)
-  #env <- rlang::quo_get_env(expr)
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
@@ -24,18 +22,9 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NUL
   # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
   # so, because we want to keep any `!!` contained in expr intact (i.e. too
   # early to perform expansion of expr here).
-  expr <- wrapExpr(shinymeta, metaExpr, expr, env, private = TRUE)
+  expr <- wrapExpr(shinymeta::metaExpr, expr, env)
 
-  r_meta <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
-  r_normal <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
-
-  function() {
-    if (metaMode()) {
-      r_meta()
-    } else {
-      r_normal()
-    }
-  }
+  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
 }
 
 
@@ -48,12 +37,25 @@ metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
     quoted <- TRUE
   }
 
-  r_meta <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
-  r_normal <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
+  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
+}
+
+metaReactiveImpl <- function(expr, env, label, domain) {
+  force(expr)
+  force(env)
+  force(label)
+  force(domain)
+
+  r_meta <- reactiveWithInputs({
+    rlang::eval_tidy(expr, NULL, env)
+  }, domain = domain)
+
+  r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = label, domain = domain)
 
   function() {
     if (metaMode()) {
-      r_meta()
+      # r_meta cache varies by dynamicVars
+      r_meta(.globals$dynamicVars)
     } else {
       r_normal()
     }
@@ -71,7 +73,7 @@ metaAction <- function(expr, env = parent.frame(), quoted = FALSE) {
   # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
   # so, because we want to keep any `!!` contained in expr intact (i.e. too
   # early to perform expansion of expr here).
-  expr <- wrapExpr(shinymeta, metaExpr, expr, env, private = TRUE)
+  expr <- wrapExpr(shinymeta::metaExpr, expr, env)
 
   function() {
     rlang::eval_tidy(expr, NULL, env)
