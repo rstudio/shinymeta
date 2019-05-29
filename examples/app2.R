@@ -24,9 +24,7 @@ server <- function(input, output, session) {
     !!df() %>% tail(!!input$n)
   })
 
-  summarize <- metaAction({
-    summary(!!filtered())
-  })
+  summarize <- metaAction(summary(!!filtered()))
 
   output$text <- renderPrint({
     summarize()
@@ -40,9 +38,7 @@ server <- function(input, output, session) {
     expandCode(
       {
         df <- !!df()
-
-        # a comment inside expandCode()
-
+        '# a comment inside expandCode()'
         top <- !!filtered()
         bottom <- !!filtered2()
         !!summarize()
