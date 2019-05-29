@@ -91,14 +91,14 @@ metaMode <- local({
 })
 
 #' @export
-withMetaMode <- function(expr, mode = TRUE) {
+withMetaMode <- function(expr, mode = TRUE, formatter = format_tidy_code) {
   origVal <- metaMode()
   if (!identical(origVal, mode)) {
     metaMode(mode)
     on.exit(metaMode(!mode))
   }
 
-  force(expr)
+  prefix_class(expr, if (mode) "shinyMetaExpr" else "shinyMetaValue")
 }
 
 #' @export
@@ -141,7 +141,21 @@ expandCode <- function(expr, patchCalls = list(), indent = 0) {
     )
   )
 
-  rlang::quo_get_expr(quosure)
+  expr <- rlang::quo_get_expr(
+    remove_class(quosure, "shinyMetaExpr")
+  )
+
+  prefix_class(expr, "shinyMetaExpr")
+}
+
+prefix_class <- function (x, y) {
+  oldClass(x) <- unique(c(y, oldClass(x)))
+  x
+}
+
+remove_class <- function(x, y) {
+  oldClass(x) <- setdiff(oldClass(x), y)
+  x
 }
 
 quotedList <- function(...) {
