@@ -77,6 +77,8 @@ rebreak <- function(str) {
       ""
     )
   )
+  # if the token appearing after a line-break is a
+  # comma/operator, remove the line-break
   operator_newline <- grepl("\n", tokens$value) &
     tokens$type == "whitespace" &
     c(FALSE, head(tokens$type %in% c("comma", "operator"), -1))
