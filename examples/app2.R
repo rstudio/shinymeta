@@ -36,19 +36,18 @@ server <- function(input, output, session) {
   })
 
   output$code <- renderPrint({
-    exp <- withDynamicScope(
-
-      df = constf(quote(df)),
-      filtered = constf(quote(top)),
-
-      withMetaMode({
-        rlang::expr({
-          df <- !!df()
-          top <- !!filtered()
-          bottom <- !!filtered2()
-          !!summarize()
-        })
-      })
+    exp <- expandCode(
+      {
+        df <- !!df()
+        top <- !!filtered()
+        bottom <- !!filtered2()
+        !!summarize()
+      },
+      patchCalls = list(
+        df = quote(df),
+        filtered = quote(top),
+        filtered2 = quote(bottom)
+      )
     )
 
     styler::style_text(capture.output(print(exp)))

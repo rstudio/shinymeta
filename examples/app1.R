@@ -28,9 +28,7 @@ server <- function(input, output, session) {
   })
 
   output$code <- renderPrint({
-    withDynamicScope(df = df, {
-      exp <- withMetaMode(filtered())
-    })
+    exp <- expandCode(!!filtered())
     styler::style_text(capture.output(print(exp)))
   })
 }
