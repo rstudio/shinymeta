@@ -12,7 +12,7 @@
 #' stack), instead of executing the code and returning the value, it returns the
 #' code expression.
 #' @export
-metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NULL, domain = getDefaultReactiveDomain()) {
+metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NULL, domain = shiny::getDefaultReactiveDomain()) {
 
   #expr <- rlang::enquo(expr)
   #env <- rlang::quo_get_env(expr)
@@ -26,8 +26,8 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NUL
   # early to perform expansion of expr here).
   expr <- wrapExpr(shinymeta, metaExpr, expr, env, private = TRUE)
 
-  r_meta <- reactive(expr, env = env, quoted = quoted, domain = domain)
-  r_normal <- reactive(expr, env = env, quoted = quoted, domain = domain)
+  r_meta <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
+  r_normal <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
 
   function() {
     if (metaMode()) {
@@ -41,15 +41,15 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NUL
 
 #' @export
 metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = getDefaultReactiveDomain()) {
+  label = NULL, domain = shiny::getDefaultReactiveDomain()) {
 
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
   }
 
-  r_meta <- reactive(expr, env = env, quoted = quoted, domain = domain)
-  r_normal <- reactive(expr, env = env, quoted = quoted, domain = domain)
+  r_meta <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
+  r_normal <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
 
   function() {
     if (metaMode()) {

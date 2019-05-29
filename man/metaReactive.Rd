@@ -5,7 +5,7 @@
 \title{Create a meta-reactive expression}
 \usage{
 metaReactive(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = getDefaultReactiveDomain())
+  label = NULL, domain = shiny::getDefaultReactiveDomain())
 }
 \description{
 Create a reactive that operates in one of two modes, depending on how it is

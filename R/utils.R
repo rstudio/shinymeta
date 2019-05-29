@@ -49,3 +49,44 @@ expandExpr <- function(expr, data, env) {
 #   env <- environment()
 #   expandExpr(quote(!!a + !!b), list(a = quote(two)), env)
 # })
+
+
+deparse_flatten <- function(expr, width.cutoff = 500L) {
+  if (is.call(expr) && length(expr) > 1 && identical(expr[[1]], quote(`{`))) {
+    paste0(vapply(expr[-1], deparse_flatten, character(1)), collapse = "\n")
+  } else {
+    paste0(deparse(expr, width.cutoff = width.cutoff), collapse = "\n")
+  }
+}
+# Neither deparse() nor styler will go out of their way to break on %>%, and
+# deparse will break on other random operators instead. This function inserts
+# newlines after %>%, and replaces newlines that follow operators or commas with
+# a single space. The resulting code string will not contain indentation, and
+# must be processed further to be considered readable.
+rebreak <- function(str) {
+  if (is.call(str) || is.symbol(str)) {
+    str <- deparse_flatten(str)
+  }
+  str <- paste(str, collapse = "\n")
+  tokens <- sourcetools::tokenize_string(str)
+  tokens$value <- paste0(
+    tokens$value,
+    ifelse(
+      tokens$type == "operator" & tokens$value == "%>%",
+      "\n",
+      ""
+    )
+  )
+  operator_newline <- grepl("\n", tokens$value) &
+    tokens$type == "whitespace" &
+    c(FALSE, head(tokens$type %in% c("comma", "operator"), -1))
+  tokens$value[operator_newline] <- " "
+  new_str <- paste(tokens$value, collapse = "")
+  gsub("\\s*\\r?\\n\\s*", "\n", new_str)
+}
+
+#' @export
+format_tidy_code <- function(code_str) {
+  code_txt <- styler::style_text(rebreak(code_str))
+  paste(code_txt, collapse = "\n")
+}
