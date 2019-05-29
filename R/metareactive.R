@@ -91,7 +91,7 @@ metaMode <- local({
 })
 
 #' @export
-withMetaMode <- function(expr, mode = TRUE, formatter = format_tidy_code) {
+withMetaMode <- function(expr, mode = TRUE) {
   origVal <- metaMode()
   if (!identical(origVal, mode)) {
     metaMode(mode)
