@@ -50,6 +50,11 @@ expandExpr <- function(expr, data, env) {
 #   expandExpr(quote(!!a + !!b), list(a = quote(two)), env)
 # })
 
+#' @export
+format_tidy_code <- function(code_str) {
+  code_txt <- styler::style_text(rebreak(code_str))
+  paste(code_txt, collapse = "\n")
+}
 
 deparse_flatten <- function(expr, width.cutoff = 500L) {
   if (is.call(expr) && length(expr) > 1 && identical(expr[[1]], quote(`{`))) {
@@ -83,25 +88,23 @@ rebreak <- function(str) {
     tokens$type == "whitespace" &
     c(FALSE, head(tokens$type %in% c("comma", "operator"), -1))
   tokens$value[operator_newline] <- " "
-
-  # if we see a string that begins with #, strip the surrounding quotes
-  isComment <- tokens$type %in% "string" &
-    grepl("^['\"]\\s*#", tokens$value)
-  for (i in which(isComment)) {
-    val <- tokens[i, "value", drop = TRUE]
-    val <- if (grepl('^"', val))
-      sub('^"', '', sub('"$', '', val))
-    else
-      sub("^'", '', sub("'$", '', val))
-    tokens[i, "value"] <- val
-  }
-
   new_str <- paste(tokens$value, collapse = "")
-  gsub("\\s*\\r?\\n\\s*", "\n", new_str)
+  new_str <- gsub("\\s*\\r?\\n\\s*", "\n", new_str)
+  commentify(new_str)
 }
 
-#' @export
-format_tidy_code <- function(code_str) {
-  code_txt <- styler::style_text(rebreak(code_str))
-  paste(code_txt, collapse = "\n")
+# If a string appears entirely on it's own line,
+# and begins with #, turn it into a comment
+commentify <- function(x) {
+  if (!is.character(x) || length(x) > 1) {
+    stop("Expected a string (character vector of length 1).")
+  }
+  txt <- strsplit(x, "\n")[[1]]
+  # Detect single-quoted comments (e.g. '# a comment')
+  isComment <- grepl("^\\s*'\\s*#.*'\\s*$", txt)
+  txt[isComment] <- sub("'$", "", sub("^'", "", txt[isComment]))
+  # Detect double-quoted comments (e.g. "# a comment")
+  isComment <- grepl('^\\s*"\\s*#.*"\\s*$', txt)
+  txt[isComment] <- sub('"$', '', sub('^"', '', txt[isComment]))
+  txt
 }
