@@ -60,15 +60,18 @@ deparse_flatten <- function(expr, width.cutoff = 500L) {
   if (is.call(expr) && length(expr) > 1 && identical(expr[[1]], quote(`{`))) {
     paste0(vapply(expr[-1], deparse_flatten, character(1)), collapse = "\n")
   } else {
+    # TODO: should this have `backtick = TRUE`?
     paste0(deparse(expr, width.cutoff = width.cutoff), collapse = "\n")
   }
 }
+
 # Neither deparse() nor styler will go out of their way to break on %>%, and
 # deparse will break on other random operators instead. This function inserts
 # newlines after %>%, and replaces newlines that follow operators or commas with
 # a single space. The resulting code string will not contain indentation, and
-# must be processed further to be considered readable.
+# must be processed fuadrther to be considered readable.
 rebreak <- function(str) {
+  str <- comment_identifier_add(str)
   if (is.call(str) || is.symbol(str)) {
     str <- deparse_flatten(str)
   }
@@ -90,21 +93,17 @@ rebreak <- function(str) {
   tokens$value[operator_newline] <- " "
   new_str <- paste(tokens$value, collapse = "")
   new_str <- gsub("\\s*\\r?\\n\\s*", "\n", new_str)
-  commentify(new_str)
+  comment_identifier_remove(new_str)
 }
 
 # If a string appears entirely on it's own line,
 # and begins with #, turn it into a comment
-commentify <- function(x) {
+comment_identifier_remove <- function(x) {
   if (!is.character(x) || length(x) > 1) {
     stop("Expected a string (character vector of length 1).")
   }
   txt <- strsplit(x, "\n")[[1]]
-  # Detect single-quoted comments (e.g. '# a comment')
-  isComment <- grepl("^\\s*'\\s*#.*'\\s*$", txt)
-  txt[isComment] <- sub("'$", "", sub("^'", "", txt[isComment]))
-  # Detect double-quoted comments (e.g. "# a comment")
-  isComment <- grepl('^\\s*"\\s*#.*"\\s*$', txt)
-  txt[isComment] <- sub('"$', '', sub('^"', '', txt[isComment]))
-  txt
+  txt <- sub(paste0('^"', comment_start), "", txt)
+  txt <- sub(paste0(comment_end, '"$'), "", txt)
+  paste(txt, collapse = "\n")
 }
