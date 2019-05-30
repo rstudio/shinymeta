@@ -69,7 +69,7 @@ deparse_flatten <- function(expr, width.cutoff = 500L) {
 # deparse will break on other random operators instead. This function inserts
 # newlines after %>%, and replaces newlines that follow operators or commas with
 # a single space. The resulting code string will not contain indentation, and
-# must be processed fuadrther to be considered readable.
+# must be processed further to be considered readable.
 rebreak <- function(str) {
   str <- comment_identifier_add(str)
   if (is.call(str) || is.symbol(str)) {
