@@ -105,9 +105,7 @@ withMetaMode <- function(expr, mode = TRUE) {
 
 #' @export
 metaExpr <- function(x, env = parent.frame()) {
-  # x <- rlang::eval_tidy(quote(rlang::enquo(x)), dynvars, env)
   x <- substitute(x)
-  # if (metaMode()) browser()
   x <- expandExpr(x, .globals$dynamicVars, env)
   x <- rlang::new_quosure(x, env)
 
