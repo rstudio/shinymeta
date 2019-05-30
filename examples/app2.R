@@ -19,13 +19,12 @@ server <- function(input, output, session) {
     !!df() %>% head(!!input$n)
   )
 
-  filtered2 <- metaReactive(
+  filtered2 <- metaReactive({
+    "# a comment inside metaReactive()"
     !!df() %>% tail(!!input$n)
-  )
-
-  summarize <- metaAction({
-    summary(!!filtered())
   })
+
+  summarize <- metaAction(summary(!!filtered()))
 
   output$text <- renderPrint({
     summarize()
@@ -36,9 +35,10 @@ server <- function(input, output, session) {
   })
 
   output$code <- renderPrint({
-    exp <- expandCode(
+    expandCode(
       {
         df <- !!df()
+        '# a comment inside expandCode()'
         top <- !!filtered()
         bottom <- !!filtered2()
         !!summarize()
@@ -49,8 +49,6 @@ server <- function(input, output, session) {
         filtered2 = quote(bottom)
       )
     )
-
-    styler::style_text(capture.output(print(exp)))
   })
 }
 

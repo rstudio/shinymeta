@@ -12,7 +12,7 @@
 #' stack), instead of executing the code and returning the value, it returns the
 #' code expression.
 #' @export
-metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NULL, domain = getDefaultReactiveDomain()) {
+metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NULL, domain = shiny::getDefaultReactiveDomain()) {
 
   #expr <- rlang::enquo(expr)
   #env <- rlang::quo_get_env(expr)
@@ -26,8 +26,8 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NUL
   # early to perform expansion of expr here).
   expr <- wrapExpr(shinymeta, metaExpr, expr, env, private = TRUE)
 
-  r_meta <- reactive(expr, env = env, quoted = quoted, domain = domain)
-  r_normal <- reactive(expr, env = env, quoted = quoted, domain = domain)
+  r_meta <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
+  r_normal <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
 
   function() {
     if (metaMode()) {
@@ -41,15 +41,15 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NUL
 
 #' @export
 metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = getDefaultReactiveDomain()) {
+  label = NULL, domain = shiny::getDefaultReactiveDomain()) {
 
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
   }
 
-  r_meta <- reactive(expr, env = env, quoted = quoted, domain = domain)
-  r_normal <- reactive(expr, env = env, quoted = quoted, domain = domain)
+  r_meta <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
+  r_normal <- shiny::reactive(expr, env = env, quoted = quoted, domain = domain)
 
   function() {
     if (metaMode()) {
@@ -98,7 +98,7 @@ withMetaMode <- function(expr, mode = TRUE) {
     on.exit(metaMode(!mode))
   }
 
-  force(expr)
+  prefix_class(expr, if (mode) "shinyMetaExpr" else "shinyMetaValue")
 }
 
 #' @export
@@ -141,7 +141,21 @@ expandCode <- function(expr, patchCalls = list(), indent = 0) {
     )
   )
 
-  rlang::quo_get_expr(quosure)
+  expr <- rlang::quo_get_expr(
+    remove_class(quosure, "shinyMetaExpr")
+  )
+
+  prefix_class(expr, "shinyMetaExpr")
+}
+
+prefix_class <- function (x, y) {
+  oldClass(x) <- unique(c(y, oldClass(x)))
+  x
+}
+
+remove_class <- function(x, y) {
+  oldClass(x) <- setdiff(oldClass(x), y)
+  x
 }
 
 quotedList <- function(...) {
