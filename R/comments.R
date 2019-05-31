@@ -7,9 +7,6 @@ expr_type <- function(x) {
   } else if (is.symbol(x)) {
     "symbol"
   } else if (is.call(x)) {
-    if (length(x) > 1 && identical(x[[1]], quote(`{`)) && is_comment(x[[length(x)]])) {
-      warning("A shinymeta comment can not appear as the last child of a `{` call")
-    }
     "call"
   } else if (is.pairlist(x)) {
     "pairlist"
@@ -31,9 +28,18 @@ switch_expr <- function(x, ...) {
 }
 
 comment_identifier_add <- function(x) {
+  # if a 'comment-like' string appears as the last child of a `{` call,
+  # it might be an assignment value, so we throw a warning if that occurs
+  # and add a special class to the string so that when we arrive at the string
+  # next time, we know not to add the special comment identifier
+  if (length(x) > 1 && identical(x[[1]], quote(`{`)) && is_comment(x[[length(x)]])) {
+    warning("A shinymeta comment can not appear as the last child of a `{` call")
+    x[[length(x)]] <- prefix_class(x[[length(x)]], "lastChildComment")
+  }
+
   switch_expr(x,
     # Base cases
-    comment = paste0(comment_start, x, comment_end),
+    comment = if (inherits(x, "lastChildComment")) remove_class(x, "lastChildComment") else paste0(comment_start, x, comment_end),
     constant = x,
     symbol = x,
     # Recursive cases
