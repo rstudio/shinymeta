@@ -17,7 +17,7 @@ expr_type <- function(x) {
 
 is_comment <- function(x) {
   if (!is.character(x) || length(x) > 1) return(FALSE)
-  grepl("^\\s*#", x)
+  grepl("^#", x)
 }
 
 switch_expr <- function(x, ...) {
