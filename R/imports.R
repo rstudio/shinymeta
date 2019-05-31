@@ -2,5 +2,4 @@
 #' @importFrom sourcetools tokenize_string
 #' @importFrom shiny reactive getDefaultReactiveDomain isolate
 #' @importFrom utils head
-#' @importFrom rlang quo
 NULL
