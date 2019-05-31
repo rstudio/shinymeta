@@ -80,7 +80,6 @@ server <- function(input, output) {
     plot_model()
   })
 
-
   user_code <- reactive({
     format_tidy_code(
       expandCode(
@@ -103,7 +102,6 @@ server <- function(input, output) {
           !!plot_model()
         },
         patchCalls = list(
-          data = quote(mtcars),
           outliers = quote(outliers),
           data_discard = quote(dataDiscard),
           data_kept = quote(dataKept),
@@ -136,4 +134,4 @@ server <- function(input, output) {
 
 }
 
-runGadget(ui, server)
+shinyApp(ui, server)
