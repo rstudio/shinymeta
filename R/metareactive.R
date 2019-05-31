@@ -97,7 +97,12 @@ withMetaMode <- function(expr, mode = TRUE) {
   origVal <- metaMode()
   if (!identical(origVal, mode)) {
     metaMode(mode)
-    on.exit(metaMode(!mode))
+    on.exit(metaMode(!mode), add = TRUE)
+  }
+
+  if (!getOption("shiny.allowoutputreads", FALSE)) {
+    op <- options(shiny.allowoutputreads = TRUE)
+    on.exit(options(op), add = TRUE)
   }
 
   prefix_class(expr, if (mode) "shinyMetaExpr" else "shinyMetaValue")
