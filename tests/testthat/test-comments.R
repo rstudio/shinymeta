@@ -1,10 +1,11 @@
 context("comments")
+library(shiny)
 
 capturePrint <- function(x) {
   capture.output(print(x))
 }
 
-describe("metaReactive", {
+describe("metaReactive", isolate({
 
   it("works", {
     mr <- metaReactive({
@@ -42,10 +43,10 @@ describe("metaReactive", {
     expect_equal(expected_output, actual_output)
   })
 
-})
+}))
 
 
-describe("metaObserve", {
+describe("metaObserve", isolate({
 
   it("works", {
     mo <- metaObserve({
@@ -83,10 +84,10 @@ describe("metaObserve", {
     expect_equal(expected_output, actual_output)
   })
 
-})
+}))
 
 
-describe("metaRender", {
+describe("metaRender", isolate({
 
   it("works", {
     mrt <- metaRender(renderText, {
@@ -124,4 +125,57 @@ describe("metaRender", {
     expect_equal(expected_output, actual_output)
   })
 
+}))
+
+describe("various edge cases", {
+  expect_equal(
+    capturePrint(expandCode({
+      "# Escaped \"quotes\" should \'be' supported"
+      NULL
+    })),
+    c(
+      "# Escaped \"quotes\" should 'be' supported",
+      "NULL"
+    )
+  )
+
+  expect_equal(
+    capturePrint(expandCode({
+      '# Escaped \"quotes" should \'be\' supported'
+      NULL
+    })),
+    c(
+      "# Escaped \"quotes\" should 'be' supported",
+      "NULL"
+    )
+  )
+
+  expect_equal(
+    capturePrint(expandCode({
+      " # This shouldn't count as a comment " # Leading whitespace
+      " '# This either' "                     # Nested quote
+      " \"# Or this\" "                       # Nested dbl-quote
+    })),
+    c(
+      deparse(" # This shouldn't count as a comment "),
+      deparse(" '# This either' "),
+      deparse(" \"# Or this\" ")
+    )
+  )
+
+  expect_equal(
+    capturePrint(expandCode({
+      "# This should be a comment"
+      paste(
+        "# But this should not",
+        "be a comment"
+      )
+    })),
+    c(
+      "# This should be a comment",
+      "paste(\"# But this should not\", \"be a comment\")"
+    )
+  )
+
+  # TODO: What should happen if \n appears in a string-comment?
 })
