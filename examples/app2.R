@@ -30,8 +30,8 @@ server <- function(input, output, session) {
     summarize()
   })
 
-  output$plot <- renderPlot({
-    plot(filtered())
+  output$plot <- metaRender(renderPlot, {
+    plot(!!filtered())
   })
 
   output$code <- renderPrint({
@@ -42,6 +42,7 @@ server <- function(input, output, session) {
         top <- !!filtered()
         bottom <- !!filtered2()
         !!summarize()
+        !!output$plot()
       },
       patchCalls = list(
         df = quote(df),
