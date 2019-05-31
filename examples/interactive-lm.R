@@ -1,0 +1,139 @@
+# App derived from https://gist.github.com/wch/c4b857d73493e6550cba
+library(shiny)
+library(shinymeta)
+library(shinyAce)
+library(dplyr)
+library(ggplot2)
+
+# Configurable data inputs
+data <- mtcars
+vars <- names(data)
+data <- tibble::rownames_to_column(data, var = ".row_ids")
+
+# User interface
+# TODO: turn this into a module?
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("yvar", "Select y", choices = vars, selected = vars[1]),
+      selectInput("xvar", "Select x", choices = vars, selected = vars[2]),
+      selectInput("degree", "Polynomial degree", c(1, 2, 3, 4)),
+      actionButton("code", div(icon("code"), " R code"))
+    ),
+    mainPanel(
+      plotOutput("plot", click = "plot_click")
+    )
+  )
+)
+
+server <- function(input, output) {
+  # For storing which row ids have been excluded
+  outliers <- reactiveVal(NULL)
+
+  # Toggle points that are clicked
+  observeEvent(input$plot_click, {
+    # TODO: handle more than one pt at a time
+    row_id <- nearPoints(data, input$plot_click)$.row_ids[1]
+    if (!length(row_id)) return()
+
+    # If this point is already an outlier, then
+    # it's not longer considered an outlier.
+    if (row_id %in% outliers()) {
+      outliers(setdiff(outliers(), row_id))
+    } else {
+      outliers(c(row_id, outliers()))
+    }
+  })
+
+  data_discard <- metaReactive(
+    filter(data, .row_ids %in% !!outliers())
+  )
+
+  data_kept <- metaReactive(
+    filter(data, !.row_ids %in% !!outliers())
+  )
+
+  model_fit <- metaReactive2({
+    req(input$degree)
+    formula <- as.formula(
+      glue::glue("{input$yvar} ~ poly({input$xvar}, degree = {input$degree})")
+    )
+
+    metaExpr(
+      lm(!!formula, data = !!data_kept())
+    )
+  })
+
+  data_fitted <- metaReactive({
+    modelr::add_predictions(!!data_kept(), !!model_fit())
+  })
+
+  plot_model <- metaReactive({
+    ggplot(!!data_kept(), aes_string(x = !!input$xvar, y = !!input$yvar)) +
+      geom_point() +
+      geom_line(data = !!data_fitted(), aes_string(y = "pred"), color = "gray50") +
+      geom_point(data = !!data_discard(), fill = NA, color = "black", alpha = 0.25) +
+      theme_bw(base_size = 14)
+  })
+
+  output$plot <- renderPlot({
+    plot_model()
+  })
+
+
+  user_code <- reactive({
+    format_tidy_code(
+      expandCode(
+        {
+          library(ggplot2)
+          library(dplyr)
+          library(modelr)
+          "# TODO: can/should we make it easier to 'reuse' this non-reactive code?"
+          data <- mtcars
+          data <- tibble::rownames_to_column(data, var = ".row_ids")
+          "# Row ids of the points removed"
+          outliers <- !!outliers()
+          "# Data for the points removed"
+          dataDiscard <- !!data_discard()
+          "# Data for the points remaining"
+          dataKept <- !!data_kept()
+          "# Fit the model"
+          modelFit <- !!model_fit()
+          "# Plot it!"
+          !!plot_model()
+        },
+        patchCalls = list(
+          data = quote(mtcars),
+          outliers = quote(outliers),
+          data_discard = quote(dataDiscard),
+          data_kept = quote(dataKept),
+          model_fit = quote(modelFit)
+        )
+      )
+    )
+  })
+
+
+  observeEvent(input$code, {
+    showModal(modalDialog(
+      title = "Code to reproduce data and plot",
+      aceEditor(
+        outputId = "ace",
+        value = user_code(),
+        mode = "r",
+        theme = "ambiance"
+      ),
+      footer = shiny::tagList(
+        actionButton("copy", icon("clipboard")),
+        shiny::modalButton("Dismiss")
+      )
+    ))
+  })
+
+  observeEvent(input$copy, {
+    clipr::write_clip(user_code())
+  })
+
+}
+
+runGadget(ui, server)
