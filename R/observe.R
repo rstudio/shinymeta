@@ -38,7 +38,7 @@ metaObserveImpl <- function(expr, env, label, domain) {
     rlang::eval_tidy(expr, NULL, env)
   }, domain = domain)
 
-  o_normal <- observe(expr, env = env, quoted = TRUE, label = label, domain = domain)
+  o_normal <- shiny::observe(expr, env = env, quoted = TRUE, label = label, domain = domain)
 
   structure(
     function() {
@@ -46,7 +46,7 @@ metaObserveImpl <- function(expr, env, label, domain) {
         # r_meta cache varies by dynamicVars
         r_meta(.globals$dynamicVars)
       } else {
-        stop("Can't do that") # TODO: better msg
+        stop("Meta mode must be activated when calling the function returned by `metaObserve()`: did you mean to call this function inside of `shinymeta::withMetaMode()`?")
       }
     },
     observer_impl = o_normal,

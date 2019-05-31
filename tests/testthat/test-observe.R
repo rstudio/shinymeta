@@ -1,6 +1,6 @@
 context("observe")
 
-describe("metaObserve", {
+describe("metaObserve", isolate({
   it("basically works", {
     x <- 0
     mo <- metaObserve({
@@ -9,7 +9,7 @@ describe("metaObserve", {
     shiny:::flushReact()
 
     expect_identical(x, 1)
-    expect_identical(withMetaMode(mo()), quote({ x <<- 1 }))
+    expect_equal(withMetaMode(mo()), quote({ x <<- 1 }))
   })
 
   it("basically works 2", {
@@ -22,7 +22,7 @@ describe("metaObserve", {
     shiny:::flushReact()
 
     expect_identical(x, 1)
-    expect_identical(withMetaMode(mo()), quote({ x <<- 1 }))
+    expect_equal(withMetaMode(mo()), quote({ x <<- 1 }))
   })
 
   it("varies by dynvars", {
@@ -35,15 +35,17 @@ describe("metaObserve", {
       print(!!mr())
     })
 
-    expect_identical(
-      expandCode(!!mo()),
+    x <- expandCode(!!mo())
+    expect_equal(
+      x,
       quote({ print({cars})} )
     )
 
-    expect_identical(
-      expandCode(!!mo(), patchCalls = list(mr = quote(boats))),
-      quote({ print({boats})} )
+    x <- expandCode(!!mo(), patchCalls = list(mr = quote(boats)))
+    expect_equal(
+      x,
+      quote({ print(boats)} )
     )
 
   })
-})
+}))
