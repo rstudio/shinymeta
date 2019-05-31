@@ -24,4 +24,26 @@ describe("metaObserve", {
     expect_identical(x, 1)
     expect_identical(withMetaMode(mo()), quote({ x <<- 1 }))
   })
+
+  it("varies by dynvars", {
+
+    mr <- metaReactive({
+      cars
+    })
+
+    mo <- metaObserve({
+      print(!!mr())
+    })
+
+    expect_identical(
+      expandCode(!!mo()),
+      quote({ print({cars})} )
+    )
+
+    expect_identical(
+      expandCode(!!mo(), patchCalls = list(mr = quote(boats))),
+      quote({ print({boats})} )
+    )
+
+  })
 })

@@ -1,6 +1,6 @@
 context("render")
 
-describe("metaRender", {
+describe("metaRender", isolate({
   it("basically works", {
     expect_identical(
       shiny::renderText({ paste("foo", "bar") })(),
@@ -69,4 +69,19 @@ describe("metaRender", {
     )
 
   })
-})
+
+  it("varies by dynvars", {
+    mr <- metaReactive(cars)
+
+    out <- metaRender(shiny::renderPrint, { str(!!mr()) })
+
+    # Have to call expandCode outside of expect_equal because expect_equal will
+    # expand the !!
+    x <- expandCode({ !!out() })
+    expect_equal(x, quote({{ str(cars) }}))
+
+    x <- expandCode({ !!out() }, patchCalls = list(mr = quote(boats)))
+    expect_equal(x, quote({{ str(boats) }})
+    )
+  })
+}))
