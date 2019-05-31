@@ -21,27 +21,21 @@ is_comment <- function(x) {
 }
 
 switch_expr <- function(x, ...) {
-  switch(expr_type(x),
-         ...,
-         stop("Don't know how to handle type ", typeof(x), call. = FALSE)
-  )
+  switch(expr_type(x), ...) %||% x
 }
 
 comment_identifier_add <- function(x) {
   # if a 'comment-like' string appears as the last child of a `{` call,
   # it might be an assignment value, so we throw a warning if that occurs
   # and add a special class to the string so that when we arrive at the string
-  # next time, we know not to add the special comment identifier
+  # in the future, we know not to add the special comment identifier
   if (length(x) > 1 && identical(x[[1]], quote(`{`)) && is_comment(x[[length(x)]])) {
     warning("A shinymeta comment can not appear as the last child of a `{` call")
     x[[length(x)]] <- prefix_class(x[[length(x)]], "lastChildComment")
   }
 
   switch_expr(x,
-    # Base cases
     comment = if (inherits(x, "lastChildComment")) remove_class(x, "lastChildComment") else paste0(comment_start, x, comment_end),
-    constant = x,
-    symbol = x,
     # Recursive cases
     call = as.call(lapply(x, comment_identifier_add)),
     pairlist = as.pairlist(lapply(x, comment_identifier_add))
