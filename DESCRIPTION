@@ -21,4 +21,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
+Remotes:
+    rstudio/shiny@joe/feature/readable-outputs
 VignetteBuilder: knitr

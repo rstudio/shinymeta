@@ -31,7 +31,12 @@ server <- function(input, output, session) {
   })
 
   output$plot <- metaRender(renderPlot, {
+    "# This is a helpful comment"
     plot(!!filtered())
+  })
+
+  obs <- metaObserve({
+    print(!!filtered2())
   })
 
   output$code <- renderPrint({
@@ -43,6 +48,7 @@ server <- function(input, output, session) {
         bottom <- !!filtered2()
         !!summarize()
         !!output$plot()
+        !!obs()
       },
       patchCalls = list(
         df = quote(df),
