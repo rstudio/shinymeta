@@ -14,18 +14,13 @@ expr_type <- function(x) {
   }
 }
 
-switch_expr <- function(x, ...) {
-  switch(expr_type(x), ...) %||% x
-}
-
 comment_identifier_add <- function(x) {
 
-  if (length(x) > 1 && identical(x[[1]], quote(`{`))) {
+  if (is.call(x) && length(x) > 1 && identical(x[[1]], quote(`{`))) {
 
     # comment must appear as a direct child of a `{` call
     x[-1] <- lapply(x[-1], function(y) {
-      if (is_comment(y)) y <- prefix_class(y, "isComment")
-      y
+      if (is_comment(y)) prefix_class(y, "isComment") else y
     })
 
     # if the comment appears as the last child of a `{` call,
@@ -39,16 +34,19 @@ comment_identifier_add <- function(x) {
 
   }
 
-  switch_expr(x,
+  y <- switch(expr_type(x),
     constant = if (inherits(x, "isComment")) paste0(comment_start, x, comment_end) else x,
     # Recursive cases
     call = as.call(lapply(x, comment_identifier_add)),
     pairlist = as.pairlist(lapply(x, comment_identifier_add))
   )
+
+  # if this is a case we don't recognize, return the input value
+  y %||% x
 }
 
 is_comment <- function(x) {
-  if (!is.character(x) || length(x) > 1) return(FALSE)
+  if (!is.character(x) || length(x) != 1) return(FALSE)
   grepl("^#", x)
 }
 
