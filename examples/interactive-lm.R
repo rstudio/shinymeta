@@ -5,18 +5,15 @@ library(shinyAce)
 library(dplyr)
 library(ggplot2)
 
-# Configurable data inputs
+# Define the data dataset of interest
 data <- mtcars
-vars <- names(data)
-data <- tibble::rownames_to_column(data, var = ".row_ids")
 
 # User interface
-# TODO: turn this into a module?
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
-      selectInput("yvar", "Select y", choices = vars, selected = vars[1]),
-      selectInput("xvar", "Select x", choices = vars, selected = vars[2]),
+      varSelectInput("yvar", "Select y", data),
+      varSelectInput("xvar", "Select x", data),
       selectInput("degree", "Polynomial degree", c(1, 2, 3, 4)),
       actionButton("code", div(icon("code"), " R code"))
     ),
@@ -25,6 +22,9 @@ ui <- fluidPage(
     )
   )
 )
+
+# This column will track which rows have been excluded
+data <- tibble::rownames_to_column(data, var = ".row_ids")
 
 server <- function(input, output) {
   # For storing which row ids have been excluded
@@ -55,8 +55,14 @@ server <- function(input, output) {
 
   model_fit <- metaReactive2({
     req(input$degree)
-    formula <- as.formula(
-      glue::glue("{input$yvar} ~ poly({input$xvar}, degree = {input$degree})")
+
+    formula <- substitute(
+      y ~ poly(x, degree = degree),
+      list(
+        y = input$yvar,
+        x = input$xvar,
+        degree = as.numeric(input$degree)
+      )
     )
 
     metaExpr(
@@ -69,7 +75,7 @@ server <- function(input, output) {
   })
 
   plot_model <- metaReactive({
-    ggplot(!!data_kept(), aes_string(x = !!input$xvar, y = !!input$yvar)) +
+    ggplot(!!data_kept(), aes(x = !!input$xvar, y = !!input$yvar)) +
       geom_point() +
       geom_line(data = !!data_fitted(), aes_string(y = "pred"), color = "gray50") +
       geom_point(data = !!data_discard(), fill = NA, color = "black", alpha = 0.25) +
