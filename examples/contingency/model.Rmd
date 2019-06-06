@@ -1,0 +1,10 @@
+---
+title: "My awesome test"
+output: html_document
+---
+
+A test of `{{xvar}}` vs `{{yvar}}`
+
+```{r}
+{{code}}
+```
