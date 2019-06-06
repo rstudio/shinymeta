@@ -1,0 +1,10 @@
+---
+title: "Mosaic chart"
+output: html_document
+---
+
+To read more about this visualization, see <https://plotly-r.com/bars-histograms.html#fig:ggmosaic>
+
+```{r}
+{{code}}
+```
