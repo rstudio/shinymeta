@@ -102,9 +102,9 @@ server <- function(input, output, session) {
     # report download, we'll provide the result of
     # getData() in the download and have the code
     # import in that R object
-    d <- getData()
     metaExpr({
-      count(d, !!input$xvar, !!input$yvar)
+      !!getData() %>%
+        count(!!input$xvar, !!input$yvar)
     })
   })
 
@@ -112,13 +112,12 @@ server <- function(input, output, session) {
     req(counts_long())
 
     metaExpr({
-      counts <- !!counts_long()
-      tidyr::pivot_wider(
-        counts,
-        names_from = !!input$xvar,
-        values_from = n,
-        values_fill = list(n = 0)
-      )
+      !!counts_long() %>%
+        tidyr::pivot_wider(
+          names_from = !!input$xvar,
+          values_from = n,
+          values_fill = list(n = 0)
+        )
     })
   })
 
@@ -126,8 +125,9 @@ server <- function(input, output, session) {
     req(counts_wide())
 
     metaExpr({
-      countsWide <- !!counts_wide()
-      as.matrix(countsWide[, -1])
+      !!counts_wide() %>%
+        select(-1) %>%
+        as.matrix()
     })
   })
 
@@ -145,9 +145,8 @@ server <- function(input, output, session) {
       need(input$xvar, "Choose a predictor")
     )
 
-    d <- getData()
     metaExpr({
-      gg_plot <- ggplot(d) +
+      gg_plot <- ggplot(!!getData()) +
         geom_mosaic(
           aes(
             x = product(!!input$xvar),
@@ -173,7 +172,9 @@ server <- function(input, output, session) {
     code <- expandCode({
       d <- readRDS("data.rds")
       !!output$plot()
-    })
+    }, patchCalls = list(
+      getData = quote(d)
+    ))
 
     build_report(
       "plot.Rmd",
@@ -187,18 +188,27 @@ server <- function(input, output, session) {
     validate(need(counts_raw(), "Choose some variables"))
 
     metaExpr({
-      counts <- !!counts_raw()
-      chisq.test(counts, simulate.p.value = !!isTRUE(input$simulate))
+      chisq.test(!!counts_raw(), simulate.p.value = !!isTRUE(input$simulate))
     })
   })
 
   observeEvent(input$model_code, {
 
     saveRDS(getData(), "data.rds")
-    code <- expandCode({
-      d <- readRDS("data.rds")
-      !!output$model()
-    })
+    code <- expandCode(
+      {
+        d <- readRDS("data.rds")
+        counts_long <- !!counts_long()
+        counts_wide <- !!counts_wide()
+        counts_raw <- !!counts_raw()
+        !!output$model()
+      },
+      patchCalls = list(
+        counts_long = quote(counts_long),
+        counts_wide = quote(counts_wide),
+        counts_raw = quote(counts_raw),
+        getData = quote(d)
+      ))
 
     build_report(
       "model.Rmd",
@@ -216,12 +226,21 @@ server <- function(input, output, session) {
   observeEvent(input$full_code, {
 
     saveRDS(getData(), "data.rds")
-    code <- expandCode({
-      d <- readRDS("data.rds")
-      !!output$plot()
-      !!output$model()
-      !!output$table()
-    })
+    code <- expandCode(
+      {
+        d <- readRDS("data.rds")
+        counts_long <- !!counts_long()
+        counts_wide <- !!counts_wide()
+        counts_raw <- !!counts_raw()
+        !!output$plot()
+        !!output$model()
+      },
+      patchCalls = list(
+        counts_long = quote(counts_long),
+        counts_wide = quote(counts_wide),
+        counts_raw = quote(counts_raw),
+        getData = quote(d)
+      ))
 
     build_report(
       "full.Rmd",
