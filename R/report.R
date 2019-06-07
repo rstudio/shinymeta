@@ -20,6 +20,16 @@ build_rmd_bundle <- function(report_template, output_zip_path, vars = list(),
   force(report_template)
   force(vars)
 
+  if (is.list(vars)) {
+    vars <- lapply(vars, function(x) {
+      if (is.language(x)) {
+        format_tidy_code(x)
+      } else {
+        x
+      }
+    })
+  }
+
   # TODO: Replace knit_expand with a version that doesn't allow arbitrary
   # R expressions and doesn't search the parent frame
   rmd_source <- do.call(knitr::knit_expand, c(list(report_template), vars))
