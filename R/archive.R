@@ -28,6 +28,24 @@ print.pending_zip_archive <- function(x, ...) {
   cat(paste0(rlang::rep_along(contents, "  "), contents, ifelse(dirs, "/", "")), sep = "\n")
 }
 
+add_items <- function(x, ...) {
+  include_files <- rlang::dots_list(..., .homonyms = "last", .check_assign = TRUE)
+
+  if (is.null(names(include_files))) {
+    names(include_files) <- as.character(include_files)
+  }
+
+  mapply(names(include_files), include_files, FUN = function(from, to) {
+    if (nchar(from) == 0) {
+      from <- to
+    }
+    add_item(x, from, to)
+    NULL
+  })
+
+  x
+}
+
 add_item <- function(x, source_file, target_file) {
   if (!inherits(x, "pending_zip_archive")) {
     stop("x must be return value from zip_archive")
