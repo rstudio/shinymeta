@@ -13,7 +13,7 @@ describe("expansion", isolate({
     res <- withMetaMode(
       metaExpr(!!two())
     )
-    expect_equal(res, quote({{1}}))
+    expect_equal(format_tidy_code(res), "1")
   })
 
   it("varies cache according to patchCalls", {

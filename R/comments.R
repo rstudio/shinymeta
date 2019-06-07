@@ -14,9 +14,16 @@ expr_type <- function(x) {
   }
 }
 
-comment_identifier_add <- function(x) {
+modify_call <- function(x) {
 
-  if (is.call(x) && length(x) > 1 && identical(x[[1]], quote(`{`))) {
+  # Modify a call like `x <- {1 + 1}` to `x <- 1 + 1`
+  if (rlang::is_call(x, "<-")) {
+    if (rlang::is_call(x[[3]], "{")) {
+      x[[3]] <- x[[3]][[2]]
+    }
+  }
+
+  if (rlang::is_call(x, "{")) {
 
     # comment must appear as a direct child of a `{` call
     x[-1] <- lapply(x[-1], function(y) {
@@ -37,8 +44,8 @@ comment_identifier_add <- function(x) {
   y <- switch(expr_type(x),
     constant = if (inherits(x, "isComment")) paste0(comment_start, x, comment_end) else x,
     # Recursive cases
-    call = as.call(lapply(x, comment_identifier_add)),
-    pairlist = as.pairlist(lapply(x, comment_identifier_add))
+    call = as.call(lapply(x, modify_call)),
+    pairlist = as.pairlist(lapply(x, modify_call))
   )
 
   # if this is a case we don't recognize, return the input value
