@@ -18,7 +18,7 @@ modify_call <- function(x) {
 
   # Modify a call like `x <- {1 + 1}` to `x <- 1 + 1`
   if (rlang::is_call(x, "<-")) {
-    if (rlang::is_call(x[[3]], "{")) {
+    while (rlang::is_call(x[[3]], "{") && length(x[[3]]) == 2) {
       x[[3]] <- x[[3]][[2]]
     }
   }
