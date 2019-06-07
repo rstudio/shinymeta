@@ -60,13 +60,14 @@ deparse_flatten <- function(expr, width.cutoff = 500L) {
   }
 }
 
+
 # Neither deparse() nor styler will go out of their way to break on %>%, and
 # deparse will break on other random operators instead. This function inserts
 # newlines after %>%, and replaces newlines that follow operators or commas with
 # a single space. The resulting code string will not contain indentation, and
 # must be processed further to be considered readable.
 rebreak <- function(str) {
-  str <- comment_identifier_add(str)
+  str <- modify_call(str)
   if (is.call(str) || is.symbol(str)) {
     str <- deparse_flatten(str)
   }
