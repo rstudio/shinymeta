@@ -52,7 +52,7 @@ format_tidy_code <- function(code_str) {
 }
 
 deparse_flatten <- function(expr, width.cutoff = 500L) {
-  if (is.call(expr) && length(expr) > 1 && identical(expr[[1]], quote(`{`))) {
+  if (rlang::is_call(expr, "{")) {
     paste0(vapply(expr[-1], deparse_flatten, character(1)), collapse = "\n")
   } else {
     # TODO: should this have `backtick = TRUE`?
