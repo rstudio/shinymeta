@@ -85,4 +85,38 @@ describe("metaRender", isolate({
     expect_equal(x, quote({{ str(boats) }}))
     expect_equal(format_tidy_code(x), "str(boats)")
   })
+
+
+  it("removes curly brackets when appropriate", {
+    mr1 <- metaReactive({
+      1 + 1
+    })
+
+    code <- expandCode({
+      mr1 <- !!mr1()
+    })
+
+    expect_equal(format_tidy_code(code), "mr1 <- 1 + 1")
+
+    mr2 <- metaReactive({
+      {1 + 1}
+    })
+
+    code <- expandCode({
+      mr2 <- !!mr2()
+    })
+
+    expect_equal(format_tidy_code(code), "mr2 <- 1 + 1")
+
+    code <- expandCode({
+      mr1 <- !!mr1()
+      mr2 <- !!mr2()
+    })
+
+    expect_equal(
+      format_tidy_code(code),
+      "mr1 <- 1 + 1\nmr2 <- 1 + 1"
+    )
+  })
+
 }))
