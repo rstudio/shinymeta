@@ -78,10 +78,11 @@ describe("metaRender", isolate({
     # Have to call expandCode outside of expect_equal because expect_equal will
     # expand the !!
     x <- expandCode({ !!out() })
+    expect_equal(x, quote({{ str(cars) }}))
     expect_equal(format_tidy_code(x), "str(cars)")
 
     x <- expandCode({ !!out() }, patchCalls = list(mr = quote(boats)))
-    expect_equal(x, quote({{ str(cars) }}))
+    expect_equal(x, quote({{ str(boats) }}))
     expect_equal(format_tidy_code(x), "str(boats)")
   })
 }))
