@@ -81,6 +81,7 @@ describe("metaRender", isolate({
     expect_equal(format_tidy_code(x), "str(cars)")
 
     x <- expandCode({ !!out() }, patchCalls = list(mr = quote(boats)))
+    expect_equal(x, quote({{ str(cars) }}))
     expect_equal(format_tidy_code(x), "str(boats)")
   })
 }))
