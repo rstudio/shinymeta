@@ -27,3 +27,30 @@ describe("name translation", {
     })
   })
 })
+
+describe("zip building", {
+  tmp <- tempfile(pattern = "dir")
+  dir.create(file.path(tmp, "foo"), recursive = TRUE)
+  file1 <- file.path(tmp, "foo", "bar")
+  file.create(file1)
+
+  za <- zip_archive()
+
+  # Copy file where dest doesn't have trailing slash
+  add_items(za, !!file1 := "baz")
+  expect_equal(list_items(za), c("baz"))
+
+  # Copy file where dest has trailing slash
+  add_item(za, file1, "qux/")
+  expect_equal(list_items(za), c("baz", "qux", "qux/bar"))
+
+  # Copy dir where dest doesn't have trailing slash
+  lst <- setNames(list("quuz"), fs::path_dir(file1))
+  add_items(za, !!!lst)
+  expect_equal(list_items(za), c("baz", "quuz", "quuz/bar", "qux", "qux/bar"))
+
+  # Copy dir where dest does have trailing slash (no difference)
+  lst2 <- setNames(list("corge/"), fs::path_dir(file1))
+  add_items(za, !!!lst2)
+  expect_equal(list_items(za), c("baz", "corge", "corge/bar", "quuz", "quuz/bar", "qux", "qux/bar"))
+})

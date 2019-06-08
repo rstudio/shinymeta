@@ -24,8 +24,26 @@ print.pending_zip_archive <- function(x, ...) {
   basedir <- archive_basedir(x)
   cat("Archive: ", basedir, "\n", sep = "")
   contents <- list_items(x)
-  dirs <- fs::is_dir(fs::path(basedir, contents))
-  cat(paste0(rlang::rep_along(contents, "  "), contents, ifelse(dirs, "/", "")), sep = "\n")
+  paths <- fs::path(basedir, contents)
+  dirs <- fs::is_dir(paths)
+  cat(paste0(rlang::rep_along(contents, "- "), contents, ifelse(dirs, "/", ""), pretty_file_sizes(paths, "  (", ")")), sep = "\n")
+  invisible(x)
+}
+
+# Turn file paths into "10 B", "1.3 GiB", etc. Directories come back as "".
+pretty_file_sizes <- function(paths, prefix = "", suffix = "") {
+  if (length(paths) == 0) {
+    return(character(0))
+  }
+  sizes <- fs::file_size(paths)
+  ifelse(is.na(sizes) | fs::is_dir(paths),
+    "",
+    paste0(prefix,
+      vapply(sizes, function(size) {
+        format(structure(size, class = "object_size"), units = "auto", standard = "IEC")
+      }, character(1)),
+      suffix)
+  )
 }
 
 add_items <- function(x, ...) {
