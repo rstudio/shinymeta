@@ -52,7 +52,7 @@ format_tidy_code <- function(code_str) {
 }
 
 deparse_flatten <- function(expr, width.cutoff = 500L) {
-  if (is.call(expr) && length(expr) > 1 && identical(expr[[1]], quote(`{`))) {
+  if (rlang::is_call(expr, "{")) {
     paste0(vapply(expr[-1], deparse_flatten, character(1)), collapse = "\n")
   } else {
     # TODO: should this have `backtick = TRUE`?
@@ -60,13 +60,14 @@ deparse_flatten <- function(expr, width.cutoff = 500L) {
   }
 }
 
+
 # Neither deparse() nor styler will go out of their way to break on %>%, and
 # deparse will break on other random operators instead. This function inserts
 # newlines after %>%, and replaces newlines that follow operators or commas with
 # a single space. The resulting code string will not contain indentation, and
 # must be processed further to be considered readable.
 rebreak <- function(str) {
-  str <- comment_identifier_add(str)
+  str <- modify_call(str)
   if (is.call(str) || is.symbol(str)) {
     str <- deparse_flatten(str)
   }
