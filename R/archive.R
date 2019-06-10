@@ -97,6 +97,10 @@ add_item <- function(x, source_file, target_file) {
     fs::dir_copy(full_src, full_dest)
   } else {
     if (grepl("[/\\]$", target_file)) {
+      # If source is a file, but target is a directory name, ensure
+      # that the file gets copied into the target, rather than as
+      # the target. Without this line, fs::file_copy would treat
+      # the target as a filename (it would strip off the slash).
       target_file <- fs::path(target_file, fs::path_file(source_file))
     }
     full_dest <- fs::path(basedir, target_file)
