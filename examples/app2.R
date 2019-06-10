@@ -76,7 +76,7 @@ server <- function(input, output, session) {
       code <- expandCode(!!output$code())
 
       # build_rmd_bundle("report.Rmd", out, vars = list(code = code))
-      build_script_bundle(code, , out, render = TRUE, render_args = list(
+      build_script_bundle(code, out, render = TRUE, render_args = list(
         output_format = "html_document"
       ))
     }

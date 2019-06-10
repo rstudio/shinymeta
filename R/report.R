@@ -1,7 +1,7 @@
 # TODO: Unit tests for this whole file
 
 #' @export
-build_script_bundle <- function(code = NULL, script_name = "script.R", output_zip_path,
+build_script_bundle <- function(code = NULL, output_zip_path, script_name = "script.R",
   include_files = list(), render = TRUE, render_args = list()) {
 
   if (is.language(code)) {
