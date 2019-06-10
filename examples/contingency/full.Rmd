@@ -3,6 +3,10 @@ title: "My analysis"
 output: html_document
 ---
 
+```{r, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
 A full output of your analysis
 
 ```{r}
