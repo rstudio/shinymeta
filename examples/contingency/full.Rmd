@@ -1,0 +1,10 @@
+---
+title: "My analysis"
+output: html_document
+---
+
+A full output of your analysis
+
+```{r}
+{{code}}
+```
