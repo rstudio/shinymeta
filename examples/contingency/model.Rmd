@@ -3,6 +3,10 @@ title: "My awesome test"
 output: html_document
 ---
 
+```{r, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
 A test of `{{xvar}}` vs `{{yvar}}`
 
 ```{r}

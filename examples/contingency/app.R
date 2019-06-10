@@ -170,15 +170,17 @@ server <- function(input, output, session) {
 
     saveRDS(getData(), "data.rds")
     code <- expandCode({
+      library(plotly)
+      library(dplyr)
+      library(ggmosaic)
       d <- readRDS("data.rds")
       !!output$plot()
     }, patchCalls = list(
       getData = quote(d)
     ))
 
-    build_report(
-      "plot.Rmd",
-      output_file = "plot.zip",
+    build_rmd_bundle(
+      "plot.Rmd", "plot.zip",
       vars = list(code = format_tidy_code(code)),
       include_files = c("data.rds")
     )
@@ -197,6 +199,9 @@ server <- function(input, output, session) {
     saveRDS(getData(), "data.rds")
     code <- expandCode(
       {
+        library(plotly)
+        library(dplyr)
+        library(ggmosaic)
         d <- readRDS("data.rds")
         counts_long <- !!counts_long()
         counts_wide <- !!counts_wide()
@@ -210,9 +215,8 @@ server <- function(input, output, session) {
         getData = quote(d)
       ))
 
-    build_report(
-      "model.Rmd",
-      output_file = "model.zip",
+    build_rmd_bundle(
+      "model.Rmd", "model.zip",
       vars = list(
         code = format_tidy_code(code),
         xvar = deparse(input$xvar),
@@ -228,6 +232,9 @@ server <- function(input, output, session) {
     saveRDS(getData(), "data.rds")
     code <- expandCode(
       {
+        library(plotly)
+        library(dplyr)
+        library(ggmosaic)
         d <- readRDS("data.rds")
         counts_long <- !!counts_long()
         counts_wide <- !!counts_wide()
@@ -242,9 +249,8 @@ server <- function(input, output, session) {
         getData = quote(d)
       ))
 
-    build_report(
-      "full.Rmd",
-      output_file = "full.zip",
+    build_rmd_bundle(
+      "full.Rmd", "full.zip",
       vars = list(code = format_tidy_code(code)),
       include_files = "data.rds"
     )
