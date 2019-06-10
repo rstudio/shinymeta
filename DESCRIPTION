@@ -10,8 +10,10 @@ Description: Provides functions that make it easier to construct Shiny apps
     that can dynamically construct reproducible R scripts.
 License: GPL-3
 Imports: 
+  callr,
   digest,
   fastmap,
+  fs,
   magrittr,
   rlang,
   shiny,

@@ -1,4 +1,3 @@
-#' @export
 constf <- function(value) {
   force(value)
   function() {
