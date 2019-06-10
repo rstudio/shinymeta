@@ -16,11 +16,19 @@ zip_archive <- function(temp_dir = NULL) {
   )
 }
 
+is_zip_archive <- function(x) {
+  inherits(x, "pending_zip_archive")
+}
+
 archive_basedir <- function(x) {
+  stopifnot(is_zip_archive(x))
+
   x[["basedir"]]
 }
 
 print.pending_zip_archive <- function(x, ...) {
+  stopifnot(is_zip_archive(x))
+
   basedir <- archive_basedir(x)
   cat("Archive: ", basedir, "\n", sep = "")
   contents <- list_items(x)
@@ -47,6 +55,8 @@ pretty_file_sizes <- function(paths, prefix = "", suffix = "") {
 }
 
 add_items <- function(x, ...) {
+  stopifnot(is_zip_archive(x))
+
   include_files <- rlang::dots_list(..., .homonyms = "last", .check_assign = TRUE)
 
   if (is.null(names(include_files))) {
@@ -65,9 +75,8 @@ add_items <- function(x, ...) {
 }
 
 add_item <- function(x, source_file, target_file) {
-  if (!inherits(x, "pending_zip_archive")) {
-    stop("x must be return value from zip_archive")
-  }
+  stopifnot(is_zip_archive(x))
+
   if (!is.character(source_file) || length(source_file) != 1) {
     stop("source_file must be a single-element character vector")
   }
@@ -101,6 +110,8 @@ add_item <- function(x, source_file, target_file) {
 }
 
 list_items <- function(x) {
+  stopifnot(is_zip_archive(x))
+
   basedir <- archive_basedir(x)
   fs::path_rel(
     fs::dir_ls(basedir, recurse = TRUE),
@@ -109,6 +120,8 @@ list_items <- function(x) {
 }
 
 build_archive <- function(x, output_file) {
+  stopifnot(is_zip_archive(x))
+
   basedir <- archive_basedir(x)
 
   olddir <- getwd()
