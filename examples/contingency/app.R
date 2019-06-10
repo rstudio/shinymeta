@@ -23,7 +23,7 @@ ui <- fluidPage(
       ),
       uiOutput("vars"),
       checkboxInput("na.rm", "Exclude missing values?", value = TRUE),
-      actionButton("full_code", "Full report", icon = icon("code"))
+      downloadButton("full_code", "Full report", icon = icon("code"))
     ),
     mainPanel(
       tabsetPanel(
@@ -31,7 +31,7 @@ ui <- fluidPage(
           "Plot",
           div(
             plotlyOutput("plot"),
-            actionButton("plot_code", "", icon = icon("code"))
+            downloadButton("plot_code", "", icon = icon("code"))
           )
         ),
 
@@ -40,15 +40,12 @@ ui <- fluidPage(
           div(
             checkboxInput("simulate", "Compute p-values by Monte Carlo simulation?"),
             verbatimTextOutput("model"),
-            actionButton("model_code", "", icon = icon("code"))
+            downloadButton("model_code", "", icon = icon("code"))
           )
         ),
         tabPanel(
           "Counts",
-          div(
-            tableOutput("table"),
-            actionButton("table_code", "", icon = icon("code"))
-          )
+          div(tableOutput("table"))
         )
       )
     )
@@ -166,26 +163,6 @@ server <- function(input, output, session) {
     })
   })
 
-  observeEvent(input$plot_code, {
-
-    saveRDS(getData(), "data.rds")
-    code <- expandCode({
-      library(plotly)
-      library(dplyr)
-      library(ggmosaic)
-      d <- readRDS("data.rds")
-      !!output$plot()
-    }, patchCalls = list(
-      getData = quote(d)
-    ))
-
-    build_rmd_bundle(
-      "plot.Rmd", "plot.zip",
-      vars = list(code = format_tidy_code(code)),
-      include_files = c("data.rds")
-    )
-  })
-
   output$model <- metaRender2(renderPrint, {
     validate(need(counts_raw(), "Choose some variables"))
 
@@ -194,67 +171,94 @@ server <- function(input, output, session) {
     })
   })
 
-  observeEvent(input$model_code, {
-
-    saveRDS(getData(), "data.rds")
-    code <- expandCode(
-      {
+  output$plot_code <- downloadHandler(
+    "plot.zip",
+    content = function(out) {
+      saveRDS(getData(), "data.rds")
+      code <- expandCode({
         library(plotly)
         library(dplyr)
         library(ggmosaic)
         d <- readRDS("data.rds")
-        counts_long <- !!counts_long()
-        counts_wide <- !!counts_wide()
-        counts_raw <- !!counts_raw()
-        !!output$model()
-      },
-      patchCalls = list(
-        counts_long = quote(counts_long),
-        counts_wide = quote(counts_wide),
-        counts_raw = quote(counts_raw),
-        getData = quote(d)
-      ))
-
-    build_rmd_bundle(
-      "model.Rmd", "model.zip",
-      vars = list(
-        code = format_tidy_code(code),
-        xvar = deparse(input$xvar),
-        yvar = deparse(input$yvar)
-      ),
-      include_files = "data.rds"
-    )
-  })
-
-
-  observeEvent(input$full_code, {
-
-    saveRDS(getData(), "data.rds")
-    code <- expandCode(
-      {
-        library(plotly)
-        library(dplyr)
-        library(ggmosaic)
-        d <- readRDS("data.rds")
-        counts_long <- !!counts_long()
-        counts_wide <- !!counts_wide()
-        counts_raw <- !!counts_raw()
         !!output$plot()
-        !!output$model()
-      },
-      patchCalls = list(
-        counts_long = quote(counts_long),
-        counts_wide = quote(counts_wide),
-        counts_raw = quote(counts_raw),
+      }, patchCalls = list(
         getData = quote(d)
       ))
 
-    build_rmd_bundle(
-      "full.Rmd", "full.zip",
-      vars = list(code = format_tidy_code(code)),
-      include_files = "data.rds"
-    )
-  })
+      build_rmd_bundle(
+        "plot.Rmd", out,
+        vars = list(code = format_tidy_code(code)),
+        include_files = c("data.rds")
+      )
+    }
+  )
+
+
+  output$model_code <- downloadHandler(
+    "model.zip",
+    content = function(out) {
+      saveRDS(getData(), "data.rds")
+      code <- expandCode(
+        {
+          library(plotly)
+          library(dplyr)
+          library(ggmosaic)
+          d <- readRDS("data.rds")
+          counts_long <- !!counts_long()
+          counts_wide <- !!counts_wide()
+          counts_raw <- !!counts_raw()
+          !!output$model()
+        },
+        patchCalls = list(
+          counts_long = quote(counts_long),
+          counts_wide = quote(counts_wide),
+          counts_raw = quote(counts_raw),
+          getData = quote(d)
+        ))
+
+      build_rmd_bundle(
+        "model.Rmd", out,
+        vars = list(
+          code = format_tidy_code(code),
+          xvar = deparse(input$xvar),
+          yvar = deparse(input$yvar)
+        ),
+        include_files = "data.rds"
+      )
+    }
+  )
+
+  output$full_code <- downloadHandler(
+    "full.zip",
+    content = function(out) {
+
+      saveRDS(getData(), "data.rds")
+      code <- expandCode(
+        {
+          library(plotly)
+          library(dplyr)
+          library(ggmosaic)
+          d <- readRDS("data.rds")
+          counts_long <- !!counts_long()
+          counts_wide <- !!counts_wide()
+          counts_raw <- !!counts_raw()
+          !!output$plot()
+          !!output$model()
+        },
+        patchCalls = list(
+          counts_long = quote(counts_long),
+          counts_wide = quote(counts_wide),
+          counts_raw = quote(counts_raw),
+          getData = quote(d)
+        ))
+
+      build_rmd_bundle(
+        "full.Rmd", out,
+        vars = list(code = format_tidy_code(code)),
+        include_files = "data.rds"
+      )
+    }
+  )
 
 }
 
