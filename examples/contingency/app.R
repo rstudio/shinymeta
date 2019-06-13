@@ -185,9 +185,9 @@ server <- function(input, output, session) {
         getData = quote(d)
       ))
 
-      build_rmd_bundle(
+      buildRmdBundle(
         "plot.Rmd", out,
-        vars = list(code = format_tidy_code(code)),
+        vars = list(code = code),
         include_files = c("data.rds")
       )
     }
@@ -216,10 +216,10 @@ server <- function(input, output, session) {
           getData = quote(d)
         ))
 
-      build_rmd_bundle(
+      buildRmdBundle(
         "model.Rmd", out,
         vars = list(
-          code = format_tidy_code(code),
+          code = code,
           xvar = deparse(input$xvar),
           yvar = deparse(input$yvar)
         ),
@@ -252,9 +252,9 @@ server <- function(input, output, session) {
           getData = quote(d)
         ))
 
-      build_rmd_bundle(
+      buildRmdBundle(
         "full.Rmd", out,
-        vars = list(code = format_tidy_code(code)),
+        vars = list(code = code),
         include_files = "data.rds"
       )
     }
