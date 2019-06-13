@@ -132,6 +132,6 @@ build_archive <- function(x, output_file) {
   setwd(basedir)
   on.exit(setwd(olddir))
 
-  zip(fs::path_abs(output_file, olddir), ".")
+  utils::zip(fs::path_abs(output_file, olddir), ".")
   invisible(output_file)
 }

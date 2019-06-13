@@ -31,3 +31,4 @@ Remotes:
     rstudio/shiny@joe/feature/readable-outputs,
     r-lib/fastmap
 VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)

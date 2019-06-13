@@ -1,0 +1,10 @@
+---
+title: "My great report"
+output: pdf_document
+---
+
+This is nice
+
+```{r}
+{{code}}
+```

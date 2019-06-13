@@ -1,3 +1,4 @@
+# Creates a nullary function that returns the given value
 constf <- function(value) {
   force(value)
   function() {
@@ -5,20 +6,14 @@ constf <- function(value) {
   }
 }
 
-replaceInExpr <- function(expr, target, replacement) {
-  if (identical(expr, target)) {
-    return(replacement)
-  }
-
-  if (is.call(expr)) {
-    for (i in seq_len(length(expr) - 1)) {
-      expr[[i + 1]] <- replaceInExpr(expr[[i + 1]], target, replacement)
-    }
-  }
-
-  expr
-}
-
+#' Wrap expressions with a function call
+#'
+#' Creates a function call with the given function, using the quoted expressions
+#' as unnamed arguments.
+#'
+#' @param func Fully-qualified function (i.e. base::head or shiny:::withLocalOptions)
+#' @param ... Language objects to pass to the function
+#' @noRd
 wrapExpr <- function(func, ...) {
   func <- substitute(func)
 
@@ -44,9 +39,27 @@ expandExpr <- function(expr, data, env) {
 #   expandExpr(quote(!!a + !!b), list(a = quote(two)), env)
 # })
 
+#' Format code objects
+#'
+#' Converts language/expression objects (i.e. quoted code) into pretty-formatted
+#' text. This logic is based on [styler::style_text()], but with additional
+#' features/opinions; see Details.
+#'
+#' `formatCode` differs from [styler::style_text()] in a few ways:
+#'
+#' * Pipe operators (`%>%`) are always followed by a line break.
+#' * Superfluous `\{` and `\}` are removed in many cases.
+#' * Since quoted R code cannot contain comments, you can use comment strings.
+#'
+#' Comment strings are literal strings that appear on their own line, and begin
+#' with one or more `#` characters. Such strings will be converted into comments
+#' by `formatCode`.
+#'
+#' @param code Language/expr object (recommended), or character vector
+#' @return Single-element character vector with formatted code
 #' @export
-format_tidy_code <- function(code_str) {
-  code_txt <- styler::style_text(rebreak(code_str))
+formatCode <- function(code) {
+  code_txt <- styler::style_text(rebreak(code))
   paste(code_txt, collapse = "\n")
 }
 

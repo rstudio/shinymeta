@@ -4,4 +4,4 @@ This **highly experimental** package provides metaprogramming helper functions a
 
 Some slides about the motivation can be seen [here](https://speakerdeck.com/jcheng5/using-shiny-responsibly-in-pharma?slide=5), though the solutions outlined in the post are precursors of the ideas in shinymeta.
 
-For another promising solution to this problem, see [dgkf/scriptgloss](https://github.com/dgkf/scriptgloss).
+For another experimental but promising solution to this problem, see [dgkf/scriptgloss](https://github.com/dgkf/scriptgloss).

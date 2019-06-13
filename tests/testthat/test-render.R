@@ -78,12 +78,15 @@ describe("metaRender", isolate({
     # Have to call expandCode outside of expect_equal because expect_equal will
     # expand the !!
     x <- expandCode({ !!out() })
-    expect_equal(x, quote({{ str(cars) }}))
-    expect_equal(format_tidy_code(x), "str(cars)")
+    q1 <- quote({{ str(cars) }})
+    expect_equal(x, q1)
+    expect_equal(formatCode(x), "str(cars)")
 
     x <- expandCode({ !!out() }, patchCalls = list(mr = quote(boats)))
-    expect_equal(x, quote({{ str(boats) }}))
-    expect_equal(format_tidy_code(x), "str(boats)")
+
+    q2 <- quote({{ str(boats) }})
+    expect_equal(x, q2)
+    expect_equal(formatCode(x), "str(boats)")
   })
 
 
@@ -96,17 +99,17 @@ describe("metaRender", isolate({
       mr1 <- !!mr1()
     })
 
-    expect_equal(format_tidy_code(code), "mr1 <- 1 + 1")
+    expect_equal(formatCode(code), "mr1 <- 1 + 1")
 
     mr2 <- metaReactive({
-      {1 + 1}
+      !!quote({1 + 1})
     })
 
     code <- expandCode({
       mr2 <- !!mr2()
     })
 
-    expect_equal(format_tidy_code(code), "mr2 <- 1 + 1")
+    expect_equal(formatCode(code), "mr2 <- 1 + 1")
 
     code <- expandCode({
       mr1 <- !!mr1()
@@ -114,7 +117,7 @@ describe("metaRender", isolate({
     })
 
     expect_equal(
-      format_tidy_code(code),
+      formatCode(code),
       "mr1 <- 1 + 1\nmr2 <- 1 + 1"
     )
   })
