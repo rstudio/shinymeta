@@ -6,6 +6,6 @@
 #' @param ... arguments passed along to [cat()].
 #'
 #' @export
-print.shinyMetaExpr <- function(x, formatter = format_tidy_code, ...) {
+print.shinyMetaExpr <- function(x, formatter = formatCode, ...) {
   cat(formatter(x), ..., sep = "\n")
 }

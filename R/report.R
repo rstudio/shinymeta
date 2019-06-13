@@ -1,11 +1,11 @@
 # TODO: Unit tests for this whole file
 
 #' @export
-build_script_bundle <- function(code = NULL, output_zip_path, script_name = "script.R",
+buildScriptBundle <- function(code = NULL, output_zip_path, script_name = "script.R",
   include_files = list(), render = TRUE, render_args = list()) {
 
   if (is.language(code)) {
-    code <- format_tidy_code(code)
+    code <- formatCode(code)
   }
 
   build_bundle(code, script_name, output_zip_path,
@@ -14,7 +14,7 @@ build_script_bundle <- function(code = NULL, output_zip_path, script_name = "scr
 }
 
 #' @export
-build_rmd_bundle <- function(report_template, output_zip_path, vars = list(),
+buildRmdBundle <- function(report_template, output_zip_path, vars = list(),
   include_files = list(), render = TRUE, render_args = list()) {
 
   force(report_template)
@@ -23,7 +23,7 @@ build_rmd_bundle <- function(report_template, output_zip_path, vars = list(),
   if (is.list(vars)) {
     vars <- lapply(vars, function(x) {
       if (is.language(x)) {
-        format_tidy_code(x)
+        formatCode(x)
       } else {
         x
       }

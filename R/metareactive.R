@@ -139,9 +139,7 @@ withDynamicScope <- function(expr, ..., .list = list(...)) {
 expandCode <- function(expr, patchCalls = list(), indent = 0) {
   quosure <- withMetaMode(
     withDynamicScope(
-      {
-        rlang::enquo(expr)
-      },
+      rlang::enquo(expr),
       .list = lapply(patchCalls, constf)
     )
   )
