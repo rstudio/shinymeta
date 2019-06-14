@@ -135,8 +135,50 @@ withDynamicScope <- function(expr, ..., .list = list(...)) {
   # TODO use promise domain
 }
 
+#' Expand meta primitives into user code
+#'
+#' This function provides the main entry point for generating user code
+#' via meta-components (e.g., [metaReactive()], [metaObserve()], [metaRender()], etc).
+#' It's similar to [withMetaMode()], but instead, quotes the `expr`, which allows you
+#' to generate code from multiple meta-components via quasiquotation (e.g. [rlang::!!]).
+#' When producing code from multiple meta-components, you may find that code produced from one
+#' meta-component overlaps (i.e., repeats redundant computation) with another meta-component.
+#' In that case, it's desirable to assign the return value of a meta-component to a variable, and
+#' use that variable (i.e., symbol) in downstream code generated from other meta-components. This
+#' can be done via the `patchCalls` argument which can replace the return value of
+#' a meta-component with a relevant variable name.
+#'
+#' @param expr an expression.
+#' @param patchCalls a named list of quoted symbols. The names of the list
+#' should match name(s) bound to relevant meta-component(s) found in `expr`
+#' (e.g. `petal_width` in the example below). The quoted symbol(s) should
+#' match variable name(s) representing the return value of the meta-component(s).
+#'
 #' @export
-expandCode <- function(expr, patchCalls = list(), indent = 0) {
+#' @seealso [withMetaMode()]
+#' @examples
+#'
+#' options(shiny.suppressMissingContextError = TRUE)
+#'
+#' petal_width <- metaReactive({
+#'   iris$Petal.Width
+#' })
+#'
+#' mean_pw <- metaReactive({
+#'   mean(!!petal_width())
+#' })
+#'
+#' expandCode(
+#'   {
+#'     pw <- !!petal_width()
+#'     !!mean_pw()
+#'   },
+#'   patchCalls = list(
+#'     petal_width = quote(pw)
+#'   )
+#' )
+#'
+expandCode <- function(expr, patchCalls = list()) {
   quosure <- withMetaMode(
     withDynamicScope(
       rlang::enquo(expr),
@@ -147,6 +189,7 @@ expandCode <- function(expr, patchCalls = list(), indent = 0) {
   expr <- rlang::quo_get_expr(
     remove_class(quosure, "shinyMetaExpr")
   )
+
 
   prefix_class(expr, "shinyMetaExpr")
 }
