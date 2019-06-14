@@ -195,11 +195,15 @@ expandCode <- function(expr, patchCalls = list()) {
 }
 
 prefix_class <- function (x, y) {
+  # Can't set attributes on a symbol, but that's alright because
+  # we don't need to run formatCode on symbols
+  if (is.symbol(x)) return(x)
   oldClass(x) <- unique(c(y, oldClass(x)))
   x
 }
 
 remove_class <- function(x, y) {
+  if (is.symbol(x)) return(x)
   oldClass(x) <- setdiff(oldClass(x), y)
   x
 }
