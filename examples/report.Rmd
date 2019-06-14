@@ -5,6 +5,6 @@ output: pdf_document
 
 This is nice
 
-```{r}
+```{r, message=FALSE}
 {{code}}
 ```
