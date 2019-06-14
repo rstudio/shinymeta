@@ -105,7 +105,7 @@ withMetaMode <- function(expr, mode = TRUE) {
     on.exit(options(op), add = TRUE)
   }
 
-  prefix_class(expr, if (mode) "shinyMetaExpr" else "shinyMetaValue")
+  expr
 }
 
 #' @export
@@ -115,7 +115,7 @@ metaExpr <- function(x, env = parent.frame()) {
   x <- rlang::new_quosure(x, env)
 
   if (metaMode())
-    rlang::quo_get_expr(x)
+    prefix_class(rlang::quo_get_expr(x), "shinyMetaExpr")
   else
     rlang::eval_tidy(x)
 }
