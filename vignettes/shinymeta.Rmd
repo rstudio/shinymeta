@@ -16,243 +16,242 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Motivation
+## Motivation: Interactivity or reproducibility, pick one
 
-Fundamental tension between interactive processes and reproducibility. One solution is to use interactive processes to generate a reproducible artifact. (Doesn't solve the problem of “how you got there” though.)
+Since its introduction in 2012, Shiny has become a mainstay of the R ecosystem, providing a solid foundation for building interactive artifacts of all kinds. But that interactivity has always come at a significant cost to reproducibility, as actions performed in a Shiny app are not easily captured for later analysis and replication.
 
-## Other approaches (scriptgloss, phyloseq)
+In 2016, Shiny gained a "bookmarkable state" feature that makes it possible to snapshot and restore application state via URL. But this feature, though useful, doesn't completely solve the reproducibility problem, as the actual program logic is still locked behind a user interface.
 
-Tradeoffs exist between ease-of-use and quality/clarity of code. All existing approaches are far from perfect IMHO, including the one I am presenting today.
+The goal of shinymeta is to allow Shiny app authors to present their users with not only the traditional outputs of their analysis (plots, tables, etc.), but also the exact R source code necessary to reproduce that analysis, without any trace of Shiny boilerplate.
 
-## Demo
+[Screenshot or diagram]
 
-I can use this Shiny app interactively, there's a code preview window, and I can click this button to download a source .R or .Rmd.
+An app author might have any number of reasons for wanting to expose such R code to their users:
 
-## Code
+* **Teaching:** For classroom use, a student might use a Shiny app interactively to gain intuitive understanding of a statistical concept, then use the code to learn how to use the corresponding function from their own R scripts.
+* **Transparency:** In research, your methods are just as important as your results. If you want your Shiny app's users to have the ability to audit your methods, it's much easier for them to do so using a reproducible script.
+* // TODO: Gateway drug to coding / Enabling
+* **Automation:** Shiny apps often use data that changes over time: stock quotes, sensor readings, centralized databases, etc. By providing users with reproducible R code, you enable them to take that logic into other workflows, such as creating a [periodic R Markdown email using RStudio Connect](https://docs.rstudio.com/connect/1.7.4/user/r-markdown-schedule.html).
+* **Permanence:** Using a Shiny app can have an ephemeral feeling to it; what happens in the future if the server goes down, or the app's features change? With a reproducible report, your user can download a more permanent artifact that can be saved locally.
+* **Scaffolding:** Some Shiny apps don't answer a lot of questions on their own, but instead provide access data that might otherwise be difficult for users to acquire; for example, very large data sets often have an interactive front end that analysts can use to download CSV files that are generated on the fly. With shinymeta, such apps could also offer code snippets for downloading the same data programatically, making the act of downloading the data reproducible.
 
-As you can see, the code is all relatively concise, but it does involve some weird syntax. Not your typical Shiny reactives.
+## Design and implementation
 
-Now let's talk about what these pieces are, and how to put them together.
+Our goal is to make it possible for a Shiny app to serve two purposes:
 
-## Metaprogramming with Shiny
+1. Serving an interactive web application, i.e. its usual purpose
+2. Exposing the essential logic that drives one or more of the app's outputs, in the form of .R or .Rmd
 
-Regular programming is writing code that generates actions and results.
+First, can we stop for a moment and recognize that this is a pretty daunting challenge? As it is, Shiny works pretty hard to provide a natural syntax for writing interactive applications. And now, these apps have to not only work, they also need to expose their "essential logic" in a way that can be used outside of Shiny.
 
-Metaprogramming is writing code that generates code.
+Perhaps in the future, someone smarter than your humble author will come up with a silver bullet for achieving perfect reproducibility from any Shiny app with no effort from the app author. But for today, we're stuck with difficult tradeoffs between:
 
+1. **Quality of output:** Does the generated code look clean, like a human would write it; or is it awkwardly structured and/or contain random boilerplate?
+2. **Implementation effort:** How hard is it to add code generation to your app?
+3. **Generality:** Can code generation features be added to _any_ Shiny app, or only apps that follow certain conventions? Does it work as well for large, complex apps as for small ones?
+
+### Approach 1: Copy and paste
+
+> Quality of output: \*\*\*\*\*
+>
+> Ease of learning: \*\*\*\*
+>
+> Ease of implementation: \*\* (but highly variable)
+>
+> Generality: \*\*
+
+The simplest approach is to simply duplicate your logic. You have an `app.R` file that contains your Shiny app, and a separate `script.R` or `report.Rmd` file that contains the same logic in linear form (i.e. minus any of the structure that Shiny imposes). The `script.R` or `report.Rmd` contains placeholders that will be replaced by input values selected by the user.
+
+// TODO: Example
+
+This approach is easy to understand, but it means that you are stuck maintaining a parallel codebase that you must manually keep in sync; over the long term, this can be a source of not only tedium but also bugs. On the plus side, because you're maintaining `script.R`/`report.Rmd` by hand, the level of code quality is limited only by your own skill.
+
+### Approach 2: Mechanical transformation (scriptgloss)
+
+> Quality of output: \**
+>
+> Ease of learning: \*\*\*
+>
+> Ease of implementation: \*\*\*\*
+>
+> Generality: \*\*
+
+This approach automatically transforms your reactives, outputs, and observers into linearized code, using predefined algorithms/heuristics. You as the app author are neither required nor able to influence the code generation process very much. The nice thing about this is how little effort it is—you can add scriptgloss to your app in a couple of minutes!
+
+The price you pay for all this automation is that the generated code looks pretty unnatural, with some Shiny-related wires sticking out. Plus, there are several common situations that will lead to the script not working; then the onus is on either the app author to gain a deeper understanding of scriptgloss and restructure the app to suit, or on the user to take the slightly broken code and fix it.
+
+### Approach 3: Metaprogramming (shinymeta)
+
+> Quality of output: \*\*\*\*
+>
+> Ease of learning: \*\*
+>
+> Ease of implementation: \*\*\*
+>
+> Generality: \*\*\*\*\*
+
+Of these three techniques, metaprogramming is by far the most conceptually challenging to get started with. In exchange for climbing the considerable learning curve, you get much more control over how the code output is generated. We also believe (but can't yet prove) that this approach can scale to larger, more complex apps, including ones that use Shiny modules.
+
+The rest of this document will explain the shinymeta approach.
+
+## shinymeta in action
+
+Let's cut to the chase by looking at a finished example of a shinymeta app.
+
+This app is an interactive demonstration of polynomial regression. You can choose your independent and dependent variables, and the desired degree. Less obviously, you can click on individual data points to mark them as outliers and exclude them from the model.
+
+[Screenshot or maybe movie]
+
+It feels just like a normal Shiny app, until you press the "R Code" button. Here's the output we've been talking about: the logic behind the app. We can copy this code into a new R session and it produces exactly the same output:
+
+[Screenshot]
+
+In order to achieve this, we had to use the shinymeta package and take special care in crafting the logic of this app. A typical reactive expression might look like this (where `data_kept` and `model_fit` are also reactive expressions):
+
+```r
+data_fitted <- reactive({
+  modelr::add_predictions(data_kept(), model_fit())
+})
 ```
-regular_function() => data frame, model object, plotting to graphics device
-meta_function() => code
+
+But the version used in this shinymeta-enabled app looks like this:
+
+```r
+data_fitted <- metaReactive({
+  modelr::add_predictions(!!data_kept(), !!model_fit())
+})
 ```
 
-By "code" I don't mean a string, but rather, R's built-in data type for code (expressions).
+The `reactive` function has been changed to `metaReactive`, and `!!` prefixes have been added to the reactive expression reads. We'll get into the specifics in a moment, but first, we need to take a step back and talk about the idea that puts the "meta" in "shinymeta".
 
-```
-Characters =parse()=> Expressions =eval()=> Results
-```
+## Metaprogramming
 
-**Hypothesis:** Let Shiny app authors write logic that is suitable for both execution (for interactive use) and exporting (for generating reproducible artifacts).
+In traditional programming, your code manipulates data; say, adding two vectors together, or filtering a data frame, or converting a matrix of numbers to an RGB image.
 
-### Quoting/unquoting
+In metaprogramming, your code manipulates code! This may seem strange, since we normally think of the code we write as being simply input for the R compiler/interpreter, which then faithfully executes our commands. But actually, R is capable of treating its own code as data, to be examined, modified, executed, printed.
 
-In general terms, “quoting” is how we tell the compiler/interpreter “don’t evaluate this!”
+What do we mean by "code as data"? Well, here's a number as data:
 
 ```{r}
-# This is a comment
-"# This is not a comment, because quotes"
+num_data <- 3 + 5
+num_data
 ```
 
-The preceding is an example of string quoting--that’s what double-quote and single-quote characters do.
-
-The equivalent for metaprogramming is quoting code; instead of using double-quotes to mark a sequence of characters as a string, we use `quote()` (or `rlang::expr()`, if you prefer) to mark an expression as code.
-
-`str(cars)` will cause the structure of cars to be printed, but `quote(str(cars))` will just return the _code_ for `str(cars)`.
+Here's a string as data:
 
 ```{r}
-str(cars)
-quote(str(cars))
+str_data <- "3 + 5"
+str_data
 ```
 
-(to be continued)
+Note that the result isn't `8`, because the `3 + 5` is quoted using `"..."`.
 
-## Specifics of metaprogramming with Shiny
-
-There are several types of code in Shiny that you might want to export.
-
-1. **Top-level functions:** write these in a separate file (functions.R)
-2. **Reactive expressions:** use metaReactive or metaReactive2
-3. **Observers and outputs:** extract bodies into metaAction
-4. **eventReactive/observeEvent:** ??? Probably will need metaEventReactive, that in meta mode only returns the body? For now just use regular metaReactive2 with isolate
-
-### Using `metaReactive`
-
-A `metaReactive` is like a regular reactive expression, except for two differences.
-
-First, a `metaReactive` can be called in two ways. If you call it the normal way, it calculates and returns a result as usual. But if you call it inside `withMetaMode(...)`, then instead of returning a result, it returns code.
+And here, finally, is _code_ as data:
 
 ```{r}
+code_data <- quote(3 + 5)
+code_data
+eval(code_data)
+```
+
+This looks a lot like the string example, but instead of quoting using `"..."`, we quote using `quote(...)`.
+
+### Creating code objects using `quote()`
+
+You can quote any syntactically valid R expression using `quote`:
+
+```{r}
+quote(print(letters))
+quote(lm.D9 <- lm(weight ~ group))
+quote(mtcars %>% dplyr::filter(hp >= 200))
+```
+
+If you have more than one statement/expression, you can use code blocks (`{...}`):
+
+```{r}
+quote({
+  p <- ggplot(diamonds, aes(carat, price))
+  p <- p + geom_point()
+  p
+})
+```
+
+Now, we could've used `"..."` to turn these expressions into strings instead of using `quote(...)` to turn them into code blocks. But there are significant advantages to using the latter.
+
+For one thing, `quote` does some basic syntax error checking for you. The expression `print(*10)` isn't valid R, yet it's a totally valid string. `quote(...)` will rightfully reject it.
+
+```{r}
+"print(*10)"
+```
+```{r error=TRUE}
+quote(print(*10))
+```
+
+It's not impossible to construct a syntactically invalid code object, but it's much harder to do so accidentally than if we were using strings to represent our code.
+
+There are more advantages to using code objects when we start talking about manipulation, not just creation. More on that below, but first let's bring it back to Shiny.
+
+## Using metaprogramming with reactivity
+
+Most of the essential logic in Shiny apps is locked up in reactive expressions, output renderers, and observers. We need to make it possible to have these reactive objects work as normal when the app is running, but to also make it possible to "export" their code bodies when it's time to generate a reproducible script or report.
+
+Let's focus on reactive expressions first. `shiny::reactive` doesn't have an "export code" feature, so shinymeta includes a function called `metaReactive` that acts as a replacement:
+
+```{r}
+library(dplyr)
 library(shiny)
 library(shinymeta)
-library(magrittr)
 
-# For demonstration purposes, suppress shiny's missing context error so we can walk through meta-programming in shiny *outside* of a shiny app
-options(shiny.suppressMissingContextError=TRUE)
+# Non-meta
+r <- reactive({
+  mtcars %>% filter(hp >= input$min_hp)
+})
 
-input <- list(
-  url = "https://raw.githubusercontent.com/rstudio/gt/master/data-raw/sza.csv",
-  rows = 5
-)
-
-r <- metaReactive({
-  read.csv(input$url) %>%
-    head(input$rows)
+# Meta
+mr <- metaReactive({
+  mtcars %>% filter(hp >= input$min_hp)
 })
 ```
 
-If you call `r()` normally, it returns a data frame:
+
+
+Dividing shinymeta into subproblems:
+
+1. Dual-purpose reactive objects (`metaExpr` and `withMetaMode`)
+    1. Dual-Purpose
+        - Use `metaExpr` to wrap code that needs to play these dual roles.
+        - Use `withMetaMode` to control whether `metaExpr` returns unevaluated code, or evaluates the code and returns the results.
+              - It's surprising that this works by setting global state, why isn't this just an option you pass to `metaExpr`? This'll be answered later.
+        - You'll rarely use these primitives directly, but it's important that you understand that there are these two modes.
+    2. Reactive
+        - `metaReactive` is a version of `reactive` that implicitly wraps your code in `metaExpr`--that works great assuming you want the entire code body to be wrapped. (Use `metaReactive2` if you want to control what code gets `metaExpr`'d.)
+        - Why not just `reactive(metaExpr(...))`? Because caching. And if that doesn't make sense to you, don't worry about it--just know that it's always wrong to put `metaExpr` inside of `reactive`, `observe`, `output$foo`.
 
 ```{r}
-r()
-```
-
-But if you use `withMetaMode(r())`, it returns code:
-
-```{r}
-withMetaMode(r())
-```
-
-Second, metaReactives are tidyeval aware, and use this capability to let you, the app author, perform some customization as to how the code should be rendered. Specifically, you can decide what parts of your code should appear in the output code verbatim, and which parts you want to replace with the value.
-
-For example, in the previous example, do you want the output code to contain `input$url` and `input$rows`? Probably not, you want the actual values instead. In that case, you need to unquote `input$url` by changing it to `!!input$url`. This doesn’t result in any different behavior when calling the metaReactive normally, but when called inside `withMetaMode`, the code will have `input$url` replaced with its value.
-
-```{r}
-r <- metaReactive({
-  read.csv(!!input$url) %>%
-    head(!!input$rows)
-})
-
-r()
-
-withMetaMode(r())
-```
-
-Now, the actual URL and number of rows have been inserted into the code.
-
-### Using metaReactive2
-
-metaReactive is used when the entire body of code in the metaReactive should be exported. But what if you want just a subset of the code to be exported, i.e. some of the code is only for interactive use?
-
-```{r}
-time <- metaReactive({
-  invalidateLater(1000)
-  Sys.time()
-})
-
-withMetaMode(time())
-```
-
-The output code contains `invalidateLater(1000); Sys.time()`. Even though we need `invalidateLater(1000)` for runtime purposes, we don't want it to be in our reproducible script, only `Sys.time()`. We can use `metaReactive2` (note: function name is subject to change!) instead:
-
-```{r}
-time <- metaReactive2({
-  invalidateLater(1000)
-  metaExpr({
-    Sys.time()
-  })
-})
-
-withMetaMode(time())
-```
-
-When using `metaReactive2`, you wrap the code you care about in `metaExpr()` and return the result. (Exercise: What if you want the output code to contain the actual time, instead of a call to Sys.time()?)
-
-### metaReactives calling metaReactives
-
-Just as reactive expressions can call reactive expressions, metaReactives can call metaReactives.
-
-```{r}
-time <- metaReactive2({
-  invalidateLater(1000)
-  metaExpr(Sys.time())
-})
-
-tomorrow <- metaReactive({
-  !!time() + (60 * 60 * 24)
-})
-
-withMetaMode(tomorrow())
-```
-
-In this example, the tomorrow metaReactive calls the time metaReactive. Just like a regular reactive expression, we have to call time like a function.
-
-Notice that calling `!!time()` turned into the code `Sys.time()`, instead of a value like <code>`r Sys.time()`</code>. This may be surprising, because in the case of `!!input$url`, it turned into a value; why doesn't `!!time()` do the same? The answer is, `time` is a metaReactive, and it too is being invoked inside of `withMetaMode` (albeit indirectly). And whenever a metaReactive is called within a `withMetaMode`, its return value is code. So `!!time()` _does_ insert the "value", so to speak, of `time`; it just so happens that, because we're in `withMetaMode`, that value happens to be code.
-
-## Combining multiple code objects into one code block
-
-Is this the best way?
-
-```{r}
-a <- quote(foo %>% bar())
-b <- quote(baz <- qux)
-
-rlang::expr({
-  !!a
-  !!b
-})
-```
-
-An alternative:
-
-```{r}
-join_code <- function(...) {
-  as.call(c(list(quote(`{`)), list(...)))
-}
-
-join_code(a, b)
-```
-
-## Reducing code duplication
-
-```{r}
-input <- list(dataset = "pressure")
-
-df <- metaReactive(
-  get(!!input$dataset, "package:datasets")
-)
-
-first <- metaReactive(!!df() %>% head(1L))
-last <- metaReactive(!!df() %>% tail(1L))
-
-withMetaMode(rlang::expr({
-  first <- !!first()
-  last <- !!last()
-}))
-```
-
-This duplication of the `get()` wouldn't pass code review, can we extract it into a variable instead?
-
-```{r}
-# TODO: I was forced to redefine first/last because the
-# copies in the last code chunk have already cached their
-# inputs, so withDynamicScope has no effect. Consider not
-# caching metaReactives at all in meta mode?
-first <- metaReactive(!!df() %>% head(1L))
-last <- metaReactive(!!df() %>% tail(1L))
-
-expandCode(
-  {
-    mydata <- !!df()
-    first <- !!first()
-    last <- !!last()
-  },
-  patchCalls = list(
-    df = quote(mydata)
+downloads <- metaReactive({
+  cran_downloads(
+    package = input$packages, 
+    from    = from(),
+    to      = Sys.Date() - 1
   )
-)
+})
 ```
 
-## Prettifying code
-## Turning code into outputs
-### Code preview pane
-### R scripts
-### Rmd reports
+r2 <- metaReactive({
+
+})
+
+2. Using annotation to combine/compose meta reactive objects (`!!`)
+    - Based on unquoting, a concept that exists in base R (see `bquote`) and more recently was (un-)popularized by the `!!` operator from the tidyverse
+    - 
+
+
+
+
+3. Global optimization/clean-up (`expandCode`)
+
+4. Displaying/reporting/bundling
+
+
+
+
