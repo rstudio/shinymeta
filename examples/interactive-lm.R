@@ -56,17 +56,8 @@ server <- function(input, output) {
   model_fit <- metaReactive2({
     req(input$degree)
 
-    formula <- substitute(
-      y ~ poly(x, degree = degree),
-      list(
-        y = input$yvar,
-        x = input$xvar,
-        degree = as.numeric(input$degree)
-      )
-    )
-
     metaExpr(
-      lm(!!formula, data = !!data_kept())
+      lm(!!input$yvar ~ poly(!!input$xvar, degree = !!as.numeric(input$degree)), data = !!data_kept())
     )
   })
 
