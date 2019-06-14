@@ -14,6 +14,8 @@ knitr::opts_chunk$set(
   echo = TRUE, 
   comment = "#>"
 )
+library(shiny)
+library(shinymeta)
 ```
 
 ## Motivation: Interactivity or reproducibility, pick one
@@ -191,7 +193,7 @@ It's not impossible to construct a syntactically invalid code object, but it's m
 
 There are more advantages to using code objects when we start talking about manipulation, not just creation. More on that below, but first let's bring it back to Shiny.
 
-## Using metaprogramming with reactivity
+## Creating a new class of reactive objects
 
 Most of the essential logic in Shiny apps is locked up in reactive expressions, output renderers, and observers. We need to make it possible to have these reactive objects work as normal when the app is running, but to also make it possible to "export" their code bodies when it's time to generate a reproducible script or report.
 
@@ -199,8 +201,6 @@ Let's focus on reactive expressions first. `shiny::reactive` doesn't have an "ex
 
 ```{r}
 library(dplyr)
-library(shiny)
-library(shinymeta)
 
 # Non-meta
 r <- reactive({
@@ -213,7 +213,39 @@ mr <- metaReactive({
 })
 ```
 
+To help you understand how `metaReactive` works, we need to discuss a couple of lower-level functions that it builds on top of.
 
+The first is a function called `metaExpr`. At first glance, this function does... nothing. It just returns whatever you give it, like `base::identity`:
+
+```{r}
+metaExpr(1 + 1)
+metaExpr(matrix(1:4, 2, 2))
+```
+
+`metaExpr` only starts being useful when we introduce the second function, `metaMode()`. It's technically a function, but conceptually it's like a global variable that's either `TRUE` or `FALSE`. Call it with no arguments to get the current value, or pass it `TRUE` or `FALSE` to set it.
+
+```{r}
+metaMode()        # Initially FALSE
+metaMode(TRUE)    # Set it to TRUE
+metaMode()        # Yep, it's TRUE
+```
+
+When `metaMode` is `TRUE`, the behavior of `metaExpr` changes.
+
+```{r}
+metaMode(FALSE)
+metaExpr(1 + 1)
+metaMode(TRUE)
+metaExpr(1 + 1)
+```
+
+Instead of getting the result, now we get the code!
+
+To sum up the relationship of these two functions: `metaExpr` acts like `identity`, unless `metaMode` is true, in which case it acts like `quote`.
+
+
+
+<!--
 
 Dividing shinymeta into subproblems:
 
@@ -253,5 +285,4 @@ r2 <- metaReactive({
 4. Displaying/reporting/bundling
 
 
-
-
+-->
