@@ -56,10 +56,16 @@ expandExpr <- function(expr, data, env) {
 #' by `formatCode`.
 #'
 #' @param code Language/expr object (recommended), or character vector
+#' @param localize whether or not to [local()]ize assignment calls that
+#' begin with an open brace (that is, `\{`). The default, `"auto"`, wraps
+#' these calls if they contain a [return()] statement.
+#' @param unpack If an assigment call begins with an open brace (that is, `\{`),
+#' and the `\{` call has not been `localize`d, should we move the assignment
+#' to the child of the `\{` call?
 #' @return Single-element character vector with formatted code
 #' @export
-formatCode <- function(code) {
-  code_txt <- styler::style_text(rebreak(code))
+formatCode <- function(code, localize = "auto", unpack = TRUE) {
+  code_txt <- styler::style_text(rebreak(code, localize = localize, unpack = unpack))
   paste(code_txt, collapse = "\n")
 }
 
@@ -78,8 +84,8 @@ deparse_flatten <- function(expr, width.cutoff = 500L) {
 # newlines after %>%, and replaces newlines that follow operators or commas with
 # a single space. The resulting code string will not contain indentation, and
 # must be processed further to be considered readable.
-rebreak <- function(str) {
-  str <- modify_call(str)
+rebreak <- function(str, localize = "auto", unpack = TRUE) {
+  str <- modify_call(str, localize = localize, unpack = unpack)
   if (is.call(str) || is.symbol(str)) {
     str <- deparse_flatten(str)
   }

@@ -4,10 +4,18 @@
 \alias{formatCode}
 \title{Format code objects}
 \usage{
-formatCode(code)
+formatCode(code, localize = "auto", unpack = TRUE)
 }
 \arguments{
 \item{code}{Language/expr object (recommended), or character vector}
+
+\item{localize}{whether or not to \code{\link[=local]{local()}}ize assignment calls that
+begin with an open brace (that is, \code{\{}). The default, \code{"auto"}, wraps
+these calls if they contain a \code{\link[=return]{return()}} statement.}
+
+\item{unpack}{If an assigment call begins with an open brace (that is, \code{\{}),
+and the \code{\{} call has not been \code{localize}d, should we move the assignment
+to the child of the \code{\{} call?}
 }
 \value{
 Single-element character vector with formatted code
