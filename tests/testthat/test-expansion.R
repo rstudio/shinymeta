@@ -13,7 +13,7 @@ describe("expansion", isolate({
     res <- withMetaMode(
       metaExpr(!!two())
     )
-    q1 <- quote({{1}})
+    q1 <- quote(1)
     expect_equal(res, q1)
     expect_equal(formatCode(res), "1")
   })
@@ -22,7 +22,7 @@ describe("expansion", isolate({
     res2 <- expandCode(!!two(),
       patchCalls = list(one = quote(x))
     )
-    expect_equal(res2, quote({x}))
+    expect_equal(res2, quote(x))
   })
 
   it("actually caches", {
@@ -33,5 +33,13 @@ describe("expansion", isolate({
     x1 <- withMetaMode(metaExpr(!!rand()))
     x2 <- withMetaMode(metaExpr(!!rand()))
     expect_identical(x1, x2)
+  })
+
+  it("has clean pipeline stages", {
+    x1 <- expandCode(!!one() + 2)
+    expect_equal(x1, quote(1 + 2))
+
+    x2 <- expandCode(!!one() %>% print())
+    expect_equal(x2, quote(1 %>% print()))
   })
 }))
