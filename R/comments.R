@@ -18,15 +18,9 @@ expr_type <- function(x) {
 # an anonymous function or local() expresion
 has_return <- function(x) {
   if (!is.call(x)) return(FALSE)
-
-  if (rlang::is_call(x, "function") || rlang::is_call(x, "local")) {
-    return(FALSE)
-  }
-
-  if (rlang::is_call(x, "return")) {
-    return(TRUE)
-  }
-
+  if (rlang::is_call(x, "function")) return(FALSE)
+  if (rlang::is_call(x, "local")) return(FALSE)
+  if (rlang::is_call(x, "return")) return(TRUE)
   lapply(x, has_return)
 }
 
