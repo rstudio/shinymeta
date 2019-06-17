@@ -72,6 +72,13 @@ deparse_flatten <- function(expr, width.cutoff = 500L) {
   }
 }
 
+strip_outer_brace <- function(expr) {
+  while (rlang::is_call(expr, "{", 1)) {
+    expr <- expr[[2]]
+  }
+  expr
+}
+
 
 # Neither deparse() nor styler will go out of their way to break on %>%, and
 # deparse will break on other random operators instead. This function inserts
