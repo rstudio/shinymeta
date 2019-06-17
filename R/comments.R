@@ -14,11 +14,20 @@ expr_type <- function(x) {
   }
 }
 
-# return TRUE if return appears anywhere in a call tree, otherwise FALSE
+# Returns TRUE if a return() is detected outside of
+# an anonymous function or local() expresion
 has_return <- function(x) {
   if (!is.call(x)) return(FALSE)
-  if (rlang::is_call(x, "return")) return(TRUE)
-  any(vapply(x, has_return, logical(1)))
+
+  if (rlang::is_call(x, "function") || rlang::is_call(x, "local")) {
+    return(FALSE)
+  }
+
+  if (rlang::is_call(x, "return")) {
+    return(TRUE)
+  }
+
+  lapply(x, has_return)
 }
 
 
@@ -33,7 +42,7 @@ modify_call <- function(x, localize = "auto", unpack = TRUE) {
     if (rlang::is_call(x[[3]], "{")) {
 
       if (identical(localize, "auto")) {
-        localize <- has_return(x[[3]])
+        localize <- any(unlist(has_return(x[[3]]), use.names = FALSE))
       }
 
       if (localize) {

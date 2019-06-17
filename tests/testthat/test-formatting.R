@@ -14,105 +14,148 @@ generate_code_string <- function(code, ...) {
 }
 
 describe(
-  "localization works", {
+  "auto-localized expressions", isolate({
 
-  mr <- metaReactive({
-    a <- 1 + 1
-    if (T) return("b")
-    a + 1
-  })
+    mr <- metaReactive({
+      a <- 1 + 1
+      if (T) return("b")
+      a + 1
+    })
 
-  expect_code_string(
-    expandCode(!!mr()),
-    c(
-      'a <- 1 + 1',
-      'if (T) {',
-      '  return("b")',
-      '}',
-      'a + 1'
-    )
-  )
+    it("without assignment", {
+      expected <- c(
+        'a <- 1 + 1',
+        'if (T) {',
+        '  return("b")',
+        '}',
+        'a + 1'
+      )
+      expect_code_string(expandCode(!!mr()), expected)
+      expect_code_string(expandCode({!!mr()}), expected)
+    })
 
-  expected <- c(
-    'x <- local({',
-    '  a <- 1 + 1',
-    '  if (T) {',
-    '    return("b")',
-    '  }',
-    '  a + 1',
-    '})'
-  )
-  expect_code_string(expandCode(x <- !!mr()), expected)
-  expect_code_string(expandCode({x <- !!mr()}), expected)
+    # TODO: can we reliably do with with `=` assignment?
+    it("with assignment", {
+      expected <- c(
+        'x <- local({',
+        '  a <- 1 + 1',
+        '  if (T) {',
+        '    return("b")',
+        '  }',
+        '  a + 1',
+        '})'
+      )
+      expect_code_string(expandCode(x <- !!mr()), expected)
+      expect_code_string(expandCode({x <- !!mr()}), expected)
+    })
 
-  expect_code_string(
-    expandCode({
-      mr1 <- !!mr()
-      mr2 <- !!mr()
-    }),
-    c(
-      'mr1 <- local({',
-      '  a <- 1 + 1',
-      '  if (T) {',
-      '    return("b")',
-      '  }',
-      '  a + 1',
-      '})',
-      'mr2 <- local({',
-      '  a <- 1 + 1',
-      '  if (T) {',
-      '    return("b")',
-      '  }',
-      '  a + 1',
-      '})'
-    )
-  )
+    it("with multiple assignments", {
+      expect_code_string(
+        expandCode({
+          mr1 <- !!mr()
+          mr2 <- !!mr()
+        }),
+        c(
+          'mr1 <- local({',
+          '  a <- 1 + 1',
+          '  if (T) {',
+          '    return("b")',
+          '  }',
+          '  a + 1',
+          '})',
+          'mr2 <- local({',
+          '  a <- 1 + 1',
+          '  if (T) {',
+          '    return("b")',
+          '  }',
+          '  a + 1',
+          '})'
+        )
+      )
+    })
 
-})
+    it("with anonymous functions", {
+      mrx <- metaReactive({
+        unlist(lapply(1:5, function(x) { if (x == 2) return(x) }))
+      })
+
+      expect_code_string(
+        expandCode(two <- !!mrx()),
+        c(
+          'two <- unlist(lapply(1:5, function(x) {',
+          '  if (x == 2) {',
+          '    return(x)',
+          '  }',
+          '}))'
+        )
+      )
+    })
+
+    it("with already localized expression", {
+      mrl <- metaReactive({
+        local({
+          a <- 1
+          a + 2
+        })
+      })
+
+      expect_code_string(
+        expandCode(three <- !!mrl()),
+        c(
+          'three <- local({',
+          '  a <- 1',
+          '  a + 2',
+          '})'
+        )
+      )
+
+    })
+
+  }))
 
 
 describe(
-  "unpacking works", {
+  "unpacking assignment", {
 
-  mr <- metaReactive({
-    a <- 1+1
-    b <- a+1
-    b+1
+    mr <- metaReactive({
+      a <- 1+1
+      b <- a+1
+      b+1
+    })
+
+    expect_code_string(
+      expandCode({mr <- !!mr()}),
+      c(
+        'a <- 1 + 1',
+        'b <- a + 1',
+        'mr <- b + 1'
+      )
+    )
+
+    expect_code_string(
+      expandCode({
+        mr1 <- !!mr()
+        mr2 <- !!mr()
+      }),
+      c(
+        'a <- 1 + 1',
+        'b <- a + 1',
+        'mr1 <- b + 1',
+        'a <- 1 + 1',
+        'b <- a + 1',
+        'mr2 <- b + 1'
+      )
+    )
+
+    expect_code_string(
+      expandCode({
+        mr <- !!mr()
+      }),
+      c(
+        'a <- 1 + 1',
+        'b <- a + 1',
+        'mr <- b + 1'
+      )
+    )
+
   })
-
-  expect_code_string(
-    expandCode({mr <- !!mr()}),
-    c(
-      'a <- 1 + 1',
-      'b <- a + 1',
-      'mr <- b + 1'
-    )
-  )
-
-  expect_code_string(
-    expandCode({
-      mr1 <- !!mr()
-      mr2 <- !!mr()
-    }),
-    c(
-      'a <- 1 + 1',
-      'b <- a + 1',
-      'mr1 <- b + 1',
-      'a <- 1 + 1',
-      'b <- a + 1',
-      'mr2 <- b + 1'
-    )
-  )
-
-  expect_code_string(
-    expandCode({
-      mr <- !!mr()
-    }),
-    c(
-      'a <- 1 + 1',
-      'b <- a + 1',
-      'mr <- b + 1'
-    )
-  )
-
-})
