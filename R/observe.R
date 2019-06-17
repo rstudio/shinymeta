@@ -1,6 +1,22 @@
+#' Create a meta-reactive observer
+#'
+#' Create a [observe()]r that, when invoked with meta-mode activated
+#' (i.e. called within [withMetaMode()] or [expandCode()]), returns a
+#' partially evaluated code expression. Outside of meta-mode,
+#' `metaObserve()` is equivalent to `observe()`
+#' (it fully evaluates the given expression).
+#'
+#' @details If you wish to capture specific code inside of `expr` (e.g. ignore code
+#' that has no meaning outside shiny, like [req()]), use `metaObserve2()` in combination
+#' with `metaExpr()`.
+#'
+#' @inheritParams shiny::observe
+#' @inheritParams metaReactive
+#' @seealso [metaExpr()]
 #' @export
 metaObserve <- function(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = getDefaultReactiveDomain()) {
+  label = NULL, domain = getDefaultReactiveDomain(),
+  localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
@@ -12,23 +28,31 @@ metaObserve <- function(expr, env = parent.frame(), quoted = FALSE,
   # early to perform expansion of expr here).
   expr <- wrapExpr(shinymeta::metaExpr, expr, env)
 
-  metaObserveImpl(expr = expr, env = env, label = label, domain = domain)
+  metaObserveImpl(
+    expr = expr, env = env, label = label, domain = domain,
+    localize = localize, bindToReturn = bindToReturn
+  )
 }
 
-
+#' @inheritParams metaObserve
 #' @export
+#' @rdname metaObserve
 metaObserve2 <- function(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = getDefaultReactiveDomain()) {
+  label = NULL, domain = getDefaultReactiveDomain(),
+  localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
   }
 
-  metaObserveImpl(expr = expr, env = env, label = label, domain = domain)
+  metaObserveImpl(
+    expr = expr, env = env, label = label, domain = domain,
+    localize = localize, bindToReturn = bindToReturn
+  )
 }
 
-metaObserveImpl <- function(expr, env, label, domain) {
+metaObserveImpl <- function(expr, env, label, domain, localize, bindToReturn) {
   force(expr)
   force(env)
   force(label)
@@ -43,8 +67,12 @@ metaObserveImpl <- function(expr, env, label, domain) {
   structure(
     function() {
       if (metaMode()) {
-        # r_meta cache varies by dynamicVars
-        r_meta(.globals$dynamicVars)
+        as_meta_expr(
+          # r_meta cache varies by dynamicVars
+          r_meta(.globals$dynamicVars),
+          localize,
+          bindToReturn
+        )
       } else {
         stop("Meta mode must be activated when calling the function returned by `metaObserve()`: did you mean to call this function inside of `shinymeta::withMetaMode()`?")
       }

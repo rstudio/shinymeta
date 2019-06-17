@@ -1,5 +1,24 @@
-#'@export
-metaRender <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE) {
+#' Create a meta-reactive output
+#'
+#' Create a meta-reactive output that, when invoked with meta-mode activated
+#' (i.e. called within [expandCode()] or [withMetaMode()]), returns a
+#' code expression (instead of evaluating that expression and returning the value).
+#'
+#' @details If you wish to capture specific code inside of `expr` (e.g. ignore code
+#' that has no meaning outside shiny, like [req()]), use `metaRender2()` in combination
+#' with `metaExpr()`.
+#'
+#' @param renderFunc A reactive output function (e.g., [shiny::renderPlot], [shiny::renderText], [shiny::renderUI], etc).
+#' @param expr An expression that generates given output expected by `renderFunc`.
+#' @param ... Other arguments passed along to `renderFunc`.
+#' @param env The environment in which to evaluate `expr`.
+#' @param quoted Is `expr` a quoted expression (with `quote()`)?
+#' This is useful if you want to save an expression in a variable.
+#'
+#' @seealso [metaExpr()]
+#' @export
+metaRender <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE,
+                       localize = "auto", bindToReturn = FALSE) {
   # # Can't use this code, because rlang::exprs(...) causes `!!` to be expanded,
   # # which we don't want. If there was a way to substitute ... without causing
   # # `!!` expansion, that's what we'd want to do.
@@ -26,8 +45,11 @@ metaRender <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FAL
   metaRender2(renderFunc, expr, ..., env = env, quoted = quoted)
 }
 
+#' @inheritParams metaRender
 #' @export
-metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE) {
+#' @rdname metaRender
+metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE,
+                        localize = "auto", bindToReturn = FALSE) {
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
@@ -41,7 +63,7 @@ metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FA
   function(...) {
     if (metaMode()) {
       # TODO: Verify that length(list(...)) == 0?
-      meta()
+      as_meta_expr(meta(), localize, bindToReturn)
     } else {
       if (is.null(formals(normal)))
         normal()

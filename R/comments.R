@@ -16,11 +16,31 @@ expr_type <- function(x) {
 
 modify_call <- function(x) {
 
-  # Modify a call like `x <- {1 + 1}` to `x <- 1 + 1`
+  # TODO: do this for = assignment as well (how do we make sure it's not an argument?)
   if (rlang::is_call(x, "<-")) {
+    # Modify a call like `x <- {1 + 1}` to `x <- 1 + 1`
     while (rlang::is_call(x[[3]], "{", n = 1)) {
       x[[3]] <- x[[3]][[2]]
     }
+
+    if (rlang::is_call(x[[3]], "{") && inherits(x[[3]], "bindToReturn")) {
+      # Modify a call like:
+      # x <- {
+      #   a <- 1
+      #   b <- 1 + a
+      #   b + 1
+      # }
+      #  to
+      # {
+      #   a <- 1
+      #   b <- 1 + a
+      #   x <- b + 1
+      # }
+      rhs <- x[[3]]
+      rhs[[length(rhs)]] <- call("<-", x[[2]], rhs[[length(rhs)]])
+      x <- rhs
+    }
+
   }
 
   if (rlang::is_call(x, "{")) {

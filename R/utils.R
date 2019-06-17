@@ -26,99 +26,18 @@ wrapExpr <- function(func, ...) {
 # Takes an expr that contains !!, and expands the expr so that all !! are
 # resolved. This is similar to rlang::quo except that 1) expr is already
 # quoted, and 2) you can specify the data/env from which !! should be
-# resolved.
-expandExpr <- function(expr, data, env) {
-  wrappedExpr <- wrapExpr(rlang::quo, expr)
-  rlang::quo_get_expr(eval(wrappedExpr, data, env))
-}
-
+# resolved. For example:
 # local({
 #   a <- quote(one)
 #   b <- quote(three)
 #   env <- environment()
 #   expandExpr(quote(!!a + !!b), list(a = quote(two)), env)
 # })
-
-#' Format code objects
-#'
-#' Converts language/expression objects (i.e. quoted code) into pretty-formatted
-#' text. This logic is based on [styler::style_text()], but with additional
-#' features/opinions; see Details.
-#'
-#' `formatCode` differs from [styler::style_text()] in a few ways:
-#'
-#' * Pipe operators (`%>%`) are always followed by a line break.
-#' * Superfluous `\{` and `\}` are removed in many cases.
-#' * Since quoted R code cannot contain comments, you can use comment strings.
-#'
-#' Comment strings are literal strings that appear on their own line, and begin
-#' with one or more `#` characters. Such strings will be converted into comments
-#' by `formatCode`.
-#'
-#' @param code Language/expr object (recommended), or character vector
-#' @return Single-element character vector with formatted code
-#' @export
-formatCode <- function(code) {
-  code_txt <- styler::style_text(rebreak(code))
-  paste(code_txt, collapse = "\n")
+expandExpr <- function(expr, data, env) {
+  wrappedExpr <- wrapExpr(rlang::quo, expr)
+  rlang::quo_get_expr(eval(wrappedExpr, data, env))
 }
 
-deparse_flatten <- function(expr, width.cutoff = 500L) {
-  if (rlang::is_call(expr, "{")) {
-    paste0(vapply(expr[-1], deparse_flatten, character(1)), collapse = "\n")
-  } else {
-    # TODO: should this have `backtick = TRUE`?
-    paste0(deparse(expr, width.cutoff = width.cutoff), collapse = "\n")
-  }
-}
-
-
-# Neither deparse() nor styler will go out of their way to break on %>%, and
-# deparse will break on other random operators instead. This function inserts
-# newlines after %>%, and replaces newlines that follow operators or commas with
-# a single space. The resulting code string will not contain indentation, and
-# must be processed further to be considered readable.
-rebreak <- function(str) {
-  str <- modify_call(str)
-  if (is.call(str) || is.symbol(str)) {
-    str <- deparse_flatten(str)
-  }
-  str <- paste(str, collapse = "\n")
-  tokens <- sourcetools::tokenize_string(str)
-  tokens$value <- paste0(
-    tokens$value,
-    ifelse(
-      tokens$type == "operator" & tokens$value == "%>%",
-      "\n",
-      ""
-    )
-  )
-  # if the token appearing after a line-break is a
-  # comma/operator, remove the line-break
-  operator_newline <- grepl("\n", tokens$value) &
-    tokens$type == "whitespace" &
-    c(FALSE, head(tokens$type %in% c("comma", "operator"), -1))
-  tokens$value[operator_newline] <- " "
-  new_str <- paste(tokens$value, collapse = "")
-  new_str <- gsub("\\s*\\r?\\n\\s*", "\n", new_str)
-  comment_identifier_remove(new_str)
-}
-
-# If a string appears entirely on it's own line,
-# and begins with #, turn it into a comment
-comment_identifier_remove <- function(x) {
-  if (!is.character(x) || length(x) > 1) {
-    stop("Expected a string (character vector of length 1).")
-  }
-  txt <- strsplit(x, "\n")[[1]]
-  comment_index <- grep(paste0('^"', comment_start), txt)
-  if (!length(comment_index)) return(txt)
-  txt[comment_index] <- sub(paste0('^"', comment_start), "", txt[comment_index])
-  txt[comment_index] <- sub(paste0(comment_end, '"$'), "", txt[comment_index])
-  # e.g. `deparse("a \"string\"")` -> "\"a \\\"string\\\"\""
-  txt[comment_index] <- gsub("\\\"", "\"", txt[comment_index], fixed = TRUE)
-  paste(txt, collapse = "\n")
-}
 
 reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domain = getDefaultReactiveDomain()) {
   map <- fastmap::fastmap()
@@ -140,3 +59,36 @@ reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domai
     map$get(hash)()
   }
 }
+
+
+
+# Note that bindToReturn won't make sense for a localized call,
+# so determine we need local scope first, then add a special class
+# (we don't yet have the name for binding the return value)
+as_meta_expr <- function(cl, localize, bindToReturn) {
+  cl <- add_local_scope(cl, localize)
+  if (bindToReturn && rlang::is_call(cl, "{")) {
+    prefix_class(cl, "bindToReturn")
+  } else {
+    cl
+  }
+}
+
+add_local_scope <- function(cl, localize) {
+  if (!is.call(cl)) return(cl)
+  if (identical(localize, "auto")) {
+    localize <- any(unlist(has_return(cl), use.names = FALSE))
+  }
+  if (localize) call("local", cl) else cl
+}
+
+# Returns TRUE if a return() is detected outside of
+# an anonymous function or local() expresion
+has_return <- function(x) {
+  if (!is.call(x)) return(FALSE)
+  if (rlang::is_call(x, "function")) return(FALSE)
+  if (rlang::is_call(x, "local")) return(FALSE)
+  if (rlang::is_call(x, "return")) return(TRUE)
+  lapply(x, has_return)
+}
+

@@ -3,16 +3,53 @@
 
 #' Create a meta-reactive expression
 #'
-#' Create a reactive that operates in one of two modes, depending on how it is
-#' invoked.
+#' Create a [reactive()] that, when invoked with meta-mode activated
+#' (i.e. called within [expandCode()] or [withMetaMode()]), returns a
+#' code expression (instead of evaluating that expression and returning the value).
 #'
-#' When invoked normally, it operates just like a normal reactive.
+#' @details If you wish to capture specific code inside of `expr` (e.g. ignore code
+#' that has no meaning outside shiny, like [req()]), use `metaReactive2()` in combination
+#' with `metaExpr()`.
 #'
-#' When invoked with meta-mode activated (i.e. withMetaMode is on the call
-#' stack), instead of executing the code and returning the value, it returns the
-#' code expression.
+#' @inheritParams shiny::reactive
+#' @param localize whether or not to wrap the returned expression in [`local()`].
+#' The default, \code{"auto"}, only wraps expressions with a top-level [`return()`]
+#' statement (i.e., return statements in anonymized functions are ignored).
+#' @param bindToReturn for non-`localize`d expressions, should an assignment
+#' of a meta expression be applied to the _last child_ of the top-level `\{` call?
 #' @export
-metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NULL, domain = shiny::getDefaultReactiveDomain()) {
+#' @seealso [metaExpr()]
+#' @examples
+#'
+#' options(shiny.suppressMissingContextError = TRUE)
+#'
+#' input <- list(x = 1)
+#'
+#' y <- metaReactive({
+#'   req(input$x)
+#'   a <- !!input$x + 1
+#'   b <- a + 1
+#'   c + 1
+#' })
+#'
+#' withMetaMode(y())
+#' expandCode(y <- !!y())
+#'
+#' y <- metaReactive2({
+#'   req(input$x)
+#'
+#'   metaExpr({
+#'     a <- !!input$x + 1
+#'     b <- a + 1
+#'     c + 1
+#'   })
+#' }, bindToReturn = TRUE)
+#'
+#' expandCode(y <- !!y())
+#'
+metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NULL,
+                         domain = shiny::getDefaultReactiveDomain(),
+                         localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
@@ -24,23 +61,31 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NUL
   # early to perform expansion of expr here).
   expr <- wrapExpr(shinymeta::metaExpr, expr, env)
 
-  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
+  metaReactiveImpl(
+    expr = expr, env = env, label = label, domain = domain,
+    localize = localize, bindToReturn = bindToReturn
+  )
 }
 
-
+#' @inheritParams metaReactive
 #' @export
-metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain()) {
+#' @rdname metaReactive
+metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE, label = NULL,
+                          domain = shiny::getDefaultReactiveDomain(),
+                          localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
   }
 
-  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
+  metaReactiveImpl(
+    expr = expr, env = env, label = label, domain = domain,
+    localize = localize, bindToReturn = bindToReturn
+  )
 }
 
-metaReactiveImpl <- function(expr, env, label, domain) {
+metaReactiveImpl <- function(expr, env, label, domain, localize, bindToReturn) {
   force(expr)
   force(env)
   force(label)
@@ -54,8 +99,12 @@ metaReactiveImpl <- function(expr, env, label, domain) {
 
   function() {
     if (metaMode()) {
-      # r_meta cache varies by dynamicVars
-      r_meta(.globals$dynamicVars)
+      as_meta_expr(
+        # r_meta cache varies by dynamicVars
+        r_meta(.globals$dynamicVars),
+        localize,
+        bindToReturn
+      )
     } else {
       r_normal()
     }
@@ -81,6 +130,7 @@ metaAction <- function(expr, env = parent.frame(), quoted = FALSE) {
 }
 
 #' @export
+#' @rdname withMetaMode
 metaMode <- local({
   isMetaMode <- FALSE
   function(value) {
@@ -92,6 +142,12 @@ metaMode <- local({
   }
 })
 
+#' Evaluate an expression with meta mode activated
+#'
+#' @param expr an expression.
+#' @param mode whether or not to evaluate expression in meta mode.
+#'
+#' @seealso [expandCode()]
 #' @export
 withMetaMode <- function(expr, mode = TRUE) {
   origVal <- metaMode()
@@ -108,16 +164,24 @@ withMetaMode <- function(expr, mode = TRUE) {
   expr
 }
 
+#' Mark an expression as a meta-expression
+#'
+#'
+#'
+#' @param expr an expression.
+#' @param env an environment.
+#'
+#' @seealso [metaReactive2()], [metaObserve2()], [metaRender2()]
 #' @export
-metaExpr <- function(x, env = parent.frame()) {
-  x <- substitute(x)
-  x <- expandExpr(x, .globals$dynamicVars, env)
-  x <- rlang::new_quosure(x, env)
+metaExpr <- function(expr, env = parent.frame()) {
+  expr <- substitute(expr)
+  expr <- expandExpr(expr, .globals$dynamicVars, env)
+  expr <- rlang::new_quosure(expr, env)
 
   if (metaMode())
-    prefix_class(rlang::quo_get_expr(x), "shinyMetaExpr")
+    prefix_class(rlang::quo_get_expr(expr), "shinyMetaExpr")
   else
-    rlang::eval_tidy(x)
+    rlang::eval_tidy(expr)
 }
 
 withDynamicScope <- function(expr, ..., .list = list(...)) {
