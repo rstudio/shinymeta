@@ -7,14 +7,58 @@
 metaReactive(expr, env = parent.frame(), quoted = FALSE,
   label = NULL, domain = shiny::getDefaultReactiveDomain())
 }
+\arguments{
+\item{env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression.}
+
+\item{quoted}{Is the expression quoted? By default, this is \code{FALSE}.
+This is useful when you want to use an expression that is stored in a
+variable; to do so, it must be quoted with \code{quote()}.}
+
+\item{label}{A label for the reactive expression, useful for debugging.}
+
+\item{domain}{See \link{domains}.}
+}
 \description{
-Create a reactive that operates in one of two modes, depending on how it is
-invoked.
+Create a \code{\link[=reactive]{reactive()}} that, when invoked with meta-mode activated
+(i.e. called within \code{\link[=expandCode]{expandCode()}} or \code{\link[=withMetaMode]{withMetaMode()}}), returns a
+code expression (instead of evaluating that expression and returning the value).
 }
 \details{
-When invoked normally, it operates just like a normal reactive.
+If you wish to capture specific code inside of \code{expr} (e.g. ignore code
+that has no meaning outside shiny, like \code{\link[=req]{req()}}), use \code{metaReactive2()} in combination
+with \code{metaExpr()}.
+}
+\examples{
 
-When invoked with meta-mode activated (i.e. withMetaMode is on the call
-stack), instead of executing the code and returning the value, it returns the
-code expression.
+options(shiny.suppressMissingContextError = TRUE)
+
+input <- list(x = 1)
+
+y <- metaReactive({
+  req(input$x)
+  a <- !!input$x + 1
+  b <- a + 1
+  c + 1
+})
+
+withMetaMode(y())
+expandCode(y <- !!y())
+
+y <- metaReactive2({
+  req(input$x)
+
+  metaExpr({
+    a <- !!input$x + 1
+    b <- a + 1
+    c + 1
+  })
+}, bindToReturn = TRUE)
+
+expandCode(y <- !!y())
+
+}
+\seealso{
+\code{\link[=metaExpr]{metaExpr()}}
 }
