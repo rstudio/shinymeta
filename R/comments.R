@@ -16,13 +16,6 @@ expr_type <- function(x) {
 
 modify_call <- function(x) {
 
-  # Modify a call like `x <- {1 + 1}` to `x <- 1 + 1`
-  if (rlang::is_call(x, "<-")) {
-    while (rlang::is_call(x[[3]], "{", n = 1)) {
-      x[[3]] <- x[[3]][[2]]
-    }
-  }
-
   if (rlang::is_call(x, "{")) {
 
     # comment must appear as a direct child of a `{` call

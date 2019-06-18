@@ -16,18 +16,18 @@ describe("metaRender", isolate({
       withMetaMode({
         metaRender(shiny::renderText, { paste("foo", "bar") })()
       }),
-      quote({
+      quote(
         paste("foo", "bar")
-      })
+      )
     )
 
     expect_equal(
       withMetaMode({
         metaRender2(shiny::renderText, metaExpr({ paste("foo", "bar") }))()
       }),
-      quote({
+      quote(
         paste("foo", "bar")
-      })
+      )
     )
 
   })
@@ -54,18 +54,18 @@ describe("metaRender", isolate({
       withMetaMode({
         metaRender(shiny::renderText, expr = x$expr1, env = x$env, quoted = TRUE)()
       }),
-      quote({
+      quote(
         paste("foo", "bar")
-      })
+      )
     )
 
     expect_equal(
       withMetaMode({
         metaRender2(shiny::renderText, expr = x$expr2, env = x$env, quoted = TRUE)()
       }),
-      quote({
+      quote(
         paste("foo", "bar")
-      })
+      )
     )
 
   })
@@ -77,14 +77,14 @@ describe("metaRender", isolate({
 
     # Have to call expandCode outside of expect_equal because expect_equal will
     # expand the !!
-    x <- expandCode({ !!out() })
-    q1 <- quote({{ str(cars) }})
+    x <- expandCode( !!out() )
+    q1 <- quote( str(cars) )
     expect_equal(x, q1)
     expect_equal(formatCode(x), "str(cars)")
 
     x <- expandCode({ !!out() }, patchCalls = list(mr = quote(boats)))
 
-    q2 <- quote({{ str(boats) }})
+    q2 <- quote( str(boats) )
     expect_equal(x, q2)
     expect_equal(formatCode(x), "str(boats)")
   })
