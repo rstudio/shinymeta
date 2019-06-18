@@ -115,7 +115,7 @@ metaExpr <- function(x, env = parent.frame()) {
   x <- rlang::new_quosure(x, env)
 
   if (metaMode())
-    prefix_class(rlang::quo_get_expr(x), "shinyMetaExpr")
+    prefix_class(strip_outer_brace(rlang::quo_get_expr(x)), "shinyMetaExpr")
   else
     rlang::eval_tidy(x)
 }
@@ -190,14 +190,16 @@ expandCode <- function(expr, patchCalls = list()) {
     remove_class(quosure, "shinyMetaExpr")
   )
 
-
-  prefix_class(expr, "shinyMetaExpr")
+  prefix_class(strip_outer_brace(expr), "shinyMetaExpr")
 }
 
 prefix_class <- function (x, y) {
   # Can't set attributes on a symbol, but that's alright because
   # we don't need to run formatCode on symbols
   if (is.symbol(x)) return(x)
+  if (!is.character(x) && !is.language(x)) {
+    return(x)
+  }
   oldClass(x) <- unique(c(y, oldClass(x)))
   x
 }
