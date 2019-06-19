@@ -14,40 +14,74 @@ expr_type <- function(x) {
   }
 }
 
-modify_call <- function(x) {
+# Crawl the AST to find and flag (i.e. attach attributes) to
+# strings that are eligible to become comments.
+# N.B. This is must be done twice: once in metaExpr() and once in withMetaMode().
+# The reason is that a string could be 'illegal' inside metaExpr() but not necessarily
+# when incorporated in a larger expression (although it should still be considered illegal)
+comment_flags <- function(x) {
 
   if (rlang::is_call(x, "{")) {
 
     # comment must appear as a direct child of a `{` call
     x[-1] <- lapply(x[-1], function(y) {
-      if (is_comment(y)) prefix_class(y, "isComment") else y
+      if (is_comment(y) && !is_illegal(y)) attr(y, "shinymeta_comment") <- TRUE
+      y
     })
 
-    # if the comment appears as the last child of a `{` call,
+    # If the comment appears as the last child of a `{` call,
     # it might be an assignment value, so we throw a warning if that occurs
-    # and add a special class to the string so that when we arrive at the string
-    # in the future, we know not to add the special comment identifier
+    # and tag it so that if and when we arrive at the string in the future,
+    # we know not to add the special comment identifier.
     if (is_comment(x[[length(x)]])) {
       warning("A shinymeta comment can not appear as the last child of a `{` call")
-      x[[length(x)]] <- remove_class(x[[length(x)]], "isComment")
+      attr(x[[length(x)]], "shinymeta_comment") <- "illegal"
     }
 
   }
 
   y <- switch(expr_type(x),
-    constant = if (inherits(x, "isComment")) paste0(comment_start, x, comment_end) else x,
+    constant = x,
     # Recursive cases
-    call = as.call(lapply(x, modify_call)),
-    pairlist = as.pairlist(lapply(x, modify_call))
+    call = as.call(lapply(x, comment_flags)),
+    pairlist = as.pairlist(lapply(x, comment_flags))
   )
 
   # if this is a case we don't recognize, return the input value
   y %||% x
 }
 
+
+# Walk the AST to find strings that are eligible to become comments
+# and wrap the string with an enclosing that we grep for after
+# the expression has been deparsed.
+comment_flags_to_enclosings <- function(x) {
+  y <- switch(
+    expr_type(x),
+    constant = {
+      if (isTRUE(attr(x, "shinymeta_comment"))) {
+        paste0(comment_start, x, comment_end)
+      } else if (length(attr(x, "shinymeta_comment"))) {
+        structure(x, shinymeta_comment = NULL)
+      } else {
+        x
+      }
+    },
+    # Recursive cases
+    call = as.call(lapply(x, comment_flags_to_enclosings)),
+    pairlist = as.pairlist(lapply(x, comment_flags_to_enclosings))
+  )
+
+  y %||% x
+}
+
 is_comment <- function(x) {
   if (!is.character(x) || length(x) != 1) return(FALSE)
   grepl("^#", x)
+}
+
+is_illegal <- function(x) {
+  identical(attr(x, "shinymeta_comment"), "illegal")
 }
 
 comment_start <- "######StartOfShinyMetaCommentIdentifier######"

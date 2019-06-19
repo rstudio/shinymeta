@@ -41,11 +41,36 @@ expandExpr <- function(expr, data, env) {
 
 
 strip_outer_brace <- function(expr) {
-  while (rlang::is_call(expr, "{", 1)) {
+  while (rlang::is_call(expr, "{", n = 1)) {
     expr <- expr[[2]]
   }
   expr
 }
+
+
+
+elevate_comments <- function(expr) {
+  # transform a call like
+  # a <- {
+  #  "# my comment"
+  #  1+1
+  # }
+  # to
+  # {
+  # "# my comment"
+  # a <- 1+1
+  # }
+  if (rlang::is_call(expr, "<-") && rlang::is_call(expr[[3]], "{", n = 2)) {
+    if (isTRUE(attr(expr[[3]][[2]], "shinymeta_comment"))) {
+      expr <- call(
+        "{", expr[[3]][[2]], call("<-", expr[[2]], expr[[3]][[3]])
+      )
+    }
+  }
+
+  expr
+}
+
 
 
 reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domain = getDefaultReactiveDomain()) {
@@ -67,4 +92,24 @@ reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domai
     }
     map$get(hash)()
   }
+}
+
+
+
+add_local_scope <- function(x, localize) {
+  if (!is.call(x)) return(x)
+  if (identical(localize, "auto")) {
+    localize <- any(unlist(has_return(x), use.names = FALSE))
+  }
+  if (localize) call("local", x) else x
+}
+
+# Returns TRUE if a return() is detected outside of
+# an anonymous function or local() expresion
+has_return <- function(x) {
+  if (!is.call(x)) return(FALSE)
+  if (rlang::is_call(x, "function")) return(FALSE)
+  if (rlang::is_call(x, "local")) return(FALSE)
+  if (rlang::is_call(x, "return")) return(TRUE)
+  lapply(x, has_return)
 }

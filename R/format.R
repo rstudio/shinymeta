@@ -37,7 +37,7 @@ deparse_flatten <- function(expr, width.cutoff = 500L) {
 # a single space. The resulting code string will not contain indentation, and
 # must be processed further to be considered readable.
 rebreak <- function(str) {
-  str <- modify_call(str)
+  str <- comment_flags_to_enclosings(str)
   if (is.call(str) || is.symbol(str)) {
     str <- deparse_flatten(str)
   }
@@ -59,12 +59,12 @@ rebreak <- function(str) {
   tokens$value[operator_newline] <- " "
   new_str <- paste(tokens$value, collapse = "")
   new_str <- gsub("\\s*\\r?\\n\\s*", "\n", new_str)
-  comment_identifier_remove(new_str)
+  comment_remove_enclosing(new_str)
 }
 
 # If a string appears entirely on it's own line,
 # and begins with #, turn it into a comment
-comment_identifier_remove <- function(x) {
+comment_remove_enclosing <- function(x) {
   if (!is.character(x) || length(x) > 1) {
     stop("Expected a string (character vector of length 1).")
   }

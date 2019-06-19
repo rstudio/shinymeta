@@ -4,12 +4,20 @@
 \alias{metaExpr}
 \title{Mark an expression as a meta-expression}
 \usage{
-metaExpr(expr, env = parent.frame())
+metaExpr(expr, env = parent.frame(), localize = "auto",
+  bindToReturn = FALSE)
 }
 \arguments{
 \item{expr}{an expression.}
 
 \item{env}{an environment.}
+
+\item{localize}{whether or not to wrap the returned expression in \code{\link[=local]{local()}}.
+The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[=return]{return()}}
+statement (i.e., return statements in anonymized functions are ignored).}
+
+\item{bindToReturn}{for non-\code{localize}d expressions, should an assignment
+of a meta expression be applied to the \emph{last child} of the top-level \code{\{} call?}
 }
 \description{
 Mark an expression as a meta-expression
