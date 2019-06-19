@@ -127,7 +127,7 @@ describe("metaRender", isolate({
 
 }))
 
-describe("various edge cases", {
+describe("various edge cases", isolate({
   expect_equal(
     capturePrint(expandCode({
       "# Escaped \"quotes\" should \'be' supported"
@@ -229,4 +229,4 @@ describe("various edge cases", {
   )
 
   # TODO: What should happen if \n appears in a string-comment?
-})
+}))
