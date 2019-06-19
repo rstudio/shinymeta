@@ -50,6 +50,11 @@ strip_outer_brace <- function(expr) {
 
 
 elevate_comments <- function(expr) {
+  # try elevate comments inside a `{` call
+  if (rlang::is_call(expr, "{")) {
+    return(as.call(c(list(quote(`{`)), lapply(expr[-1], elevate_comments))))
+  }
+
   # transform a call like
   # a <- {
   #  "# my comment"
