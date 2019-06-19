@@ -92,7 +92,7 @@ describe("metaRender", isolate({
   it("works", {
     mrt <- metaRender(renderText, {
       "# a comment"
-       1 + 1
+      1 + 1
     })
     expected_output <- c("# a comment", "1 + 1")
     actual_output <- capturePrint(withMetaMode(mrt()))
@@ -211,6 +211,20 @@ describe("various edge cases", {
     c(
       "# This comment should appear above the assignment",
       "x <- 1 + 1"
+    )
+  )
+
+  code <- expandCode({
+    x <- !!x()
+    x2 <- !!x()
+  })
+  expect_equal(
+    capturePrint(code),
+    c(
+      "# This comment should appear above the assignment",
+      "x <- 1 + 1",
+      "# This comment should appear above the assignment",
+      "x2 <- 1 + 1"
     )
   )
 
