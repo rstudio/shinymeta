@@ -4,7 +4,7 @@
 \alias{formatCode}
 \title{Format code objects}
 \usage{
-formatCode(code)
+formatCode(code, ...)
 }
 \arguments{
 \item{code}{Language/expr object (recommended), or character vector}

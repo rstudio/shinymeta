@@ -177,5 +177,42 @@ describe("various edge cases", {
     )
   )
 
+
+  mr <- metaReactive({
+    "# This is not a comment"
+  })
+
+  mr2 <- metaReactive({
+    !!mr()
+    NULL
+  })
+
+  out <- expect_warning(
+    capturePrint(withMetaMode(mr2())),
+    "comment can not appear as the last child"
+  )
+
+  expect_equal(
+    out,
+    c(
+      "\"# This is not a comment\"",
+      "NULL"
+    )
+  )
+
+  x <- metaReactive({
+    "# This comment should appear above the assignment"
+    1 + 1
+  })
+
+  out <- capturePrint(expandCode(x <- !!x()))
+  expect_equal(
+    out,
+    c(
+      "# This comment should appear above the assignment",
+      "x <- 1 + 1"
+    )
+  )
+
   # TODO: What should happen if \n appears in a string-comment?
 })

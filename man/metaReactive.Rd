@@ -5,9 +5,12 @@
 \title{Create a meta-reactive expression}
 \usage{
 metaReactive(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain())
+  label = NULL, domain = shiny::getDefaultReactiveDomain(),
+  localize = "auto", bindToReturn = FALSE)
 }
 \arguments{
+\item{expr}{an expression.}
+
 \item{env}{The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression.}
@@ -19,6 +22,13 @@ variable; to do so, it must be quoted with \code{quote()}.}
 \item{label}{A label for the reactive expression, useful for debugging.}
 
 \item{domain}{See \link{domains}.}
+
+\item{localize}{whether or not to wrap the returned expression in \code{\link[=local]{local()}}.
+The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[=return]{return()}}
+statement (i.e., return statements in anonymized functions are ignored).}
+
+\item{bindToReturn}{for non-\code{localize}d expressions, should an assignment
+of a meta expression be applied to the \emph{last child} of the top-level \code{\{} call?}
 }
 \description{
 Create a \code{\link[=reactive]{reactive()}} that, when invoked with meta-mode activated
