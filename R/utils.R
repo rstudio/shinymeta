@@ -18,7 +18,7 @@ wrapExpr <- function(func, ...) {
   func <- substitute(func)
 
   as.call(list(
-    as.call(func),
+    if (is.call(func)) as.call(func) else as.symbol(func),
     ...
   ))
 }
