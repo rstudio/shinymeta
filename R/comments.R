@@ -40,15 +40,11 @@ comment_flags <- function(x) {
 
   }
 
-  y <- switch(expr_type(x),
-    constant = x,
-    # Recursive cases
+  switch(expr_type(x),
     call = as.call(lapply(x, comment_flags)),
-    pairlist = as.pairlist(lapply(x, comment_flags))
+    pairlist = as.pairlist(lapply(x, comment_flags)),
+    x
   )
-
-  # if this is a case we don't recognize, return the input value
-  y %||% x
 }
 
 
@@ -56,7 +52,7 @@ comment_flags <- function(x) {
 # and wrap the string with an enclosing that we grep for after
 # the expression has been deparsed.
 comment_flags_to_enclosings <- function(x) {
-  y <- switch(
+  switch(
     expr_type(x),
     constant = {
       if (isTRUE(attr(x, "shinymeta_comment"))) {
@@ -69,10 +65,9 @@ comment_flags_to_enclosings <- function(x) {
     },
     # Recursive cases
     call = as.call(lapply(x, comment_flags_to_enclosings)),
-    pairlist = as.pairlist(lapply(x, comment_flags_to_enclosings))
+    pairlist = as.pairlist(lapply(x, comment_flags_to_enclosings)),
+    x
   )
-
-  y %||% x
 }
 
 is_comment <- function(x) {
