@@ -147,9 +147,6 @@ withMetaMode <- function(expr, mode = TRUE) {
 
 
   if (mode) {
-    expr <- comment_flags(expr)
-    expr <- strip_outer_brace(expr)
-    expr <- elevate_comments(expr)
     expr <- prefix_class(expr, "shinyMetaExpr")
   }
 
@@ -160,18 +157,24 @@ withMetaMode <- function(expr, mode = TRUE) {
 #'
 #'
 #'
-#' @param expr an expression.
-#' @param env an environment.
-#' @param localize whether or not to wrap the returned expression in [`local()`].
+#' @param expr An expression (quoted or unquoted).
+#' @param env An environment.
+#' @param quote Is the expression quoted? This is useful when you want to use an expression
+#' that is stored in a variable; to do so, it must be quoted with [`quote()`].
+#' @param localize Whether or not to wrap the returned expression in [`local()`].
 #' The default, \code{"auto"}, only wraps expressions with a top-level [`return()`]
 #' statement (i.e., return statements in anonymized functions are ignored).
-#' @param bindToReturn for non-`localize`d expressions, should an assignment
+#' @param bindToReturn For non-`localize`d expressions, should an assignment
 #' of a meta expression be applied to the _last child_ of the top-level `\{` call?
 #'
 #' @seealso [metaReactive2()], [metaObserve2()], [metaRender2()]
 #' @export
-metaExpr <- function(expr, env = parent.frame(), localize = "auto", bindToReturn = FALSE) {
-  expr <- substitute(expr)
+metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE) {
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
+
 
   if (!metaMode()) {
     return(rlang::eval_tidy(expr, env = env))
@@ -185,6 +188,7 @@ metaExpr <- function(expr, env = parent.frame(), localize = "auto", bindToReturn
   # so determine we need local scope first, then add a special class
   # (we don't yet have the name for binding the return value)
   expr <- add_local_scope(expr, localize)
+  expr <- elevate_comments(expr)
   if (bindToReturn && !rlang::is_call(expr, "local")) {
     prefix_class(expr, "bindToReturn")
   } else {
@@ -220,7 +224,7 @@ withDynamicScope <- function(expr, ..., .list = list(...)) {
 #' can be done via the `patchCalls` argument which can replace the return value of
 #' a meta-component with a relevant variable name.
 #'
-#' @param expr an expression.
+#' @inheritParams metaExpr
 #' @param patchCalls a named list of quoted symbols. The names of the list
 #' should match name(s) bound to relevant meta-component(s) found in `expr`
 #' (e.g. `petal_width` in the example below). The quoted symbol(s) should
@@ -250,10 +254,15 @@ withDynamicScope <- function(expr, ..., .list = list(...)) {
 #'   )
 #' )
 #'
-expandCode <- function(expr, patchCalls = list()) {
+expandCode <- function(expr, env = parent.frame(), quoted = FALSE, patchCalls = list()) {
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
+
   withMetaMode(
     withDynamicScope(
-      rlang::enexpr(expr),
+      metaExpr(expr, env = env, quoted = quoted),
       .list = lapply(patchCalls, constf)
     )
   )

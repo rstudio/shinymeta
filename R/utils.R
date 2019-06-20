@@ -62,8 +62,8 @@ elevate_comments <- function(expr) {
   # }
   # to
   # {
-  # "# my comment"
-  # a <- 1+1
+  #  "# my comment"
+  #  a <- 1+1
   # }
 
   # TODO: do this for `=` assignment as well
