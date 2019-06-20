@@ -1,7 +1,7 @@
 context("localize")
 
 expect_code_string <- function(code, expected, ...) {
-  actual <- strsplit(formatCode(code, ...), "\n")[[1]]
+  actual <- unclass(formatCode(code, ...))
   expect_equal(actual, expected)
 }
 
