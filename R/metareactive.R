@@ -188,12 +188,22 @@ metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "aut
   # so determine we need local scope first, then add a special class
   # (we don't yet have the name for binding the return value)
   expr <- add_local_scope(expr, localize)
+
+  expr <- bind_to_return(expr)
+
+  # TODO:
+  # 1. let user opt-out of comment elevation?
+  # 2. Why does this clobber the bindToReturn class?
+  # 3. This is related to bindToReturn, can we exploit that relationship?
   expr <- elevate_comments(expr)
-  if (bindToReturn && !rlang::is_call(expr, "local")) {
-    prefix_class(expr, "bindToReturn")
-  } else {
-    expr
+
+  # flag the call so that we know to bind next time we see this call
+  # inside an assign call, we should modify it
+  if (bindToReturn && rlang::is_call(expr, "{")) {
+    expr <- prefix_class(expr, "bindToReturn")
   }
+
+  expr
 }
 
 withDynamicScope <- function(expr, ..., .list = list(...)) {

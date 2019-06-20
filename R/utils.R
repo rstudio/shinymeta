@@ -48,36 +48,56 @@ strip_outer_brace <- function(expr) {
 }
 
 
+# Modify a call like (also works with a collection of them)
+# a <- {
+#  "# my comment"
+#  1+1
+# }
+# to
+# {
+#  "# my comment"
+#  a <- 1+1
+# }
+elevate_comments <- function(x) {
 
-elevate_comments <- function(expr) {
-  # try elevate comments inside a `{` call
-  if (rlang::is_call(expr, "{")) {
-    return(as.call(c(list(quote(`{`)), lapply(expr[-1], elevate_comments))))
-  }
-
-  # transform a call like
-  # a <- {
-  #  "# my comment"
-  #  1+1
-  # }
-  # to
-  # {
-  #  "# my comment"
-  #  a <- 1+1
-  # }
-
-  # TODO: do this for `=` assignment as well
-  if (rlang::is_call(expr, "<-") && rlang::is_call(expr[[3]], "{", n = 2)) {
-    if (isTRUE(attr(expr[[3]][[2]], "shinymeta_comment"))) {
-      expr <- call(
-        "{", expr[[3]][[2]], call("<-", expr[[2]], expr[[3]][[3]])
+  if (is_assign(x) && rlang::is_call(x[[3]], "{", n = 2)) {
+    if (isTRUE(attr(x[[3]][[2]], "shinymeta_comment"))) {
+      x <- call(
+        "{", x[[3]][[2]], call("<-", x[[2]], x[[3]][[3]])
       )
     }
   }
 
-  expr
+  walk_ast(x, elevate_comments)
 }
 
+# Modify a call like (also works with a collection of them)
+# x <- {
+#   a <- 1
+#   b <- 1 + a
+#   b + 1
+# }
+#  to
+# {
+#   a <- 1
+#   b <- 1 + a
+#   x <- b + 1
+# }
+bind_to_return <- function(x) {
+
+  if (is_assign(x) && rlang::is_call(x[[3]], "{") && inherits(x[[3]], "bindToReturn")) {
+    rhs <- x[[3]]
+    rhs[[length(rhs)]] <- call("<-", x[[2]], rhs[[length(rhs)]])
+    x <- rhs
+  }
+
+  walk_ast(x, bind_to_return)
+}
+
+
+is_assign <- function(x) {
+  rlang::is_call(x, "<-") || rlang::is_call(x, "=")
+}
 
 
 reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domain = getDefaultReactiveDomain()) {

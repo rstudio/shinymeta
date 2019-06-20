@@ -14,6 +14,16 @@ expr_type <- function(x) {
   }
 }
 
+walk_ast <- function(x, fun, ...) {
+  switch(
+    expr_type(x),
+    ...,
+    call = as.call(lapply(x, fun)),
+    pairlist = as.pairlist(lapply(x, fun)),
+    x
+  )
+}
+
 # Crawl the AST to find and flag (i.e. attach attributes) to
 # strings that are eligible to become comments.
 comment_flags <- function(x) {
@@ -37,11 +47,7 @@ comment_flags <- function(x) {
 
   }
 
-  switch(expr_type(x),
-    call = as.call(lapply(x, comment_flags)),
-    pairlist = as.pairlist(lapply(x, comment_flags)),
-    x
-  )
+  walk_ast(x, comment_flags)
 }
 
 
@@ -49,8 +55,9 @@ comment_flags <- function(x) {
 # and wrap the string with an enclosing that we grep for after
 # the expression has been deparsed.
 comment_flags_to_enclosings <- function(x) {
-  switch(
-    expr_type(x),
+  walk_ast(
+    x,
+    comment_flags_to_enclosings,
     constant = {
       if (isTRUE(attr(x, "shinymeta_comment"))) {
         paste0(comment_start, x, comment_end)
@@ -59,11 +66,7 @@ comment_flags_to_enclosings <- function(x) {
       } else {
         x
       }
-    },
-    # Recursive cases
-    call = as.call(lapply(x, comment_flags_to_enclosings)),
-    pairlist = as.pairlist(lapply(x, comment_flags_to_enclosings)),
-    x
+    }
   )
 }
 
