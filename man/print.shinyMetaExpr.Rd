@@ -4,15 +4,12 @@
 \alias{print.shinyMetaExpr}
 \title{Print method for shinymeta metaExpression}
 \usage{
-\method{print}{shinyMetaExpr}(x, formatter = formatCode, ...)
+\method{print}{shinyMetaExpr}(x, ...)
 }
 \arguments{
 \item{x}{an object of class shinyMetaExpr.}
 
-\item{formatter}{a function that takes an unevaluated expression
-and returns a character string.}
-
-\item{...}{arguments passed along to \code{\link[=cat]{cat()}}.}
+\item{...}{arguments passed along to \code{\link[=formatCode]{formatCode()}}.}
 }
 \description{
 Print method for shinymeta metaExpression
