@@ -16,9 +16,6 @@ expr_type <- function(x) {
 
 # Crawl the AST to find and flag (i.e. attach attributes) to
 # strings that are eligible to become comments.
-# N.B. This is must be done twice: once in metaExpr() and once in withMetaMode().
-# The reason is that a string could be 'illegal' inside metaExpr() but not necessarily
-# when incorporated in a larger expression (although it should still be considered illegal)
 comment_flags <- function(x) {
 
   if (rlang::is_call(x, "{")) {
