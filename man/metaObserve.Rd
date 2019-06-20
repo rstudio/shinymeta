@@ -12,7 +12,7 @@ metaObserve2(expr, env = parent.frame(), quoted = FALSE,
   label = NULL, domain = getDefaultReactiveDomain())
 }
 \arguments{
-\item{expr}{an expression.}
+\item{expr}{An expression (quoted or unquoted).}
 
 \item{env}{The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
