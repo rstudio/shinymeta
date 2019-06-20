@@ -39,28 +39,38 @@ server <- function(input, output, session) {
   })
 
   obs <- metaObserve({
+    "# Print filtered data"
     print(!!filtered2())
   })
 
   output$code <- renderPrint({
-    expandCode(
-      {
-        library(dplyr)
-
-        df <- !!df()
-        '# a comment inside expandCode()'
-        top <- !!filtered()
-        bottom <- !!filtered2()
-        !!summarize()
-        !!output$plot()
-        !!obs()
-      },
-      patchCalls = list(
-        df = quote(df),
-        filtered = quote(top),
-        filtered2 = quote(bottom)
-      )
+    expandObjects(
+      "# Retrieve data",
+      df,
+      filtered,
+      filtered2,
+      obs,
+      output$plot
     )
+
+    # expandCode(
+    #   {
+    #     library(dplyr)
+    #
+    #     df <- !!df()
+    #     '# a comment inside expandCode()'
+    #     top <- !!filtered()
+    #     bottom <- !!filtered2()
+    #     !!summarize()
+    #     !!output$plot()
+    #     !!obs()
+    #   },
+    #   patchCalls = list(
+    #     df = quote(df),
+    #     filtered = quote(top),
+    #     filtered2 = quote(bottom)
+    #   )
+    # )
   })
 
   output$download_report <- downloadHandler("report.zip",
