@@ -65,6 +65,8 @@ elevate_comments <- function(expr) {
   # "# my comment"
   # a <- 1+1
   # }
+
+  # TODO: do this for `=` assignment as well
   if (rlang::is_call(expr, "<-") && rlang::is_call(expr[[3]], "{", n = 2)) {
     if (isTRUE(attr(expr[[3]][[2]], "shinymeta_comment"))) {
       expr <- call(

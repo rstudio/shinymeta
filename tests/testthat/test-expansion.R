@@ -15,7 +15,7 @@ describe("expansion", isolate({
     )
     q1 <- quote(1)
     expect_equal(res, q1)
-    expect_equal(formatCode(res), "1")
+    expect_true(formatCode(res) == "1")
   })
 
   it("varies cache according to patchCalls", {
