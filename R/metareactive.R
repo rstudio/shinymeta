@@ -82,14 +82,17 @@ metaReactiveImpl <- function(expr, env, label, domain) {
 
   r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = label, domain = domain)
 
-  function() {
-    if (metaMode()) {
-      # r_meta cache varies by dynamicVars
-      r_meta(.globals$dynamicVars)
-    } else {
-      r_normal()
-    }
-  }
+  structure(
+    function() {
+      if (metaMode()) {
+        # r_meta cache varies by dynamicVars
+        r_meta(.globals$dynamicVars)
+      } else {
+        r_normal()
+      }
+    },
+    class = c("shinymeta_reactive", "function")
+  )
 }
 
 #' @export
@@ -235,6 +238,45 @@ expandCode <- function(expr, patchCalls = list()) {
   )
 
   prefix_class(strip_outer_brace(expr), "shinyMetaExpr")
+}
+
+is_output_read <- function(expr) {
+  rlang::is_call(expr, name = "$", n = 2) &&
+    rlang::is_symbol(expr[[2]], "output") &&
+    rlang::is_symbol(expr[[3]])
+}
+
+#' @export
+expandObjects <- function(..., .env = parent.frame()) {
+  exprs <- rlang::exprs(...)
+
+  patchCalls <- list()
+
+  objs <- lapply(exprs, function(x) {
+    # TODO: Also accept output$...
+    if (is_comment(x)) {
+      x
+    } else if (is.symbol(x)) {
+      # TODO: Ensure existence of `x` in `env` (with inherits=TRUE, probably?)
+      patchCalls[[as.character(x)]] <<- x
+      rhs <- wrapExpr(rlang::UQ, as.call(list(x)))
+
+      val <- get(as.character(x), pos = .env, inherits = TRUE)
+      if (inherits(val, "shinymeta_observer"))
+        rhs
+      else if (inherits(val, "shinymeta_reactive"))
+        rlang::expr(!!x <- !!rhs)
+      else
+        stop(as.character(x), " has unrecognized object type ", deparse(class(val)))
+    } else if (is_output_read(x)) {
+      wrapExpr(rlang::UQ, as.call(list(x)))
+    } else {
+      stop("expandReactiveObjs can only take comments, and variable names of meta-reactive objects, as arguments")
+    }
+  })
+
+  expr <- do.call(call, c(list("{"), objs), quote = TRUE)
+  expandCode(!!expandExpr(expr, NULL, .env), patchCalls = patchCalls)
 }
 
 prefix_class <- function (x, y) {
