@@ -31,6 +31,17 @@ knit_print.data.frame <- function(x, ...) {
 }
 # register the method
 registerS3method("knit_print", "data.frame", knit_print.data.frame)
+
+knitr::opts_chunk$set(comment = "")
+```
+
+```{css echo=FALSE}
+pre:not(.sourceCode), pre:not(.sourceCode) code {
+  background-color: #d3f3df;
+}
+div.sourceCode + pre:not(.sourceCode) {
+  margin-top: -1em;
+}
 ```
 
 # Introducing `shinymeta`
@@ -383,7 +394,7 @@ To summarize everything we've learned so far, we convert a Shiny app to shinymet
 
 There are two more significant steps in the code generation process, both of which are handled through the `expandCode` function we'll introduce now.
 
-## Code expansion with... `expandCode`
+## Code expansion with `expandCode`
 
 We've demonstrated that once you've used the previous steps to convert and annotate your reactive objects, you can use `withMetaMode()` to retrieve the code from any object. But we usually want to generate chunks of code that bring together _multiple_ distinct reactive objects (say, more than one output).
 
@@ -484,12 +495,32 @@ The generated code looks clean, but it's wrong! `downloads_rolling` uses `pkg_do
 
 Just as you carefully test your Shiny app's behavior to ensure it does what you intend, you need to carefully inspect/test your generated code for correctness as well--and this goes double when `patchCalls` is involved.
 
-## Exporting code
+## Code expansion with `expandObjects`
 
-TODO: 1. code preview box, 2. "Show R code" button, 3. download script/report bundle
+TODO: Now that this exists, it really should be used more often than `expandCode`--can we restructure to introduce this first?
 
-## 
+The `expandCode` function gives us some important capabilities for assembling our code. But while using it in our own development and testing, we noticed that the majority of the time, we were following the same exact patterns with it: making assignment statements with each `metaReactive` (in the form of `x <- !!x()`) and adding the corresponding calls to `patchCalls` (i.e. `x = quote(x)`), and then adding whatever outputs we had at the end. This involves a lot of mindless boilerplate.
 
-TODO: explain exportCode
+The `expandObjects` function presents a higher-level way to express this pattern. The final `expandCode` example can be expressed like this with `expandObjects`:
 
-TODO: explain patchCode
+```{r}
+expandObjects(
+  "# Seven-day rolling average of download counts",
+  downloads_rolling,
+  "# Data frame of package downloads",
+  pkg_downloads = downloads,
+  "# A summary of output counts",
+  output$summary,
+  "# A plot",
+  output$plot
+)
+```
+
+If you want to export a graph of meta-reactive objects in one chunk of code, then `expandObjects` is much more straightforward than `expandCode`. You only need `expandCode` if you want to put more custom code in the code template, or, if you want to make multiple calls to `expandCode` that will eventually be composed in a single script or report (see example **TODO**).
+
+## Future directions
+
+shinymeta is very much an experiment and a work in progress. Some obvious ideas to invest in going forward:
+
+1. `expandObjects` is a convenient wrapper over `expandCode` in that you only need to provide a list of the meta-reactive expressions, outputs, and observers you care about. But you still have to provide _all_ of these objects by name, and in the correct dependency order. It would be nicer to have a function that takes merely the outputs and observers you care about, and _automatically infers_ the relevant meta-reactive expressions and their correct order.
+2. R's language objects effectively strip all comments and insignificant whitespace from the original source code. We're using comment-strings as a workaround for the former, but we don't currently have a solution for the latter, making shinymeta-generated code harder to read than it ought to be. In the future, we could use [source references](https://journal.r-project.org/archive/2010-2/RJournal_2010-2_Murdoch.pdf) to reverse-engineer the code author's desired whitespace.
