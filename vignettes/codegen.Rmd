@@ -1,10 +1,10 @@
 ---
-title: "Introduction to shinymeta"
+title: "Using shinymeta"
 author: "Joe Cheng"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to shinymeta}
+  %\VignetteIndexEntry{3. Using shinymeta}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -44,7 +44,7 @@ div.sourceCode + pre:not(.sourceCode) {
 }
 ```
 
-# Introducing `shinymeta`
+TODO: Document comment-strings feature
 
 Our goal: allow the creation of Shiny apps that you use interactively, then produce reproducible scripts/report from.
 
@@ -161,7 +161,7 @@ In normal usage, the behavior of `downloads` doesn't change at all—it still wo
 downloads()
 ```
 
-But when we call it under the influence of a new function, `shinymeta::withMetaMode`, suddenly its behavior changes: (TODO: introduce expandCode, point out lack of !!)
+But when we call it under the influence of a new function, `shinymeta::withMetaMode`, suddenly its behavior changes:
 
 ```{r}
 withMetaMode(downloads())

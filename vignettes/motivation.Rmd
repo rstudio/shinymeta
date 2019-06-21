@@ -1,10 +1,10 @@
 ---
-title: "Introduction to shinymeta"
+title: "Motivation: Interactivity or reproducibility, pick one"
 author: "Joe Cheng"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to shinymeta}
+  %\VignetteIndexEntry{1. Motivation: Interactivity or reproducibility, pick one}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,8 +17,6 @@ knitr::opts_chunk$set(
 library(shiny)
 library(shinymeta)
 ```
-
-## Motivation: Interactivity or reproducibility, pick one
 
 Since its introduction in 2012, Shiny has become a mainstay of the R ecosystem, providing a solid foundation for building interactive artifacts of all kinds. But that interactivity has always come at a significant cost to reproducibility, as actions performed in a Shiny app are not easily captured for later analysis and replication.
 
