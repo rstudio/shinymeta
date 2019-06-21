@@ -33,6 +33,10 @@ describe("expansion", isolate({
     x1 <- withMetaMode(metaExpr(!!rand()))
     x2 <- withMetaMode(metaExpr(!!rand()))
     expect_identical(x1, x2)
+
+    y1 <- rand()
+    y2 <- rand()
+    expect_identical(y1, y2)
   })
 
   it("has clean pipeline stages", {
