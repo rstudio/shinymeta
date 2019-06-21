@@ -82,14 +82,17 @@ metaReactiveImpl <- function(expr, env, label, domain) {
 
   r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = label, domain = domain)
 
-  function() {
-    if (metaMode()) {
-      # r_meta cache varies by dynamicVars
-      r_meta(.globals$dynamicVars)
-    } else {
-      r_normal()
-    }
-  }
+  structure(
+    function() {
+      if (metaMode()) {
+        # r_meta cache varies by dynamicVars
+        r_meta(.globals$dynamicVars)
+      } else {
+        r_normal()
+      }
+    },
+    class = c("shinymeta_reactive", "function")
+  )
 }
 
 #' @export
@@ -235,6 +238,104 @@ expandCode <- function(expr, patchCalls = list()) {
   )
 
   prefix_class(strip_outer_brace(expr), "shinyMetaExpr")
+}
+
+is_output_read <- function(expr) {
+  rlang::is_call(expr, name = "$", n = 2) &&
+    rlang::is_symbol(expr[[2]], "output") &&
+    rlang::is_symbol(expr[[3]])
+}
+
+# Create an `lhs <- rhs` expression, unless lhs == "", in which case
+# just return rhs.
+#
+# lhs should be either "", some other string (to be converted using as.name),
+# or a language object (e.g. quote(foo) or quote(foo$bar)).
+#
+# rhs can be anything; either a simple value, or a language object.
+#
+# Return value will probably be a language object, but possibly not (e.g.
+# make_assign_expr("", 10) would just return 10).
+make_assign_expr <- function(lhs = "", rhs) {
+  stopifnot(is.character(lhs) || is.language(lhs))
+
+  if (is.character(lhs)) {
+    if (lhs == "") {
+      return(rhs)
+    } else {
+      lhs <- as.name(lhs)
+    }
+  }
+
+  call("<-", lhs, rhs)
+}
+
+#' @export
+expandObjects <- function(..., .env = parent.frame()) {
+  exprs <- rlang::exprs(...)
+
+  patchCalls <- list()
+
+  objs <- mapply(names(exprs), exprs, FUN = function(nm, x) {
+
+    if (is_comment(x)) {
+      if (nzchar(nm)) {
+        stop("expandObjects called with a named comment; only unnamed comments are supported")
+      }
+      return(x)
+    }
+
+    # Do a sensible thing if someone has done `expandObjects(mr())` instead of `expandObjects(mr)`
+    if (rlang::is_call(x) && length(x) == 1 && (is.symbol(x[[1]]) || is_output_read(x[[1]]))) {
+      x <- x[[1]]
+    }
+
+
+    if (is.symbol(x)) {
+      # Get the value pointed to by `x`. We'll need this to decide what rules we
+      # apply to its expansion. Throws error if not found.
+      val <- get(as.character(x), pos = .env, inherits = TRUE)
+
+      # Observers and reactive expressions get different rules.
+      is_observe <- inherits(val, "shinymeta_observer")
+      is_reactive_expr <- inherits(val, "shinymeta_reactive")
+
+      # Only metaObserve and metaReactive objects are supported
+      if (!is_observe && !is_reactive_expr) {
+        stop("expandObjects called with ", as.character(x), ", which has unrecognized object type ", deparse(class(val)))
+      }
+
+      # If metaReactive objects are passed without an explicit name, use the
+      # name of the object itself as the name--this is the common case.
+      if (is_reactive_expr && nm == "") {
+        nm <- as.character(x)
+      }
+
+      # Reactive expressions always go into patchCalls; observers never do, even
+      # if they're passed to us as named arguments, because there's no way they
+      # can be validly referred to from other meta-reactive objects.
+      if (is_reactive_expr) {
+        patchCalls[[as.character(x)]] <<- as.name(nm)
+      }
+
+      rhs <- wrapExpr(`!!`, as.call(list(x)))
+      return(make_assign_expr(nm, rhs))
+    }
+
+    if (is_output_read(x)) {
+      output_obj <- withMetaMode(eval(x, envir = .env))
+      if (is.null(output_obj)) {
+        stop("Could not find ", format(x))
+      }
+      rhs <- wrapExpr(`!!`, as.call(list(x)))
+      return(make_assign_expr(nm, rhs))
+    }
+
+    stop("expandObjects requires all arguments to be comment-strings and/or variable names of meta-reactive objects")
+  })
+
+  expr <- do.call(call, c(list("{"), objs), quote = TRUE)
+  expandCode(!!expandExpr(expr, NULL, .env), patchCalls = patchCalls)
 }
 
 prefix_class <- function (x, y) {
