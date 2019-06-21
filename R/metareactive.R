@@ -47,6 +47,9 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
                          label = NULL, domain = shiny::getDefaultReactiveDomain(),
                          localize = "auto", bindToReturn = FALSE) {
 
+  # Force evaluation
+  list(env, quoted, label, domain, localize, bindToReturn)
+
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
@@ -55,7 +58,10 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
   # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
   # so, because we want to keep any `!!` contained in expr intact (i.e. too
   # early to perform expansion of expr here).
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted, localize = localize, bindToReturn = bindToReturn)
+  #
+  # Even though expr itself is quoted, wrapExpr will effectively unquote it by
+  # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
+  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
 
   metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
 }
@@ -177,6 +183,7 @@ metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "aut
 
 
   if (!metaMode()) {
+    expr <- expandExpr(expr, list(), env)
     return(rlang::eval_tidy(expr, env = env))
   }
 
