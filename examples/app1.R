@@ -28,8 +28,7 @@ server <- function(input, output, session) {
   })
 
   output$code <- renderPrint({
-    exp <- expandCode(!!filtered())
-    styler::style_text(capture.output(print(exp)))
+    withMetaMode(filtered())
   })
 }
 

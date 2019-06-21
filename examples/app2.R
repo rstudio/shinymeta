@@ -47,30 +47,11 @@ server <- function(input, output, session) {
     expandObjects(
       "# Retrieve data",
       df,
-      filtered,
-      filtered2,
+      top = filtered,
+      bottom = filtered2,
       obs,
       output$plot
     )
-
-    # expandCode(
-    #   {
-    #     library(dplyr)
-    #
-    #     df <- !!df()
-    #     '# a comment inside expandCode()'
-    #     top <- !!filtered()
-    #     bottom <- !!filtered2()
-    #     !!summarize()
-    #     !!output$plot()
-    #     !!obs()
-    #   },
-    #   patchCalls = list(
-    #     df = quote(df),
-    #     filtered = quote(top),
-    #     filtered2 = quote(bottom)
-    #   )
-    # )
   })
 
   output$download_report <- downloadHandler("report.zip",
