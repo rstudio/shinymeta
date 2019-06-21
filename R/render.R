@@ -39,7 +39,7 @@ metaRender <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FAL
     quoted <- TRUE
   }
 
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env)
+  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted)
 
   metaRender2(renderFunc, expr, ..., env = env, quoted = quoted)
 }

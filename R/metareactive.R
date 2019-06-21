@@ -55,7 +55,7 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
   # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
   # so, because we want to keep any `!!` contained in expr intact (i.e. too
   # early to perform expansion of expr here).
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env, localize = localize, bindToReturn = bindToReturn)
+  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted, localize = localize, bindToReturn = bindToReturn)
 
   metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
 }
