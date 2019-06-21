@@ -282,8 +282,16 @@ expandObjects <- function(..., .env = parent.frame()) {
       if (nzchar(nm)) {
         stop("expandObjects called with a named comment; only unnamed comments are supported")
       }
-      x
-    } else if (is.symbol(x)) {
+      return(x)
+    }
+
+    # Do a sensible thing if someone has done `expandObjects(mr())` instead of `expandObjects(mr)`
+    if (rlang::is_call(x) && length(x) == 1 && (is.symbol(x[[1]]) || is_output_read(x[[1]]))) {
+      x <- x[[1]]
+    }
+
+
+    if (is.symbol(x)) {
       # Get the value pointed to by `x`. We'll need this to decide what rules we
       # apply to its expansion. Throws error if not found.
       val <- get(as.character(x), pos = .env, inherits = TRUE)
@@ -311,17 +319,19 @@ expandObjects <- function(..., .env = parent.frame()) {
       }
 
       rhs <- wrapExpr(`!!`, as.call(list(x)))
-      make_assign_expr(nm, rhs)
-    } else if (is_output_read(x)) {
+      return(make_assign_expr(nm, rhs))
+    }
+
+    if (is_output_read(x)) {
       output_obj <- withMetaMode(eval(x, envir = .env))
       if (is.null(output_obj)) {
         stop("Could not find ", format(x))
       }
       rhs <- wrapExpr(`!!`, as.call(list(x)))
-      make_assign_expr(nm, rhs)
-    } else {
-      stop("expandObjects requires all arguments to be comment-strings and/or variable names of meta-reactive objects")
+      return(make_assign_expr(nm, rhs))
     }
+
+    stop("expandObjects requires all arguments to be comment-strings and/or variable names of meta-reactive objects")
   })
 
   expr <- do.call(call, c(list("{"), objs), quote = TRUE)

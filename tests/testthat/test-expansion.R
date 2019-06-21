@@ -72,6 +72,17 @@ describe("expandObjects", isolate({
     expect_equal(x1, x2)
   })
 
+  it("works with calls", {
+    x1 <- expandObjects(one(), two(), `obs with tricky name`(), output$plot())
+    x2 <- expandCode({
+      one <- !!one()
+      two <- !!two()
+      !!`obs with tricky name`()
+      !!output$plot()
+    }, patchCalls = list(one = quote(one), two = quote(two)))
+    expect_equal(x1, x2)
+  })
+
   it("respects explicit names", {
     x1 <- expandObjects(uno = one, dos = two, tres = `obs with tricky name`, cuatro = output$plot)
     x2 <- expandCode({
@@ -84,7 +95,6 @@ describe("expandObjects", isolate({
   })
 
   it("fails when appropriate", {
-    expect_error(expandObjects(one()), "requires all arguments") # not a bare name
     expect_error(expandObjects(blah), "not found") # object that doesn't exist
     expect_error(expandObjects(output$table), "Could not find") # output that doesn't exist
     expect_error(expandObjects({ !!one() }), "requires all arguments") # output that doesn't exist
