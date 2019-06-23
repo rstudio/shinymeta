@@ -46,4 +46,12 @@ describe("expansion", isolate({
     x2 <- expandCode(!!one() %>% print())
     expect_equal(x2, quote(1 %>% print()))
   })
+
+  it("doesn't apply patchCalls at the top level", {
+    x1 <- expandCode({
+      one <- !!one()
+      two <- !!two()
+    }, patchCalls = list(one = quote(one)))
+    expect_equal(x1, quote({one <- 1; two <- one}))
+  })
 }))
