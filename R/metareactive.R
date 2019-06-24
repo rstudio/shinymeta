@@ -102,24 +102,6 @@ metaReactiveImpl <- function(expr, env, label, domain) {
 }
 
 #' @export
-metaAction <- function(expr, env = parent.frame(), quoted = FALSE) {
-
-  if (!quoted) {
-    expr <- substitute(expr)
-    quoted <- TRUE
-  }
-
-  # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
-  # so, because we want to keep any `!!` contained in expr intact (i.e. too
-  # early to perform expansion of expr here).
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env)
-
-  function() {
-    rlang::eval_tidy(expr, NULL, env)
-  }
-}
-
-#' @export
 metaMode <- local({
   isMetaMode <- FALSE
   function(value) {
