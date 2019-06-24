@@ -43,40 +43,35 @@ server <- function(input, output, session) {
     print(!!filtered2())
   })
 
-  output$code <- renderPrint({
+  code <- reactive({
     expandObjects(
       "# Retrieve data",
       df,
       top = filtered,
       bottom = filtered2,
       obs,
-      output$plot
+      output$plot,
+      .libraries = "magrittr"
     )
   })
 
+  output$code <- renderPrint(code())
+
   output$download_report <- downloadHandler("report.zip",
     content = function(out) {
-      code <- expandCode(!!output$code())
-
-      buildRmdBundle("report.Rmd", out, vars = list(code = code))
+      buildRmdBundle("report.Rmd", out, vars = list(code = code()))
     }
   )
 
   output$download_script_bundle <- downloadHandler("report.zip",
     content = function(out) {
-      code <- expandCode(!!output$code())
-
-      # build_rmd_bundle("report.Rmd", out, vars = list(code = code))
-      buildScriptBundle(code, out, render = TRUE, render_args = list(
-        output_format = "html_document"
-      ))
+      buildScriptBundle(code(), out, render_args = list(output_format = "html_document"))
     }
   )
 
   output$download_script <- downloadHandler("script.R",
     content = function(out) {
-      code <- expandCode(!!output$code())
-      writeLines(code, out)
+      writeLines(code(), out)
     }
   )
 }
