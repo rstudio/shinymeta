@@ -336,6 +336,7 @@ expandObjects <- function(..., .env = parent.frame()) {
       if (nzchar(nm)) {
         stop("expandObjects called with a named comment; only unnamed comments are supported")
       }
+      attr(x, "shinymeta_comment") <- TRUE
       return(x)
     }
 
