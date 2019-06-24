@@ -37,7 +37,7 @@ code expression (instead of evaluating that expression and returning the value).
 \details{
 If you wish to capture specific code inside of \code{expr} (e.g. ignore code
 that has no meaning outside shiny, like \code{\link[=req]{req()}}), use \code{metaRender2()} in combination
-with \code{metaExpr()}.
+with \code{metaExpr()}. When using \code{metaRender2()}, \code{expr} must return a \code{metaExpr()}.
 }
 \seealso{
 \code{\link[=metaExpr]{metaExpr()}}
