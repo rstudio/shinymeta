@@ -4,7 +4,8 @@
 \alias{metaRender}
 \title{Create a meta-reactive output}
 \usage{
-metaRender(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE)
+metaRender(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE,
+  localize = "auto", bindToReturn = FALSE)
 }
 \arguments{
 \item{renderFunc}{A reactive output function (e.g., \link[shiny:renderPlot]{shiny::renderPlot}, \link[shiny:renderText]{shiny::renderText}, \link[shiny:renderUI]{shiny::renderUI}, etc).}
@@ -13,10 +14,20 @@ metaRender(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE)
 
 \item{...}{Other arguments passed along to \code{renderFunc}.}
 
-\item{env}{The environment in which to evaluate \code{expr}.}
+\item{env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression.}
 
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})?
-This is useful if you want to save an expression in a variable.}
+\item{quoted}{Is the expression quoted? By default, this is \code{FALSE}.
+This is useful when you want to use an expression that is stored in a
+variable; to do so, it must be quoted with \code{quote()}.}
+
+\item{localize}{Whether or not to wrap the returned expression in \code{\link[=local]{local()}}.
+The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[=return]{return()}}
+statement (i.e., return statements in anonymized functions are ignored).}
+
+\item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
+of a meta expression be applied to the \emph{last child} of the top-level \code{\{} call?}
 }
 \description{
 Create a meta-reactive output that, when invoked with meta-mode activated

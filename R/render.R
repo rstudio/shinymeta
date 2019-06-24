@@ -11,13 +11,12 @@
 #' @param renderFunc A reactive output function (e.g., [shiny::renderPlot], [shiny::renderText], [shiny::renderUI], etc).
 #' @param expr An expression that generates given output expected by `renderFunc`.
 #' @param ... Other arguments passed along to `renderFunc`.
-#' @param env The environment in which to evaluate `expr`.
-#' @param quoted Is `expr` a quoted expression (with `quote()`)?
-#' This is useful if you want to save an expression in a variable.
+#' @inheritParams metaObserve
 #'
 #' @seealso [metaExpr()]
 #' @export
-metaRender <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE) {
+metaRender <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE,
+                       localize = "auto", bindToReturn = FALSE) {
   # # Can't use this code, because rlang::exprs(...) causes `!!` to be expanded,
   # # which we don't want. If there was a way to substitute ... without causing
   # # `!!` expansion, that's what we'd want to do.
@@ -39,7 +38,13 @@ metaRender <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FAL
     quoted <- TRUE
   }
 
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env)
+  # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
+  # so, because we want to keep any `!!` contained in expr intact (i.e. too
+  # early to perform expansion of expr here).
+  #
+  # Even though expr itself is quoted, wrapExpr will effectively unquote it by
+  # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
+  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
 
   metaRender2(renderFunc, expr, ..., env = env, quoted = quoted)
 }

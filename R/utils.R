@@ -41,12 +41,11 @@ expandExpr <- function(expr, data, env) {
 
 
 strip_outer_brace <- function(expr) {
-  while (rlang::is_call(expr, "{", 1)) {
+  while (rlang::is_call(expr, "{", n = 1)) {
     expr <- expr[[2]]
   }
   expr
 }
-
 
 reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domain = getDefaultReactiveDomain()) {
   map <- fastmap::fastmap()

@@ -92,7 +92,7 @@ describe("metaRender", isolate({
   it("works", {
     mrt <- metaRender(renderText, {
       "# a comment"
-       1 + 1
+      1 + 1
     })
     expected_output <- c("# a comment", "1 + 1")
     actual_output <- capturePrint(withMetaMode(mrt()))
@@ -127,7 +127,7 @@ describe("metaRender", isolate({
 
 }))
 
-describe("various edge cases", {
+describe("various edge cases", isolate({
   expect_equal(
     capturePrint(expandCode({
       "# Escaped \"quotes\" should \'be' supported"
@@ -177,5 +177,56 @@ describe("various edge cases", {
     )
   )
 
+
+  mr <- metaReactive({
+    "# This is not a comment"
+  })
+
+  mr2 <- metaReactive({
+    !!mr()
+    NULL
+  })
+
+  out <- expect_warning(
+    capturePrint(withMetaMode(mr2())),
+    "comment can not appear as the last child"
+  )
+
+  expect_equal(
+    out,
+    c(
+      "\"# This is not a comment\"",
+      "NULL"
+    )
+  )
+
+  x <- metaReactive({
+    "# This comment should appear above the assignment"
+    1 + 1
+  })
+
+  out <- capturePrint(expandCode(x <- !!x()))
+  expect_equal(
+    out,
+    c(
+      "# This comment should appear above the assignment",
+      "x <- 1 + 1"
+    )
+  )
+
+  code <- expandCode({
+    x <- !!x()
+    x2 <- !!x()
+  })
+  expect_equal(
+    capturePrint(code),
+    c(
+      "# This comment should appear above the assignment",
+      "x <- 1 + 1",
+      "# This comment should appear above the assignment",
+      "x2 <- 1 + 1"
+    )
+  )
+
   # TODO: What should happen if \n appears in a string-comment?
-})
+}))

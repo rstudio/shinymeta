@@ -2,30 +2,57 @@
 % Please edit documentation in R/format.R
 \name{formatCode}
 \alias{formatCode}
-\title{Format code objects}
+\alias{styleText}
+\alias{deparseCode}
+\title{Deparse and format shinymeta expressions}
 \usage{
-formatCode(code)
+formatCode(code, width = 500L, formatter = styleText, ...)
+
+styleText(code, ...)
+
+deparseCode(code, width = 500L)
 }
 \arguments{
-\item{code}{Language/expr object (recommended), or character vector}
+\item{code}{Either an unevaluated expression or a deparsed code string.}
+
+\item{width}{The \code{width.cutoff} to use when \code{\link[=deparse]{deparse()}}-ing the \code{code} expression.}
+
+\item{formatter}{a function that accepts deparsed code (a character string)
+as the first argument.}
+
+\item{...}{arguments passed along to the \code{formatter} function.}
 }
 \value{
 Single-element character vector with formatted code
 }
 \description{
-Converts language/expression objects (i.e. quoted code) into pretty-formatted
-text. This logic is based on \code{\link[styler:style_text]{styler::style_text()}}, but with additional
-features/opinions; see Details.
+Turn unevaluated shinymeta expressions into (formatted or styled) text.
 }
 \details{
-\code{formatCode} differs from \code{\link[styler:style_text]{styler::style_text()}} in a few ways:
+Before any formatting takes place, the unevaluated expression is
+deparsed into a string via \code{\link[=deparseCode]{deparseCode()}}, which ensures that
+shinymeta comment strings (i.e., literal strings that appear on their own line,
+and begin with one or more \code{#} characters.) are turned into comments and
+superfluous \code{\{} are removed. After deparsing, the \code{formatCode()} function then
+calls the \code{formatter} function on the deparsed string to format (aka style) the code string.
+The default \code{formatter}, \code{styleText()}, uses \code{\link[styler:style_text]{styler::style_text()}} with a couple differences:
 \itemize{
-\item Pipe operators (\code{\%>\%}) are always followed by a line break.
-\item Superfluous \code{\{} and \code{\}} are removed in many cases.
-\item Since quoted R code cannot contain comments, you can use comment strings.
+\item Pipe operators (\code{\%>\%}) are \emph{always} followed by a line break.
+\item If the token appearing after a line-break is a comma/operator, the line-break is removed.
 }
+}
+\examples{
 
-Comment strings are literal strings that appear on their own line, and begin
-with one or more \code{#} characters. Such strings will be converted into comments
-by \code{formatCode}.
+options(shiny.suppressMissingContextError = TRUE)
+
+x <- metaReactive({
+  "# Here's a comment"
+  sample(5) \%>\% sum()
+})
+
+code <- expandCode(x <- !!x())
+
+deparseCode(code)
+formatCode(code)
+formatCode(code, formatter = styler::style_text)
 }
