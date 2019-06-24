@@ -172,11 +172,19 @@ withMetaMode <- function(expr, mode = TRUE) {
 #' statement (i.e., return statements in anonymized functions are ignored).
 #' @param bindToReturn For non-`localize`d expressions, should an assignment
 #' of a meta expression be applied to the _last child_ of the top-level `\{` call?
-#' @param topLevelDynVars Intended for internal use only.
 #'
 #' @seealso [metaReactive2()], [metaObserve2()], [metaRender2()]
 #' @export
-metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE,
+metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE) {
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
+
+  metaExpr_(expr, env = env, quoted = quoted, localize = localize, bindToReturn = bindToReturn)
+}
+
+metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE,
   topLevelDynVars = TRUE) {
   if (!quoted) {
     expr <- substitute(expr)
@@ -280,7 +288,7 @@ expandCode <- function(expr, env = parent.frame(), quoted = FALSE, patchCalls = 
 
   withMetaMode(
     withDynamicScope(
-      metaExpr(expr, env = env, quoted = quoted, localize = FALSE,
+      metaExpr_(expr, env = env, quoted = quoted, localize = FALSE,
         bindToReturn = FALSE, topLevelDynVars = FALSE),
       .list = lapply(patchCalls, constf)
     )
