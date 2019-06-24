@@ -202,12 +202,11 @@ metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "au
   # (we don't yet have the name for binding the return value)
   expr <- add_local_scope(expr, localize)
 
+  # Apply bindToReturn rules, if relevant
   expr <- bind_to_return(expr)
 
-  # TODO:
-  # 1. let user opt-out of comment elevation?
-  # 2. Why does this clobber the bindToReturn class?
-  # 3. This is related to bindToReturn, can we exploit that relationship?
+  # TODO: let user opt-out of comment elevation
+  # (I _think_ this is always safe)?
   expr <- elevate_comments(expr)
 
   # flag the call so that we know to bind next time we see this call
