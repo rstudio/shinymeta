@@ -306,8 +306,12 @@ make_assign_expr <- function(lhs = "", rhs) {
   call("<-", lhs, rhs)
 }
 
+#' @param ... A collection of meta-reactives.
+#' @param .env An environment.
+#' @param .libraries A character vector of library names to load before the expanded code.
 #' @export
-expandObjects <- function(..., .env = parent.frame()) {
+#' @rdname expandCode
+expandObjects <- function(..., .env = parent.frame(), .libraries) {
   exprs <- rlang::exprs(...)
 
   patchCalls <- list()
@@ -370,6 +374,11 @@ expandObjects <- function(..., .env = parent.frame()) {
 
     stop("expandObjects requires all arguments to be comment-strings and/or variable names of meta-reactive objects")
   })
+
+  if (!missing(.libraries)) {
+    libs <- lapply(.libraries, function(x) call("library", x))
+    objs <- c(libs, objs)
+  }
 
   expr <- do.call(call, c(list("{"), objs), quote = TRUE)
   expandCode(!!expandExpr(expr, NULL, .env), patchCalls = patchCalls)

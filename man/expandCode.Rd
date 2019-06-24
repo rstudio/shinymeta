@@ -2,10 +2,13 @@
 % Please edit documentation in R/metareactive.R
 \name{expandCode}
 \alias{expandCode}
+\alias{expandObjects}
 \title{Expand meta primitives into user code}
 \usage{
 expandCode(expr, env = parent.frame(), quoted = FALSE,
   patchCalls = list())
+
+expandObjects(..., .env = parent.frame(), .libraries)
 }
 \arguments{
 \item{expr}{An expression (quoted or unquoted).}
@@ -16,6 +19,12 @@ expandCode(expr, env = parent.frame(), quoted = FALSE,
 should match name(s) bound to relevant meta-component(s) found in \code{expr}
 (e.g. \code{petal_width} in the example below). The quoted symbol(s) should
 match variable name(s) representing the return value of the meta-component(s).}
+
+\item{...}{A collection of meta-reactives.}
+
+\item{.env}{An environment.}
+
+\item{.libraries}{A character vector of library names to load before the expanded code.}
 }
 \description{
 This function provides the main entry point for generating user code
