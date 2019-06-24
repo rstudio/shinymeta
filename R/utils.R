@@ -47,59 +47,6 @@ strip_outer_brace <- function(expr) {
   expr
 }
 
-
-# Modify a call like (also works with a collection of them)
-# a <- {
-#  "# my comment"
-#  1+1
-# }
-# to
-# {
-#  "# my comment"
-#  a <- 1+1
-# }
-elevate_comments <- function(x) {
-
-  if (is_assign(x) && rlang::is_call(x[[3]], "{", n = 2)) {
-    if (isTRUE(attr(x[[3]][[2]], "shinymeta_comment"))) {
-      x <- call(
-        "{", x[[3]][[2]], call("<-", x[[2]], x[[3]][[3]])
-      )
-    }
-  }
-
-  walk_ast(x, elevate_comments)
-}
-
-# Modify a call like (also works with a collection of them)
-# x <- {
-#   a <- 1
-#   b <- 1 + a
-#   b + 1
-# }
-#  to
-# {
-#   a <- 1
-#   b <- 1 + a
-#   x <- b + 1
-# }
-bind_to_return <- function(x) {
-
-  if (is_assign(x) && rlang::is_call(x[[3]], "{") && inherits(x[[3]], "bindToReturn")) {
-    rhs <- x[[3]]
-    rhs[[length(rhs)]] <- call("<-", x[[2]], rhs[[length(rhs)]])
-    x <- rhs
-  }
-
-  walk_ast(x, bind_to_return)
-}
-
-
-is_assign <- function(x) {
-  rlang::is_call(x, "<-") || rlang::is_call(x, "=")
-}
-
-
 reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domain = getDefaultReactiveDomain()) {
   map <- fastmap::fastmap()
 
@@ -119,24 +66,4 @@ reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domai
     }
     map$get(hash)()
   }
-}
-
-
-
-add_local_scope <- function(x, localize) {
-  if (!is.call(x)) return(x)
-  if (identical(localize, "auto")) {
-    localize <- any(unlist(has_return(x), use.names = FALSE))
-  }
-  if (localize) call("local", x) else x
-}
-
-# Returns TRUE if a return() is detected outside of
-# an anonymous function or local() expresion
-has_return <- function(x) {
-  if (!is.call(x)) return(FALSE)
-  if (rlang::is_call(x, "function")) return(FALSE)
-  if (rlang::is_call(x, "local")) return(FALSE)
-  if (rlang::is_call(x, "return")) return(TRUE)
-  lapply(x, has_return)
 }
