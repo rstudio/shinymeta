@@ -4,6 +4,7 @@ Title: Create reproducible R scripts via Shiny apps, using metaprogramming
 Version: 0.1.0
 Authors@R: c(
     person("Joe", "Cheng", email = "joe@rstudio.com", role = "cre"),
+    person("Carson", "Sievert", email = "carson@rstudio.com", role = "aut"),
     person(family = "RStudio", role = "cph")
     )
 Description: Provides functions that make it easier to construct Shiny apps

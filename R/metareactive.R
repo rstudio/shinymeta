@@ -12,6 +12,7 @@
 #' with `metaExpr()`.
 #'
 #' @inheritParams shiny::reactive
+#' @inheritParams metaExpr
 #' @export
 #' @seealso [metaExpr()]
 #' @examples
@@ -42,7 +43,9 @@
 #'
 #' expandCode(y <- !!y())
 #'
-metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NULL, domain = shiny::getDefaultReactiveDomain()) {
+metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
+                         label = NULL, domain = shiny::getDefaultReactiveDomain(),
+                         localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
@@ -52,7 +55,10 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE, label = NUL
   # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
   # so, because we want to keep any `!!` contained in expr intact (i.e. too
   # early to perform expansion of expr here).
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env)
+  #
+  # Even though expr itself is quoted, wrapExpr will effectively unquote it by
+  # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
+  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
 
   metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
 }
@@ -144,6 +150,12 @@ withMetaMode <- function(expr, mode = TRUE) {
     on.exit(options(op), add = TRUE)
   }
 
+
+
+  if (mode) {
+    expr <- prefix_class(expr, "shinyMetaExpr")
+  }
+
   expr
 }
 
@@ -151,20 +163,62 @@ withMetaMode <- function(expr, mode = TRUE) {
 #'
 #'
 #'
-#' @param expr an expression.
-#' @param env an environment.
+#' @param expr An expression (quoted or unquoted).
+#' @param env An environment.
+#' @param quote Is the expression quoted? This is useful when you want to use an expression
+#' that is stored in a variable; to do so, it must be quoted with [`quote()`].
+#' @param localize Whether or not to wrap the returned expression in [`local()`].
+#' The default, \code{"auto"}, only wraps expressions with a top-level [`return()`]
+#' statement (i.e., return statements in anonymized functions are ignored).
+#' @param bindToReturn For non-`localize`d expressions, should an assignment
+#' of a meta expression be applied to the _last child_ of the top-level `\{` call?
 #'
 #' @seealso [metaReactive2()], [metaObserve2()], [metaRender2()]
 #' @export
-metaExpr <- function(expr, env = parent.frame()) {
-  expr <- substitute(expr)
-  expr <- expandExpr(expr, .globals$dynamicVars, env)
-  expr <- rlang::new_quosure(expr, env)
+metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE) {
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
 
-  if (metaMode())
-    prefix_class(strip_outer_brace(rlang::quo_get_expr(expr)), "shinyMetaExpr")
-  else
-    rlang::eval_tidy(expr)
+  metaExpr_(expr, env = env, quoted = quoted, localize = localize, bindToReturn = bindToReturn)
+}
+
+metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE,
+  topLevelDynVars = TRUE) {
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
+
+  if (!metaMode()) {
+    expr <- expandExpr(expr, list(), env)
+    return(rlang::eval_tidy(expr, env = env))
+  }
+
+  expr <- comment_flags(expr)
+  expr <- expandExpr(expr, if (topLevelDynVars) .globals$dynamicVars, env)
+  expr <- strip_outer_brace(expr)
+
+  # Note that bindToReturn won't make sense for a localized call,
+  # so determine we need local scope first, then add a special class
+  # (we don't yet have the name for binding the return value)
+  expr <- add_local_scope(expr, localize)
+
+  # Apply bindToReturn rules, if relevant
+  expr <- bind_to_return(expr)
+
+  # TODO: let user opt-out of comment elevation
+  # (I _think_ this is always safe)?
+  expr <- elevate_comments(expr)
+
+  # flag the call so that we know to bind next time we see this call
+  # inside an assign call, we should modify it
+  if (bindToReturn && rlang::is_call(expr, "{")) {
+    expr <- prefix_class(expr, "bindToReturn")
+  }
+
+  expr
 }
 
 withDynamicScope <- function(expr, ..., .list = list(...)) {
@@ -195,7 +249,7 @@ withDynamicScope <- function(expr, ..., .list = list(...)) {
 #' can be done via the `patchCalls` argument which can replace the return value of
 #' a meta-component with a relevant variable name.
 #'
-#' @param expr an expression.
+#' @inheritParams metaExpr
 #' @param patchCalls a named list of quoted symbols. The names of the list
 #' should match name(s) bound to relevant meta-component(s) found in `expr`
 #' (e.g. `petal_width` in the example below). The quoted symbol(s) should
@@ -225,19 +279,19 @@ withDynamicScope <- function(expr, ..., .list = list(...)) {
 #'   )
 #' )
 #'
-expandCode <- function(expr, patchCalls = list()) {
-  quosure <- withMetaMode(
+expandCode <- function(expr, env = parent.frame(), quoted = FALSE, patchCalls = list()) {
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
+
+  withMetaMode(
     withDynamicScope(
-      rlang::enquo(expr),
+      metaExpr_(expr, env = env, quoted = quoted, localize = FALSE,
+        bindToReturn = FALSE, topLevelDynVars = FALSE),
       .list = lapply(patchCalls, constf)
     )
   )
-
-  expr <- rlang::quo_get_expr(
-    remove_class(quosure, "shinyMetaExpr")
-  )
-
-  prefix_class(strip_outer_brace(expr), "shinyMetaExpr")
 }
 
 is_output_read <- function(expr) {
@@ -340,17 +394,14 @@ expandObjects <- function(..., .env = parent.frame()) {
 
 prefix_class <- function (x, y) {
   # Can't set attributes on a symbol, but that's alright because
-  # we don't need to run formatCode on symbols
-  if (is.symbol(x)) return(x)
-  if (!is.character(x) && !is.language(x)) {
-    return(x)
-  }
+  # we don't need to flag or compute on symbols
+  if (is.symbol(x) || !is.language(x)) return(x)
   oldClass(x) <- unique(c(y, oldClass(x)))
   x
 }
 
 remove_class <- function(x, y) {
-  if (is.symbol(x)) return(x)
+  if (is.symbol(x) || !is.language(x)) return(x)
   oldClass(x) <- setdiff(oldClass(x), y)
   x
 }

@@ -5,7 +5,7 @@ buildScriptBundle <- function(code = NULL, output_zip_path, script_name = "scrip
   include_files = list(), render = TRUE, render_args = list()) {
 
   if (is.language(code)) {
-    code <- formatCode(code)
+    code <- paste(formatCode(code), collapse = "\n")
   }
 
   build_bundle(code, script_name, output_zip_path,
@@ -23,7 +23,7 @@ buildRmdBundle <- function(report_template, output_zip_path, vars = list(),
   if (is.list(vars)) {
     vars <- lapply(vars, function(x) {
       if (is.language(x)) {
-        formatCode(x)
+        paste(formatCode(x), collapse = "\n")
       } else {
         x
       }

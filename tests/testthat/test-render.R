@@ -80,13 +80,13 @@ describe("metaRender", isolate({
     x <- expandCode( !!out() )
     q1 <- quote( str(cars) )
     expect_equal(x, q1)
-    expect_equal(formatCode(x), "str(cars)")
+    expect_true(formatCode(x) == "str(cars)")
 
     x <- expandCode({ !!out() }, patchCalls = list(mr = quote(boats)))
 
     q2 <- quote( str(boats) )
     expect_equal(x, q2)
-    expect_equal(formatCode(x), "str(boats)")
+    expect_true(formatCode(x) == "str(boats)")
   })
 
 
@@ -99,7 +99,7 @@ describe("metaRender", isolate({
       mr1 <- !!mr1()
     })
 
-    expect_equal(formatCode(code), "mr1 <- 1 + 1")
+    expect_true(formatCode(code) == "mr1 <- 1 + 1")
 
     mr2 <- metaReactive({
       !!quote({1 + 1})
@@ -109,17 +109,14 @@ describe("metaRender", isolate({
       mr2 <- !!mr2()
     })
 
-    expect_equal(formatCode(code), "mr2 <- 1 + 1")
+    expect_true(formatCode(code) == "mr2 <- 1 + 1")
 
     code <- expandCode({
       mr1 <- !!mr1()
       mr2 <- !!mr2()
     })
 
-    expect_equal(
-      formatCode(code),
-      "mr1 <- 1 + 1\nmr2 <- 1 + 1"
-    )
+    expect_true(all(formatCode(code) == c("mr1 <- 1 + 1", "mr2 <- 1 + 1")))
   })
 
 }))

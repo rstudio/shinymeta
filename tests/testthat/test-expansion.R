@@ -15,7 +15,7 @@ describe("expansion", isolate({
     )
     q1 <- quote(1)
     expect_equal(res, q1)
-    expect_equal(formatCode(res), "1")
+    expect_true(formatCode(res) == "1")
   })
 
   it("varies cache according to patchCalls", {
@@ -33,6 +33,10 @@ describe("expansion", isolate({
     x1 <- withMetaMode(metaExpr(!!rand()))
     x2 <- withMetaMode(metaExpr(!!rand()))
     expect_identical(x1, x2)
+
+    y1 <- rand()
+    y2 <- rand()
+    expect_identical(y1, y2)
   })
 
   it("has clean pipeline stages", {
@@ -41,6 +45,14 @@ describe("expansion", isolate({
 
     x2 <- expandCode(!!one() %>% print())
     expect_equal(x2, quote(1 %>% print()))
+  })
+
+  it("doesn't apply patchCalls at the top level", {
+    x1 <- expandCode({
+      one <- !!one()
+      two <- !!two()
+    }, patchCalls = list(one = quote(one)))
+    expect_equal(x1, quote({one <- 1; two <- one}))
   })
 }))
 

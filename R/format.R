@@ -1,33 +1,74 @@
-#' Format code objects
+#' Deparse and format shinymeta expressions
 #'
-#' Converts language/expression objects (i.e. quoted code) into pretty-formatted
-#' text. This logic is based on [styler::style_text()], but with additional
-#' features/opinions; see Details.
+#' Turn unevaluated shinymeta expressions into (formatted or styled) text.
 #'
-#' `formatCode` differs from [styler::style_text()] in a few ways:
+#' Before any formatting takes place, the unevaluated expression is
+#' deparsed into a string via [deparseCode()], which ensures that
+#' shinymeta comment strings (i.e., literal strings that appear on their own line,
+#' and begin with one or more `#` characters.) are turned into comments and
+#' superfluous `\{` are removed. After deparsing, the `formatCode()` function then
+#' calls the `formatter` function on the deparsed string to format (aka style) the code string.
+#' The default `formatter`, `styleText()`, uses [styler::style_text()] with a couple differences:
 #'
-#' * Pipe operators (`%>%`) are always followed by a line break.
-#' * Superfluous `\{` and `\}` are removed in many cases.
-#' * Since quoted R code cannot contain comments, you can use comment strings.
+#' * Pipe operators (`%>%`) are _always_ followed by a line break.
+#' * If the token appearing after a line-break is a comma/operator, the line-break is removed.
 #'
-#' Comment strings are literal strings that appear on their own line, and begin
-#' with one or more `#` characters. Such strings will be converted into comments
-#' by `formatCode`.
-#'
-#' @param code Language/expr object (recommended), or character vector
+#' @param code Either an unevaluated expression or a deparsed code string.
+#' @param width The `width.cutoff` to use when [deparse()]-ing the `code` expression.
+#' @param formatter a function that accepts deparsed code (a character string)
+#' as the first argument.
+#' @param ... arguments passed along to the `formatter` function.
 #' @return Single-element character vector with formatted code
 #' @export
-formatCode <- function(code) {
-  code_txt <- styler::style_text(rebreak(code))
-  paste(code_txt, collapse = "\n")
+#' @examples
+#'
+#' options(shiny.suppressMissingContextError = TRUE)
+#'
+#' x <- metaReactive({
+#'   "# Here's a comment"
+#'   sample(5) %>% sum()
+#' })
+#'
+#' code <- expandCode(x <- !!x())
+#'
+#' deparseCode(code)
+#' formatCode(code)
+#' formatCode(code, formatter = styler::style_text)
+formatCode <- function(code, width = 500L, formatter = styleText, ...) {
+  if (!inherits(code, "shinyMetaDeparsed")) {
+    code <- deparseCode(code, width = width)
+  }
+  do.call(formatter, c(list(code), list(...)))
 }
 
-deparse_flatten <- function(expr, width.cutoff = 500L) {
+#' @export
+#' @rdname formatCode
+styleText <- function(code, ...) {
+  # TODO: break up functionality in rebreak and allow user to opt-out?
+  # Also, perhaps someday we let styler handle the %>% line-breaking?
+  # https://github.com/r-lib/styler/issues/523
+  code <- rebreak(code)
+  styler::style_text(code, ...)
+}
+
+
+#' @inheritParams formatCode
+#' @export
+#' @rdname formatCode
+deparseCode <- function(code, width = 500L) {
+  code <- comment_flags_to_enclosings(code)
+  code_text <- deparse_flatten(code, width = width)
+  code_text <- comment_remove_enclosing(code_text)
+  oldClass(code_text) <- "shinyMetaDeparsed"
+  code_text
+}
+
+deparse_flatten <- function(expr, width = 500L) {
   if (rlang::is_call(expr, "{")) {
     paste0(vapply(expr[-1], deparse_flatten, character(1)), collapse = "\n")
   } else {
     # TODO: should this have `backtick = TRUE`?
-    paste0(deparse(expr, width.cutoff = width.cutoff), collapse = "\n")
+    paste0(deparse(expr, width.cutoff = width), collapse = "\n")
   }
 }
 
@@ -37,10 +78,6 @@ deparse_flatten <- function(expr, width.cutoff = 500L) {
 # a single space. The resulting code string will not contain indentation, and
 # must be processed further to be considered readable.
 rebreak <- function(str) {
-  str <- modify_call(str)
-  if (is.call(str) || is.symbol(str)) {
-    str <- deparse_flatten(str)
-  }
   str <- paste(str, collapse = "\n")
   tokens <- sourcetools::tokenize_string(str)
   tokens$value <- paste0(
@@ -58,13 +95,12 @@ rebreak <- function(str) {
     c(FALSE, head(tokens$type %in% c("comma", "operator"), -1))
   tokens$value[operator_newline] <- " "
   new_str <- paste(tokens$value, collapse = "")
-  new_str <- gsub("\\s*\\r?\\n\\s*", "\n", new_str)
-  comment_identifier_remove(new_str)
+  gsub("\\s*\\r?\\n\\s*", "\n", new_str)
 }
 
-# If a string appears entirely on it's own line,
-# and begins with #, turn it into a comment
-comment_identifier_remove <- function(x) {
+# If a deparsed code string contains a line that's enclosed in our special
+# identifiers, then turn it into a comment
+comment_remove_enclosing <- function(x) {
   if (!is.character(x) || length(x) > 1) {
     stop("Expected a string (character vector of length 1).")
   }

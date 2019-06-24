@@ -4,10 +4,13 @@
 \alias{expandCode}
 \title{Expand meta primitives into user code}
 \usage{
-expandCode(expr, patchCalls = list())
+expandCode(expr, env = parent.frame(), quoted = FALSE,
+  patchCalls = list())
 }
 \arguments{
-\item{expr}{an expression.}
+\item{expr}{An expression (quoted or unquoted).}
+
+\item{env}{An environment.}
 
 \item{patchCalls}{a named list of quoted symbols. The names of the list
 should match name(s) bound to relevant meta-component(s) found in \code{expr}
