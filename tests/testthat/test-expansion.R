@@ -74,10 +74,17 @@ describe("expandObjects", isolate({
   })
 
   it("works with bare names", {
-    x1 <- expandObjects(one, two, `obs with tricky name`, output$plot)
+    x1 <- expandObjects(
+      one,
+      two,
+      "# top-level comment",
+      `obs with tricky name`,
+      output$plot
+    )
     x2 <- expandCode({
       one <- !!one()
       two <- !!two()
+      "# top-level comment"
       !!`obs with tricky name`()
       !!output$plot()
     }, patchCalls = list(one = quote(one), two = quote(two)))
