@@ -6,7 +6,8 @@
 \title{Create a meta-reactive observer}
 \usage{
 metaObserve(expr, env = parent.frame(), quoted = FALSE, label = NULL,
-  domain = getDefaultReactiveDomain())
+  domain = getDefaultReactiveDomain(), localize = "auto",
+  bindToReturn = FALSE)
 
 metaObserve2(expr, env = parent.frame(), quoted = FALSE,
   label = NULL, domain = getDefaultReactiveDomain())
@@ -25,6 +26,13 @@ variable; to do so, it must be quoted with \code{quote()}.}
 \item{label}{A label for the observer, useful for debugging.}
 
 \item{domain}{See \link{domains}.}
+
+\item{localize}{Whether or not to wrap the returned expression in \code{\link[=local]{local()}}.
+The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[=return]{return()}}
+statement (i.e., return statements in anonymized functions are ignored).}
+
+\item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
+of a meta expression be applied to the \emph{last child} of the top-level \code{\{} call?}
 }
 \description{
 Create a \code{\link[=observe]{observe()}}r that, when invoked with meta-mode activated
