@@ -8,7 +8,7 @@
 #'
 #' @details If you wish to capture specific code inside of `expr` (e.g. ignore code
 #' that has no meaning outside shiny, like [req()]), use `metaObserve2()` in combination
-#' with `metaExpr()`.
+#' with `metaExpr()`. When using `metaObserve2()`, `expr` must return a `metaExpr()`.
 #'
 #' @inheritParams shiny::observe
 #' @inheritParams metaReactive

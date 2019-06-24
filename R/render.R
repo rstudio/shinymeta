@@ -6,7 +6,7 @@
 #'
 #' @details If you wish to capture specific code inside of `expr` (e.g. ignore code
 #' that has no meaning outside shiny, like [req()]), use `metaRender2()` in combination
-#' with `metaExpr()`.
+#' with `metaExpr()`. When using `metaRender2()`, `expr` must return a `metaExpr()`.
 #'
 #' @param renderFunc A reactive output function (e.g., [shiny::renderPlot], [shiny::renderText], [shiny::renderUI], etc).
 #' @param expr An expression that generates given output expected by `renderFunc`.

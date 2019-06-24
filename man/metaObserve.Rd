@@ -44,7 +44,7 @@ partially evaluated code expression. Outside of meta-mode,
 \details{
 If you wish to capture specific code inside of \code{expr} (e.g. ignore code
 that has no meaning outside shiny, like \code{\link[=req]{req()}}), use \code{metaObserve2()} in combination
-with \code{metaExpr()}.
+with \code{metaExpr()}. When using \code{metaObserve2()}, \code{expr} must return a \code{metaExpr()}.
 }
 \seealso{
 \code{\link[=metaExpr]{metaExpr()}}
