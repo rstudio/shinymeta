@@ -47,9 +47,6 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
                          label = NULL, domain = shiny::getDefaultReactiveDomain(),
                          localize = "auto", bindToReturn = FALSE) {
 
-  # Force evaluation
-  list(env, quoted, label, domain, localize, bindToReturn)
-
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
