@@ -8,7 +8,7 @@
 expandCode(expr, env = parent.frame(), quoted = FALSE,
   patchCalls = list())
 
-expandObjects(..., .env = parent.frame(), .libraries)
+expandObjects(..., .env = parent.frame(), .pkgs)
 }
 \arguments{
 \item{expr}{An expression (quoted or unquoted).}
@@ -24,7 +24,7 @@ match variable name(s) representing the return value of the meta-component(s).}
 
 \item{.env}{An environment.}
 
-\item{.libraries}{A character vector of library names to load before the expanded code.}
+\item{.pkgs}{A character vector of packages to load before the expanded code.}
 }
 \description{
 This function provides the main entry point for generating user code
