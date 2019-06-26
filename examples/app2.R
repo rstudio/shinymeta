@@ -9,7 +9,6 @@ ui <- fluidPage(
   downloadButton("download_script", "Download script"),
   downloadButton("download_script_bundle", "Download script + output"),
   verbatimTextOutput("code"),
-  verbatimTextOutput("text"),
   plotOutput("plot")
 )
 
@@ -25,12 +24,6 @@ server <- function(input, output, session) {
   filtered2 <- metaReactive({
     "# a comment inside metaReactive()"
     !!df() %>% tail(!!input$n)
-  })
-
-  summarize <- metaAction(summary(!!filtered()))
-
-  output$text <- renderPrint({
-    summarize()
   })
 
   output$plot <- metaRender(renderPlot, {
@@ -51,7 +44,7 @@ server <- function(input, output, session) {
       bottom = filtered2,
       obs,
       output$plot,
-      .libraries = "magrittr"
+      .pkgs = "magrittr"
     )
   })
 
