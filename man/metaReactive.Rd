@@ -2,11 +2,15 @@
 % Please edit documentation in R/metareactive.R
 \name{metaReactive}
 \alias{metaReactive}
+\alias{metaReactive2}
 \title{Create a meta-reactive expression}
 \usage{
 metaReactive(expr, env = parent.frame(), quoted = FALSE,
   label = NULL, domain = shiny::getDefaultReactiveDomain(),
   localize = "auto", bindToReturn = FALSE)
+
+metaReactive2(expr, env = parent.frame(), quoted = FALSE,
+  label = NULL, domain = shiny::getDefaultReactiveDomain())
 }
 \arguments{
 \item{expr}{An expression (quoted or unquoted).}

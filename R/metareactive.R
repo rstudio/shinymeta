@@ -65,6 +65,7 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
 
 
 #' @export
+#' @rdname metaReactive
 metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
   label = NULL, domain = shiny::getDefaultReactiveDomain()) {
 
