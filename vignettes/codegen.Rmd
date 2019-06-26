@@ -1,6 +1,6 @@
 ---
 title: "Using shinymeta"
-author: "Joe Cheng"
+author: "Joe Cheng & Carson Sievert"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -10,15 +10,17 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE,
+  message = FALSE
+)
 library(shiny)
 library(shinymeta)
 library(dplyr)
 library(ggplot2)
 options(shiny.suppressMissingContextError = TRUE)
-input <- list(
-  package = "ggplot2"
-)
+input <- list(package = "ggplot2")
 output <- list()
 
 # Only show the first few rows
@@ -31,20 +33,13 @@ knit_print.data.frame <- function(x, ...) {
 }
 # register the method
 registerS3method("knit_print", "data.frame", knit_print.data.frame)
-
-knitr::opts_chunk$set(comment = "")
 ```
 
 ```{css echo=FALSE}
-pre:not(.sourceCode), pre:not(.sourceCode) code {
+pre.R {
   background-color: #d3f3df;
 }
-div.sourceCode + pre:not(.sourceCode) {
-  margin-top: -1em;
-}
 ```
-
-TODO: Document comment-strings feature
 
 Our goal: allow the creation of Shiny apps that you use interactively, then produce reproducible scripts/report from.
 
@@ -52,11 +47,11 @@ Our inspiration: the concepts of metaprogramming, i.e., code that generates code
 
 Our solution: shinymeta!
 
-## Example: Before shinymeta
+## Motivating example {#example}
 
-Here's a very simple, traditional Shiny app, with no meta anything (yet). Based on a CRAN package name provided by the user, it downloads a year's worth of download data, then plots a 7-day rolling average.
+Here's a basic **shiny** app that allows you to enter an R package name to generate a plot of its CRAN downloads over the past year. This app will help us demonstrates how **shinymeta** can help us create a **shiny** app that generates R code to reproduce the things within the shiny app (for example, `output$plot`), without having to repeat any logic.
 
-```{r}
+```{r, eval = FALSE}
 library(shiny)
 library(ggplot2)
 library(dplyr)
@@ -67,6 +62,7 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
+  
   downloads <- reactive({
     # Retrieve a year's worth of daily download data
     cranlogs::cran_downloads(input$package, from = Sys.Date() - 365, to = Sys.Date())
@@ -74,7 +70,7 @@ server <- function(input, output, session) {
   
   downloads_rolling <- reactive({
     # Convert daily data to 7 day rolling average
-    downloads() %>% mutate(count = zoo::rollapply(count, 7, mean, fill="extend"))
+    downloads() %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
   })
   
   output$plot <- renderPlot({
@@ -82,17 +78,16 @@ server <- function(input, output, session) {
   })
 }
 
-# shinyApp(ui, server)
+shinyApp(ui, server)
 ```
 
-### Example: After shinymeta
+Below is the source code (and a screencast) of a **shiny** app that generates code (via **shinymeta**) to reproduce `output$plot` in a new R session. Notice how both the `output$plot` and `output$code` update dynamically in response to new package names without having to repeat the logic behind the original app. To keep the focus on code generation, we've presented the `output$code` as simple as possible here (by using `verbatimTextOutput()` and `renderPrint()`), but the next vignette outlines the various options for presenting and distributing code to users with **shinymeta**.
 
-Now, let's add a panel that shows R code you can use to reproduce this plot in a separate R process. There are lots of different ways to present code in shinymeta, but for now we'll do it as simply as possible, with a `verbatimTextOutput` and `renderPrint`.
-
-```{r}
+```{r, eval = FALSE}
 library(shiny)
 library(ggplot2)
 library(dplyr)
+library(shinymeta)
 
 ui <- fluidPage(
   textInput("package", "Package name", value = "ggplot2"),
@@ -102,11 +97,13 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   downloads <- metaReactive({
+    "# Retrieve a year's worth of daily download data"
     cranlogs::cran_downloads(!!input$package, from = Sys.Date() - 365, to = Sys.Date())
   })
   
   downloads_rolling <- metaReactive({
-    !!downloads() %>% mutate(count = zoo::rollapply(count, 7, mean, fill="extend"))
+    "# Convert daily data to 7 day rolling average"
+    !!downloads() %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
   })
   
   output$plot <- metaRender(renderPlot, {
@@ -114,29 +111,35 @@ server <- function(input, output, session) {
   })
   
   output$code <- renderPrint({
-    expandCode({
-      library(ggplot2)
-      library(dplyr)
-      
-      !!output$plot()
-    })
+    expandObjects(
+      downloads(),
+      downloads_rolling(),
+      output$plot(),
+      .pkgs = c("ggplot2", "dplyr")
+    )
   })
 }
 
-# shinyApp(ui, server)
+shinyApp(ui, server)
 ```
 
-You'll notice that the code that the app displays isn't particularly nice, nor is the way the code is being displayed. Don't worry, we're going to come back and clean that up by the end of this document. But for now, let's focus on the changes we see here:
+<div align="center" >
+  <img src="cranview-basic.gif" width="90%" />
+</div>
 
-1. Each `reactive()` has changed to `metaReactive()`, and the `renderPlot` has been jammed into a `metaRender()` function.
-2. Each read of a `metaReactive` or `input` value has been prepended with `!!`.
-3. Added a new `code` output and implemented it using `renderPrint` and `expandCode`.
+So, what has changed in the implementation between the original **shiny** app and the one that generates code? There a few high-level observations we can make here that should hold true for most apps that leverage **shinymeta** to generate code:
 
-These changes don't look dramatic, but in order for you to really understand how this all works, we'll need to peel back the onion a few layers and delve into the implementation of shinymeta.
+* Each `reactive()` has changed to `metaReactive()`, and the `renderPlot()` function has been jammed into a `metaRender()` function.
+    * Note: this example doesn't use `observe()`, but this document [covers their translation as well](#observers). 
+* Each read of a `metaReactive()` or an `input` value has been prepended with `!!`.
+* Comments are retained by surrounding them in quotes.
+* The `expandObjects()` function generates code from a chain of meta-reactives (e.g., `downloads()` -> `downloads_rolling()` -> `output$plot()`).
 
-## Generating code from reactive objects
+On the surface, these changes look somewhat straight-forward, but in order to really understand how it all fits together, we'll have to unpack a handful of pretty sophisticated concepts related to metaprogramming (i.e., writing code that generates code). If you're new to metaprogramming, and you're serious about using **shinymeta**, we recommend reading [Advanced R](https://adv-r.hadley.nz) (especially the [Quasi-quotation chapter](https://adv-r.hadley.nz/quasiquotation.html)), but that shouldn't be necessary to get the gist of what's happening in this vignette.
 
-Let's zoom in on this reactive expression from the original version app:
+## Meta-reactives
+
+Let's start with this particular reactive expression from the original app:
 
 ```{r}
 downloads <- reactive({
@@ -145,9 +148,9 @@ downloads <- reactive({
 downloads()
 ```
 
-Reactive expressions are fantastic at the job they were designed for: lazy, caching, reactivity-aware calculators of results. But they don't help us with the second part of our goal, which is extracting the essential logic of the app's reactive objects.
+Reactive expressions are fantastic at the job they were designed for: lazy, caching, reactivity-aware calculators of results. However, they don't help in the second part of our goal, which is extracting the essential logic of the app, and making it reusable for others outside of shiny.
 
-Enter `metaReactive`. Let's do nothing besides change `reactive` to `metaReactive`:
+Enter `metaReactive()`. Let's do nothing besides change `reactive()` to `metaReactive()`:
 
 ```{r}
 downloads <- metaReactive({
@@ -155,372 +158,289 @@ downloads <- metaReactive({
 })
 ```
 
-In normal usage, the behavior of `downloads` doesn't change at all—it still works exactly the same as it lazily, cachingly, reactivity-aware-ingly calculates results.
+In normal usage, the behavior of `downloads()` doesn't change at all -- it still works exactly the same as it lazily, cachingly, reactivity-aware-ingly calculates results.
 
 ```{r}
 downloads()
 ```
 
-But when we call it under the influence of a new function, `shinymeta::withMetaMode`, suddenly its behavior changes:
+However, when invoked with **shinymeta**'s meta-mode enabled (i.e., `withMetaMode()`), the behavior changes: Instead of evaluating the reactive expression and returning the value (a data frame), it returns a code expression. To make it visually clear when we're generating a code expression, this vignette will set the background color of generated code to <svg width="1em" height="1em"><rect width="1em" height="1em" style="fill: #d3f3df"/></svg>.
 
-```{r}
+```{r, class.output='R', comment = ''}
 withMetaMode(downloads())
 ```
 
-Instead of getting a data frame, we get code!
+Notice how the generated code depends on the input variable `input$package`. If we were to run this code in a new R session, it would error because `input$package` isn't defined outside of the shiny session. We can, however, replace the literal name "`input$package`" with the value it represents (by unquoting it with `!!`), which allows the code to run a context where `input` isn't defined. 
 
-We'll soon talk about what to do with the returned code. But first, let's look at how we can customize and control the generated code.
+## Unquoting with `!!` {#unquoting}
 
-### Expanding values with the unquote (`!!`) operator
+In computing, functions that return code expressions (e.g., `metaReactive()`) are called quoting functions. Since **shinymeta** supports [tidy evaluation](https://adv-r.hadley.nz/quasiquotation.html), quoting functions are also quasi-quoting functions, meaning they allow you to selectively evaluate (i.e., unquote or expand) parts of a quoted expression. For simple example, consider the `expr()` function from the **rlang** package which allow you to create code expressions:
 
-If you try to run the code we just generated in a new R session, you'll find it doesn't work. The code contains a reference to `input$package`, which only works in a live Shiny session. No problem! We can use the `!!` operator to tell `metaReactive` to *unquote* `input$package`; that is, insert the value of `input$package` into the code rather than the literal code "`input$package`".
+```{r, class.output='R', comment = ''}
+library(rlang)
 
-```{r}
+a <- 2
+expr(a + 1)
+```
+
+One way to produce an equivalent code expression that doesn't depend on the object `a` existing would be to use the `!!` operator to unquote (aka, evaluate or expand) the symbol `a`, which replaces it with the value it represents:
+
+```{r, class.output='R', comment = ''}
+expr(!!a + 1)
+```
+
+The idea is essentially the same when we wish to insert the value of `input$package` into the code rather than the literal name "`input$package`".^[This is so common that you should be a bit skeptical if you see `input$xxx` without `!!` inside of any meta-reactive.]
+
+```{r, class.output='R', comment = ''}
 downloads <- metaReactive({
   cranlogs::cran_downloads(!!input$package, from = Sys.Date() - 365, to = Sys.Date())
 })
 withMetaMode(downloads())
 ```
 
-This is so common that you should be a bit skeptical if you see `input$xxx` without `!!` inside of any meta-reactive.
+Depending on the ultimate purpose of the script we generate, we may or may not also want to replace a `Sys.Date()` call (which returns the current date) the actual value (at run time). For example, we produce code that acquires downloads starting `from` a year prior to the date the code _was generated_ and `to` whenever the code is _actually run_. The former requires us to un-quote `Sys.Date()` whereas the latter doesn't.
 
-Depending on the ultimate purpose of the script we generate, we may or may not also want to replace the `Sys.Date()` calls (which return the current date) with their actual values: do we want the generated script to always use `Sys.Date()`, or hard-code today's date when the script is generated? If the latter, we can again use unquoting to accomplish this.
-
-```{r}
+```{r, class.output='R', comment = ''}
+# Ask yourself: what's the difference between `rlang::expr(!!Sys.Date() - 365)` and `rlang::expr(!!(Sys.Date() - 365))`?
+# Why is that difference important in this case?
 downloads <- metaReactive({
-  cranlogs::cran_downloads(!!input$package, from = !!(Sys.Date() - 365), to = !!Sys.Date())
+  cranlogs::cran_downloads(!!input$package, from = !!(Sys.Date() - 365), to = Sys.Date())
 })
 withMetaMode(downloads())
 ```
 
-Ack, gross! The resulting objects work, but are pretty ugly (they are the result of `deparse(Sys.Date())`). Let's change them to `"yyyy-MM-dd"` strings using the `format` function:
+Whoa, what's this `structure()` business? Well, it's an unfortunate consequence of deparsing values that contain attributes (e.g., `deparse(Sys.Date())`), and deparsing is necessary for [supporting comments](#comments) and formatting code. In this case, since the `from` argument accepts string in `"yyyy-mm-dd"` format (i.e., the `Date` class isn't necessary), we can use `format()` to coerce the `Date` object into a string (and thus, more human-readable).
 
-```{r}
+```{r, class.output='R', comment = ''}
 downloads <- metaReactive({
-  cranlogs::cran_downloads(!!input$package, from = !!format(Sys.Date() - 365), to = !!format(Sys.Date()))
+  cranlogs::cran_downloads(!!input$package, from = !!format(Sys.Date() - 365), to = Sys.Date())
 })
 withMetaMode(downloads())
 ```
 
-Unquoting is an essential tool for fine-grained customization of the generated code. For other scenarios, you may need coarser-grained control, which is where `metaReactive2` comes in.
+> #### Takeaway: unquote reactive inputs/values (e.g., `!!input$package`)
 
-### Selective quotation with `metaReactive2`/`metaExpr`
+In summary, unquoting replaces a name with the value that it represents; and thus, is a essential tool for generating code that can run outside of a shiny session. That's because, in a shiny app, we often refer to reactive values that are only defined inside a shiny runtime. Unquoting is fairly straightforward when the name you're unquoting (`e.g. input$package`) represents a constant value (e.g. `"ggplot2"`), but become more complicated when those values become more complicated. In the next section, we'll be chaining meta-reactive expressions, which requires unquoting names that represent meta-reactives. That means, these names can actually represent un-evaluated expressions!
 
-The apps above had an unsightly bug: if the user clears the Package text box, you get an error "Invalid query, probably invalid dates". We can add a `validate(need(...))` statement to make this error nicer:
+## Chaining meta-reactives {#chaining-meta-reactives}
+
+Chaining of reactive expressions is a very useful pattern that allows **shiny** to intelligently cache computations for you. Note that our example app has a reactive chain: the acquistion of daily downloads is done in one reactive expression, `downloads()`, then `downloads_rolling()` uses the return value of `downloads()` to compute a weekly rolling average:
 
 ```{r}
-downloads <- metaReactive({
-  validate(need(input$package, "Please provide a package name"))
-  cranlogs::cran_downloads(!!input$package, from = Sys.Date() - 365, to = Sys.Date())
+downloads_rolling <- metaReactive({
+  downloads() %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
 })
 ```
 
-Unfortunately, this now means our essential logic contains this decidedly unessential validation statement:
+Recall that, when invoked with [meta-mode](#meta-mode) enabled, `metaReactive()`, like `rlang::expr()`, quotes its input, which is why `downloads()` appears in the code produced by `downloads_rolling()`:
 
-```{r}
-withMetaMode(downloads())
+```{r, class.output='R', comment = ''}
+withMetaMode(downloads_rolling())
 ```
 
-We need `validate`/`need` to be called during interactive use, but we don't want it included as part of the exported code. For these situations, shinymeta includes a second version of `metaReactive`, unimaginatively named `metaReactive2`:
+So, similar to the problem we had before with `input$package`, the generated code relies on something that won't be defined in a new R session (`downloads()`). However, by unquoting `downloads()`, we can replace it with the value it represents. Since `downloads()` is a `metaReactive()`, when meta-mode is enabled, that value represents the unevaluated expression that `withMetaMode(downloads())` returns:
 
-```{r}
-downloads <- metaReactive2({
-  validate(need(input$package, "Please provide a package name"))
-  
-  metaExpr({
-    cranlogs::cran_downloads(!!input$package, from = Sys.Date() - 365, to = Sys.Date())
-  })
+```{r, class.output='R', comment = ''}
+downloads_rolling <- metaReactive({
+  !!downloads() %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
 })
-withMetaMode(downloads())
+withMetaMode(downloads_rolling())
 ```
 
-`metaReactive` and `metaReactive2` have largely identical behavior, except for this one thing: `metaReactive` treats its entire code body as export-worthy code, but `metaReactive2` requires you to explicitly wrap the export-worthy part of your code in `metaExpr(...)`, and return it.
 
-_Note:_ The last part of that sentence is important! The result of `metaExpr` must be _returned_ from the `metaReactive2` expression, or it won't be used as the code. Neither of these examples would work as desired, for example:
+> #### Takeaway: unquote meta-reactive reads (i.e., `!!downloads()`) that appear within other meta-reactives
 
-```{r}
-wrong1 <- metaReactive2({
-  # Will not be part of exported code, because it's not the last expression
-  metaExpr({
-    important_operation(data)
-  })
-  
-  NULL
-})
-withMetaMode(wrong1())
 
-wrong2 <- metaReactive2({
-  # Will not be part of exported code
-  metaExpr({
-    do_something()
-  })
-  
-  # Will be entirety of exported code
-  metaExpr({
-    do_something_else()
-  })
-})
-withMetaMode(wrong2())
-```
+## Other meta-reactives (observers & outputs) {#observers}
 
-### Meta reactive objects explained
+So far we've learned how to manage reactive values (e.g., `input$package`) and reactive expressions (e.g., `downloads()`), but what about code captured in the endpoints of shiny's reactivity model (i.e. observers and outputs)?
 
-We have just seen the syntax for `metaReactive` and `metaReactive2`/`metaExpr`. Now let's talk about how these dual-mode reactive objects are implemented. (For the purposes of this discussion, we'll mostly ignore `metaReactive`, as it's basically just `metaReactive2` but with an implicit `metaExpr` around the whole code body.)
+<img src="reactivity-graph-00.png" width=80% />
 
-The humble truth is that behind all of this dual-mode reactive fanciness is just a global variable, in the form of the `shinymeta::metaMode()` function. Call it with no arguments to read it:
+#### Observers
 
-```{r}
-metaMode()
-```
+Creating a meta variant of `observe()` is very similar to creating a meta variant of `reactive()`: use `metaObserve()` instead of `observe()` and unquote any references to reactive values or expressions. Note that, outside of meta mode, `metaObserve()` behaves the same as `observe()`: it immediately evaluates the given expression (i.e., there's no need to invoke `msgObs()` outside of meta mode).
 
-And call it with a single logical to write to it:
-
-```{r}
-metaMode(TRUE)  # Don't actually do this, probably.
-metaMode()
-metaMode(FALSE) # Restore default value, phew!
-```
-
-The `withMetaMode` function we've been using does little more than set the `metaMode` variable (to `TRUE`, by default), evaluates the expression you give it, then restores `metaMode` to its previous value. It's highly unlikely you'd ever want to turn on `metaMode` and leave it that way, so, avoid setting `metaMode` directly and use `withMetaMode` instead--or better yet, the even higher level `expandCode` function we'll soon get to.
-
-### Going meta with observers and outputs
-
-So far, we've only looked at meta-enabled versions of reactive expressions. The other two fundamental reactive object types are observers and outputs, and we need the ability to pull code out of those as well.
-
-#### `metaObserve`/`metaObserve2`
-
-Observers are easy; just as `reactive()` has `metaReactive`/`metaReactive2`, `observe()` has `metaObserve`/`metaObserve2`.
-
-```{r}
-observe({
-  message("Package selected:", input$package)
-})
-```
-
-becomes:
-
-```{r}
+```{r, class.output='R', comment = ''}
 msgObs <- metaObserve({
-  message("Package selected:", !!input$package)
+  d <- !!downloads()
+  message(!!input$package, " has an daily download average of ", mean(d$count))
 })
 withMetaMode(msgObs())
 ```
 
-The traditional `observe()` function returns an object that can be used to control aspects of the observer, though most Shiny apps don't bother to save it. See `?observe` for the different methods available. The object returned from `metaObserve` can be used in the same way (`msgObs$suspend()`, for example) but has the additional capability of being called like a function, as in the previous code example.
+The traditional `observe()` function returns an object that can be used to control aspects of the observer, though most **shiny** apps don't bother to save it. See `?observe` for the different methods available. The object returned from `metaObserve()` can be used in the same way (`msgObs$suspend()`, for example) but has the additional capability of being called like a function, as in the previous code example.
 
-`metaObserve2` works exactly like `metaReactive2`:
+#### Outputs
 
-```{r}
-msgObs <- metaObserve2({
-  req(input$package) # Validation code; not for export
-  
-  metaExpr({
-    message("Package selected:", !!input$package)
-  })
-})
-withMetaMode(msgObs())
-```
+Since package authors are allowed to create their own output rendering functions, creating a meta variant of an output renderer (e.g. `renderPlot()`) needs to be more general than prefixing `meta` to the function name (as we did with `metaReactive()` and `metaObserve()`). Therefore, **shinymeta** has a general-purpose `metaRender()` function that anticipates a rendering function in it's first argument, and an expression in the second argument. Here's how we can make a meta variant of out downloads plot:
 
-#### `metaRender`/`metaRender2`
-
-When it comes to outputs, things are not quite as simple. Here's the original plotting code:
-
-```{r}
-output$plot <- renderPlot({
-  ggplot(downloads_rolling(), aes(date, count)) + geom_line() + ggtitle("Seven day rolling average")
-})
-```
-
-The simplest solution would be if we had a `metaRenderPlot` function that could stand in for `renderPlot`, in exactly the same vein as `metaReactive`. But `renderPlot` is just one of several output render functions that come with Shiny, and many dozens of other output render functions exist in third party R packages. It would be unwieldy to try to provide `meta`-prefixed versions of all of these functions in shinymeta.
-
-Instead, we created a general-purpose `metaRender` function that can be used with any output render function. This generality comes at the cost of a somewhat awkward syntax: `renderPlot({` becomes `metaRender(renderPlot, {`.
-
-```{r}
-output$plot <- metaRender(renderPlot, {
-  ggplot(downloads_rolling(), aes(date, count)) + geom_line() + ggtitle("Seven day rolling average")
-})
-withMetaMode(output$plot())
-```
-
-You can call `output$plot()` like a function, inside of `withMetaMode`, to get the code out. (You may not call `output$plot()` for any other reason, i.e. outside of `withMetaMode`--you will just get an error.)
-
-(`metaRender` makes some assumptions about the arguments taken by the render function, assumptions that we believe are true for all existing render functions. If you encounter a render function that doesn't seem to work properly with shinymeta, please let us know by [filing an issue on GitHub](https://github.com/rstudio/shinymeta/issues).)
-
-Finally, we won't bother with an example, but `metaRender2` is available as well, for the same purpose as the other -`2` functions.
-
-## Combining meta-reactives
-
-Now you know how to create reactive expressions, observers, and outputs that can return their own logic. So far, we've glossed over the fact that such objects can (and usually do) have relationships with each other: reactive expressions can be called by other reactive expressions, observers, and outputs.
-
-Consider these two `metaReactive`s:
-
-```{r}
-downloads <- metaReactive2({
-  validate(need(input$package, "Please provide a package name"))
-  
-  metaExpr({
-    cranlogs::cran_downloads(!!input$package, from = Sys.Date() - 365, to = Sys.Date())
-  })
-})
-
-downloads_rolling <- metaReactive({
-  downloads() %>% mutate(count = zoo::rollapply(count, 7, mean, fill="extend"))
-})
-```
-
-Here, `downloads_rolling` calls `downloads`. When we retrieve the code for `downloads_rolling`, it contains a reference to `downloads`:
-
-```{r}
-withMetaMode(downloads_rolling())
-```
-
-This isn't reproducible code on its own, as the definition for `downloads` won't exist in a new R session.
-
-In previous sections, we used `!!` to insert values where there was code. But when you use `!!` with a call to a `metaReactive` object like `downloads`, it's that object's _code_ that gets inserted, not its value.
-
-Therefore, we can inline the code for `downloads` into `downloads_rolling` by simply unquoting the call to `downloads`:
-
-```{r}
-downloads_rolling <- metaReactive({
-  !!downloads() %>% mutate(count = zoo::rollapply(count, 7, mean, fill="extend"))
-})
-withMetaMode(downloads_rolling())
-```
-
-To summarize everything we've learned so far, we convert a Shiny app to shinymeta by:
-
-1. Identifying all of the reactive expressions, observers, and outputs that represent logic we want to export, and change them into `metaReactive`, `metaObserve`, and `metaRender`, respectively (or `metaReactive2`, `metaObserve2`, and `metaRender2` if you want to be more selective about parts of their code blocks you want to export).
-2. Use `!!` to unquote `input$xxx`, calls to `metaReactive` objects, and any other expressions that you do not want to literally be part of the exported code.
-
-There are two more significant steps in the code generation process, both of which are handled through the `expandCode` function we'll introduce now.
-
-## Code expansion with `expandCode`
-
-We've demonstrated that once you've used the previous steps to convert and annotate your reactive objects, you can use `withMetaMode()` to retrieve the code from any object. But we usually want to generate chunks of code that bring together _multiple_ distinct reactive objects (say, more than one output).
-
-Let's say we introduce a second output for our app, like a printed summary of the download counts.
-
-```{r}
-output$summary <- metaRender(renderPrint, {
-  summary((!!downloads())$count)
-})
-withMetaMode(output$summary())
-```
-
-And let's re-implement `output$plot`, using everything we've learned so far.
-
-```{r}
+```{r, class.output='R', comment = ''}
 output$plot <- metaRender(renderPlot, {
   ggplot(!!downloads_rolling(), aes(date, count)) + geom_line() + ggtitle("Seven day rolling average")
 })
+```
+
+Similar to `metaReactive()` and `metaObserve()`, when meta mode is enabled, you can call `output$OUTPUT_ID()` to get an unevaluated expression.^[If meta mode is not enabled, `output$OUTPUT_ID()` will intentionally produce an error.]
+
+```{r, class.output='R', comment = ''}
 withMetaMode(output$plot())
 ```
 
-Now we have two outputs, `output$plot` and `output$summary`. The `expandCode` function gives us a way to conveniently bring these two pieces of code together. You call it with a code expression that contains unquoted (`!!`) subexpressions, and it expands those subexpressions within a `withMetaMode` scope.
+(`metaRender()` makes some assumptions about the arguments taken by the render function, assumptions that we believe are true for all existing render functions. If you encounter a render function that doesn't seem to work properly with **shinymeta**, please let us know by [filing an issue on GitHub](https://github.com/rstudio/shinymeta/issues).)
 
-```{r}
-expandCode({
-  "# A summary of output counts"
-  !!output$summary()
-  "# A plot"
-  !!output$plot()
+
+## Ignoring code
+
+Often times, for more sophisticated apps, you'll want to completely ignore part(s) of a reactive expression that are only relevant inside a shiny runtime. One common example is **shiny**'s input validation helpers (e.g. `validate()`, `need()`, and `req()`), which you probably don't want to include in your generated code. For this reason, **shinymeta** provides a second version of each meta-reactive (e.g., `metaReactive2()`, `metaObserve2()`, `metaRender2()`, etc), which allows you capture a specific subset of a reactive expression via `metaExpr()` (otherwise, they behave exactly the same). 
+
+To demonstrate, our example app could make use of `validate()` and `need()` to improve the user experience of our app, since currently, it errors out when a user hasn't specified a package name.
+
+[gif of the error]
+
+To ignore the `validate` and `need()` calls, change `metaRender()` to `metaRender2()`, then wrap the plot generation code in `metaExpr()`:
+
+```{r, eval = FALSE}
+# TODO: this doesn't yield the right thing!
+output$plot <- metaRender2(renderPlot, {
+  validate(
+    need(input$package, "Please provide a package name"),
+    need(nrow(downloads()) > 0, "Please provide a valid package name")
+  )
+  
+  metaExpr({
+    ggplot(!!downloads_rolling(), aes(date, count)) + geom_line() + ggtitle("Seven day rolling average")
+  })
 })
 ```
 
-You're not limited to just outputs; you can also introduce variables for meta-reactive expressions that you think might be interesting to the ultimate recipient of the code.
+It isn't really needed in this case, but you could also re-work `downloads()` and `downloads_rolling()` to perform input validation:
 
 ```{r}
-expandCode({
-  "# Data frame of package downloads"
-  pkg_downloads <- !!downloads()
-  "# A summary of output counts"
-  !!output$summary()
-  "# A plot"
-  !!output$plot()
+downloads <- metaReactive2({
+  req(input$package)
+  
+  metaExpr({
+    cranlogs::cran_downloads(!!input$package, from = Sys.Date() - 365, to = Sys.Date())
+  })
+})
+
+downloads_rolling <- metaReactive2({
+  req(downloads())
+  
+  metaExpr({
+    !!downloads() %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
+  })
 })
 ```
 
-### Refactoring to remove duplicated code
+It's important to note that these `...2` variants expect their return value to be a `metaExpr()`. If you find yourself in the situation where that `metaExpr()` should change depending on some sort of control flow (e.g., `if` statements), you may want to use a pattern [similar to this](https://github.com/cpsievert/cranview/blob/f4989a9/app.R#L71-L89).
 
-The code we generated in the previous section has a serious problem. The `output$plot` and `output$summary` outputs both depend on `downloads()`, directly or indirectly; and we also saved `!!downloads()` to its own `pkg_downloads` variable. Now there are _three_ identical calls to `cranlogs::cran_downloads()` in this small snippet of code!
+## Putting it altogether
 
-This is problematic for several reasons. First, it makes the code harder to read and understand. Second, any changes to the logic by the recipient of the code will need to be done thrice, which is both tedious and error-prone. And finally, the duplication of logic may introduce bugs if the logic in `downloads()` has side effects or returns different results each time it is run (i.e. having an element of randomness).
+Now that we've translated our **shiny** reactive expressions to their **shinymeta** variants, it's time to generate chunks of code from numerous meta-reactives. So far, we've been inspecting the code that a single meta-reactive produces via `withMetaMode()`, but this function is inadequate for generating code from several meta-reactives at once. Currently, **shinymeta** provides two other functions for generating code from several meta-reactives at once: `expandObjects()` and `expandCode()`. The former is a "higher-level" code generation tool that's easier to use, but depending on what you're doing you may have to learn to use the latter.
 
-For now, our solution to this problem is extremely targeted (or, less charitably, an ugly hack): `expandCode` includes we support for [monkey patching](https://en.wikipedia.org/wiki/Monkey_patch) your meta-reactive objects. You pass it a `patchCalls` argument, which is a named list.
+### `expandObjects()`
 
-```{r}
-expandCode({
-  "# Data frame of package downloads"
-  pkg_downloads <- !!downloads()
-  "# A summary of output counts"
-  !!output$summary()
-  "# A plot"
-  !!output$plot()
-}, patchCalls = list(
-  downloads = quote(pkg_downloads)
-))
-```
+The `expandObjects()` function is more or less designed to generate code that mimics a path of reactive execution. This fits the most common use case we anticipate for **shinymeta**: generating code to reproduce specific output(s). In this case, we recommend identifying the chain of reactive expression(s) necessary to generate an output of interest, then feeding those reactives, **in order**, to the `expandObjects()` function.
 
-For this example, `patchCalls` has a single entry: `downloads = quote(pkg_downloads)`. This means, "anytime `downloads()` is invoked by a meta-reactive object, return `quote(pkg_downloads)` (i.e. the symbol `pkg_downloads`).
-
-(Note that we chose to use `pkg_downloads`, not `downloads`, as the variable name for `downloads()`. There's nothing to stop us from using the more obvious variable name `downloads`, but for the purpose of introducing the concept, changing the variable name makes it easier to understand how to use `patchCalls`.)
-
-Unquoted subexpressions at the top level of `expandCode`--like the `!!downloads()` in `pkg_downloads <- !!downloads()`--are _not_ affected by `patchCalls`. Only unquoted subexpressions nested within those subexpressions are affected, such as the `!!downloads()` inside of `!!output$summary()`. This may seem like a strange design decision, but it simplified all of the examples we tried.
-
-#### Refactor with caution
-
-`patchCalls` is a useful feature that can clean up your code considerably, but be aware that this is a pretty blunt instrument. Imagine that we now want to further clean up the code by extracting our `downloads_rolling` meta-reactive into a variable; even though `downloads_rolling()` is only used in a single place, giving it a named variable makes its intent clearer, and makes the plotting code easier to understand.
-
-```{r}
-expandCode({
-  "# Seven-day rolling average of download counts"
-  downloads_rolling <- !!downloads_rolling()
-  
-  "# Data frame of package downloads"
-  pkg_downloads <- !!downloads()
-  
-  "# A summary of output counts"
-  !!output$summary()
-  
-  "# A plot"
-  !!output$plot()
-  
-}, patchCalls = list(
-  downloads = quote(pkg_downloads),
-  downloads_rolling = quote(downloads_rolling)
-))
-```
-
-The generated code looks clean, but it's wrong! `downloads_rolling` uses `pkg_downloads` before `pkg_downloads` exists. `expandCode` is not smart enough to detect this and warn, much less fix the problem for you automatically.
-
-Just as you carefully test your Shiny app's behavior to ensure it does what you intend, you need to carefully inspect/test your generated code for correctness as well--and this goes double when `patchCalls` is involved.
-
-## Code expansion with `expandObjects`
-
-TODO: Now that this exists, it really should be used more often than `expandCode`--can we restructure to introduce this first?
-
-The `expandCode` function gives us some important capabilities for assembling our code. But while using it in our own development and testing, we noticed that the majority of the time, we were following the same exact patterns with it: making assignment statements with each `metaReactive` (in the form of `x <- !!x()`) and adding the corresponding calls to `patchCalls` (i.e. `x = quote(x)`), and then adding whatever outputs we had at the end. This involves a lot of mindless boilerplate.
-
-The `expandObjects` function presents a higher-level way to express this pattern. The final `expandCode` example can be expressed like this with `expandObjects`:
-
-```{r}
+```{r, class.output='R', comment = ''}
 expandObjects(
-  "# Seven-day rolling average of download counts",
-  downloads_rolling,
-  "# Data frame of package downloads",
-  pkg_downloads = downloads,
-  "# A summary of output counts",
-  output$summary,
-  "# A plot",
-  output$plot
+  downloads(),
+  downloads_rolling(),
+  output$plot()
 )
 ```
 
-If you want to export a graph of meta-reactive objects in one chunk of code, then `expandObjects` is much more straightforward than `expandCode`. You only need `expandCode` if you want to put more custom code in the code template, or, if you want to make multiple calls to `expandCode` that will eventually be composed in a single script or report (see example **TODO**).
+<h4 style="color:red"> CAUTION: </h4> Make sure you've correctly identified the ordering of your reactive expressions. `expandObjects()` does nothing to ensure that this ordering is correct, and if it's not, it will produce code that is incorrect!
 
-## Future directions
+```{r, class.output='R', comment = ''}
+expandObjects(
+  downloads_rolling(),
+  downloads(),
+  output$plot()
+)
+```
 
-shinymeta is very much an experiment and a work in progress. Some obvious ideas to invest in going forward:
+Once you've identified a reactive chain of interest, and placed them in correct order, there are a few other things to consider that can improve the generated code:
 
-1. `expandObjects` is a convenient wrapper over `expandCode` in that you only need to provide a list of the meta-reactive expressions, outputs, and observers you care about. But you still have to provide _all_ of these objects by name, and in the correct dependency order. It would be nicer to have a function that takes merely the outputs and observers you care about, and _automatically infers_ the relevant meta-reactive expressions and their correct order.
+* Make sure to identify any packages that the code relies on and include them in the `.pkgs` argument.
+* Add comments by surrounding them in quotes.
+    * You can also add comments in the meta-reactives themselves, if you prefer (see the [motivating example](#example)).
+* Use named arguments to name the return value of each `metaReactive()`.
+    * If you'd like names in the user-facing code to be different from the names of your meta-reactives.
+* Consider adding other reactive endpoints that use values from this reactive chain (e.g., `output$summary()`).
+
+```{r, class.output='R', comment = ''}
+output$summary <- metaRender(renderPrint, {
+  summary((!!downloads())$count)
+})
+
+expandObjects(
+  "# Retrieve a year's worth of daily download data",
+  downloads_daily = downloads(),
+  "# Convert daily data to 7 day rolling average",
+  downloads_avg = downloads_rolling(),
+  output$plot(),
+  output$summary(),
+  .pkgs = c("ggplot2", "dplyr")
+)
+```
+
+
+### `expandCode()`
+
+If `expandObjects()` isn't flexible enough to generate the code you desire, you may want to consider using `expandCode()` instead. Similar to the functions we learned about in [Unquoting with `!!`](#unquoting), `expandCode()` is a quasi-quoting function, meaning we can selectively evaluate portions of the expression we provide it:
+
+```{r, class.output='R', comment = ''}
+expandCode({
+  downloads <- !!downloads()
+  downloads_rolling <- !!downloads_rolling()
+})
+```
+
+This yields code that is similar to `expandObjects(downloads(), downloads_rolling())`, except that `expandCode()` isn't intelligent enough to know to avoid duplicated code (e.g., `cran_downloads()` is called twice here). This is problematic for several reasons: (1) it makes the code harder to read and understand, (2) any changes to the logic by the recipient of the code will need to be done thrice, which is both tedious and error-prone, and (3) the duplication of logic may introduce bugs if the logic in `downloads()` has side effects or returns different results each time it is run (i.e. having an element of randomness). We can, however, teach `expandCode()` how to avoid the redundant computation by intercepting (i.e. patching) the usual unquoting (i.e., expanding) rules. 
+
+Recall that `downloads_rolling()` contains a `!!downloads()`. Since `downloads()` is a meta-reactive, unquoting it interpolates the result of `withMetaMode(downloads())` into the result of `withMetaMode(downloads_rolling())`. However, what we really want is for the unquoting of `downloads()` *inside* `downloads_rolling()` to expand to a symbol (`downloads`) instead of the result of `withMetaMode(downloads())`. For this reason, `expandCode()` provides a way to override these expansion rules by replacing the unquoted meta-reactives with a name of our choosing in the `patchCalls` argument.
+
+```{r, class.output='R', comment = ''}
+expandCode(
+  {
+    require('ggplot2')
+    require('dplyr')
+    "# Retrieve a year's worth of daily download data"
+    d <- !!downloads()
+    "# Convert daily data to 7 day rolling average"
+    downloads_rolling <- !!downloads_rolling()
+  },
+  patchCalls = list(
+    downloads = quote(d)
+  )
+)
+```
+
+For this example, `patchCalls` has a single entry: `downloads = quote(d)`. This means, "anytime `downloads()` is invoked by a meta-reactive object (or, put another way, anytime `!!downloads()` appears in another meta-reactive), return the symbol `d` (instead of the result of `withMetaMode(downloads())`). This meaning subtly implies that unquoting at the top-level of `expandCode()` is not affected by `patchCalls` (i.e., it's only the unquoting that happens *inside* `downloads_rolling()` that is affected).
+
+TODO: deliver a pay-off for understanding `expandCode()` (e.g., saving/reading file to disk?)
+
+<h4 style="color:red"> CAUTION: </h4> As with `expandObjects()`, it's entirely possible to produce code that's incorrect (it suffers from the same ordering issue):
+
+```{r, class.output='R', comment = ''}
+expandCode({
+  downloads_rolling <- !!downloads_rolling()
+  pkg_downloads <- !!downloads()
+  !!output$plot()
+})
+```
+
+In fact, it's much easier to produce incorrect code with `expandCode()` since you have complete control over the expression you're building. With great power come great responsibilty, so make sure to test that the code you're generating runs successfully!
+
+TODO: discuss more ways this can go wrong?
+
+
+## Future work
+
+**shinymeta** is very much an experiment and a work in progress. Some obvious ideas to invest in going forward:
+
+1. `expandObjects()` is a convenient wrapper over `expandCode()` in that you only need to provide a list of the meta-reactive expressions, outputs, and observers you care about. But you still have to provide _all_ of these objects by name, and in the correct dependency order. It would be nicer to have a function that takes merely the outputs and observers you care about, and _automatically infers_ the relevant meta-reactive expressions and their correct order.
 2. R's language objects effectively strip all comments and insignificant whitespace from the original source code. We're using comment-strings as a workaround for the former, but we don't currently have a solution for the latter, making shinymeta-generated code harder to read than it ought to be. In the future, we could use [source references](https://journal.r-project.org/archive/2010-2/RJournal_2010-2_Murdoch.pdf) to reverse-engineer the code author's desired whitespace.
