@@ -4,13 +4,17 @@
 buildScriptBundle <- function(code = NULL, output_zip_path, script_name = "script.R",
   include_files = list(), render = TRUE, render_args = list()) {
 
+  progress <- shiny::Progress$new()
+  progress$set(value = 0)
+  progress$set(message = "Generating code")
+
   if (is.language(code)) {
     code <- paste(formatCode(code), collapse = "\n")
   }
 
   build_bundle(code, script_name, output_zip_path,
     include_files = include_files, render = render,
-    render_args = render_args)
+    render_args = render_args, progress = progress)
 }
 
 #' @export
@@ -19,6 +23,10 @@ buildRmdBundle <- function(report_template, output_zip_path, vars = list(),
 
   force(report_template)
   force(vars)
+
+  progress <- shiny::Progress$new()
+  progress$set(value = 0)
+  progress$set(message = "Generating code")
 
   if (is.list(vars)) {
     vars <- lapply(vars, function(x) {
@@ -30,6 +38,9 @@ buildRmdBundle <- function(report_template, output_zip_path, vars = list(),
     })
   }
 
+  progress$set(value = 0.1)
+  progress$set(message = "Expanding Rmd template")
+
   # TODO: Replace knit_expand with a version that doesn't allow arbitrary
   # R expressions and doesn't search the parent frame
   rmd_source <- do.call(knitr::knit_expand, c(list(report_template), vars))
@@ -37,11 +48,11 @@ buildRmdBundle <- function(report_template, output_zip_path, vars = list(),
 
   build_bundle(rmd_source, rmd_filename, output_zip_path,
     include_files = include_files, render = render,
-    render_args = render_args)
+    render_args = render_args, progress = progress)
 }
 
 build_bundle <- function(input_src, input_filename, output_zip_path,
-  include_files = list(), render = TRUE, render_args = list()) {
+  include_files = list(), render = TRUE, render_args = list(), progress) {
 
   force(input_src)
   force(input_filename)
@@ -51,6 +62,8 @@ build_bundle <- function(input_src, input_filename, output_zip_path,
   force(render_args)
 
   # TODO: validate args
+  progress$set(value = 0.2)
+  progress$set(message =  "Adding items to zip archive")
 
   x <- zip_archive()
 
@@ -61,11 +74,20 @@ build_bundle <- function(input_src, input_filename, output_zip_path,
 
   add_items(x, !!!include_files)
 
+  progress$set(value = 0.3)
+
   if (render) {
+    progress$set(message =  "Rendering report")
     render_with_args(dest_filename_full, render_args)
   }
 
-  build_archive(x, output_zip_path)
+
+  progress$set(value = 0.9)
+  progress$set(message =  "Compressing bundle")
+  archive <- build_archive(x, output_zip_path)
+  progress$set(value = 1)
+  progress$close()
+  archive
 }
 
 render_with_args <- function(input_file, render_args = list(), switch_dirs = TRUE, fork = TRUE) {
