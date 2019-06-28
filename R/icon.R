@@ -15,21 +15,23 @@
 #' @seealso [displayCode]
 #' @examples
 #'
-#' library(shiny)
-#' ui <- fluidPage(
-#'   sliderInput("n", label = "Number of samples", min = 10, max = 100, value = 30),
-#'   metaIcon(plotOutput("p"))
-#' )
-#' server <- function(input, output) {
-#'   output$p <- metaRender(renderPlot, {
-#'     plot(sample(!!input$n))
-#'   })
-#'   observeEvent(input$p_shinymeta_icon, {
-#'     code <- expandObjects(output$p)
-#'     displayEditor(code)
-#'   })
+#' if (interactive()) {
+#'   library(shiny)
+#'   ui <- fluidPage(
+#'     sliderInput("n", label = "Number of samples", min = 10, max = 100, value = 30),
+#'     metaIcon(plotOutput("p"))
+#'   )
+#'   server <- function(input, output) {
+#'     output$p <- metaRender(renderPlot, {
+#'       plot(sample(!!input$n))
+#'     })
+#'     observeEvent(input$p_shinymeta_icon, {
+#'       code <- expandObjects(output$p)
+#'       displayEditor(code)
+#'     })
+#'   }
+#'   shinyApp(ui, server)
 #' }
-#' shinyApp(ui, server)
 #'
 metaIcon <- function(outputObj,
                      icon_ = tags$span(style = "color: #707070", icon("code")),

@@ -34,30 +34,30 @@ from a call to \code{\link{removeModal}} on the server.}
 \item{session}{a shiny session object (the default should almost always be used).}
 
 \item{...}{arguments passed along to \code{shinyAce::aceEditor()}}
-
-\item{id}{An id used to namespace the editor and copy event.}
 }
 \description{
-Display a shinyAce code editor via shiny modal
+Show a \code{shinyAce::aceEditor()} in a \code{shiny::modalDialog()}.
 }
 \examples{
 
-library(shiny)
-ui <- fluidPage(
-  sliderInput("n", label = "Number of samples", min = 10, max = 100, value = 30),
-  actionButton("code", icon("code")),
-  plotOutput("p")
-)
-server <- function(input, output) {
-  output$p <- metaRender(renderPlot, {
-    plot(sample(!!input$n))
-  })
-  observeEvent(input$code, {
-    code <- expandObjects(output$p)
-    displayEditor("code", code)
-  })
+if (interactive()) {
+  library(shiny)
+  ui <- fluidPage(
+    sliderInput("n", label = "Number of samples", min = 10, max = 100, value = 30),
+    actionButton("code", icon("code")),
+    plotOutput("p")
+  )
+  server <- function(input, output) {
+    output$p <- metaRender(renderPlot, {
+      plot(sample(!!input$n))
+    })
+    observeEvent(input$code, {
+      code <- expandObjects(output$p)
+      displayEditor(code)
+    })
+  }
+  shinyApp(ui, server)
 }
-shinyApp(ui, server)
 
 }
 \seealso{

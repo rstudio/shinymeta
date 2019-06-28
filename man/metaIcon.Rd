@@ -25,21 +25,23 @@ of that input is a function of \code{outputObj}'s \code{outputId}:
 }
 \examples{
 
-library(shiny)
-ui <- fluidPage(
-  sliderInput("n", label = "Number of samples", min = 10, max = 100, value = 30),
-  metaIcon(plotOutput("p"))
-)
-server <- function(input, output) {
-  output$p <- metaRender(renderPlot, {
-    plot(sample(!!input$n))
-  })
-  observeEvent(input$p_shinymeta_icon, {
-    code <- expandObjects(output$p)
-    displayEditor("p_code", code)
-  })
+if (interactive()) {
+  library(shiny)
+  ui <- fluidPage(
+    sliderInput("n", label = "Number of samples", min = 10, max = 100, value = 30),
+    metaIcon(plotOutput("p"))
+  )
+  server <- function(input, output) {
+    output$p <- metaRender(renderPlot, {
+      plot(sample(!!input$n))
+    })
+    observeEvent(input$p_shinymeta_icon, {
+      code <- expandObjects(output$p)
+      displayEditor(code)
+    })
+  }
+  shinyApp(ui, server)
 }
-shinyApp(ui, server)
 
 }
 \seealso{
