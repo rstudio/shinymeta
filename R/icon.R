@@ -35,7 +35,7 @@
 #'
 metaIcon <- function(outputObj,
                      icon_ = tags$span(style = "color: #707070", icon("code")),
-                     tooltip = "Get Code",
+                     tooltip = "Show Code",
                      tooltip_placement = c("bottom", "top", "right", "left")) {
 
   # TODO: controlable icon positioning
