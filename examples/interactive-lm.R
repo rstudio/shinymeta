@@ -14,11 +14,10 @@ ui <- fluidPage(
     sidebarPanel(
       varSelectInput("yvar", "Select y", data),
       varSelectInput("xvar", "Select x", data),
-      selectInput("degree", "Polynomial degree", c(1, 2, 3, 4)),
-      actionButton("code", div(icon("code"), " R code"))
+      selectInput("degree", "Polynomial degree", c(1, 2, 3, 4))
     ),
     mainPanel(
-      plotOutput("plot", click = "plot_click")
+      metaIcon(plotOutput("plot", click = "plot_click"))
     )
   )
 )
@@ -65,7 +64,7 @@ server <- function(input, output) {
     modelr::add_predictions(!!data_kept(), !!model_fit())
   })
 
-  plot_model <- metaReactive({
+  output$plot <- metaRender(renderPlot, {
     ggplot(!!data_kept(), aes(x = !!input$xvar, y = !!input$yvar)) +
       geom_point() +
       geom_line(data = !!data_fitted(), aes_string(y = "pred"), color = "gray50") +
@@ -73,62 +72,40 @@ server <- function(input, output) {
       theme_bw(base_size = 14)
   })
 
-  output$plot <- renderPlot({
-    plot_model()
-  })
-
-  user_code <- reactive({
-    format_tidy_code(
-      expandCode(
-        {
-          library(ggplot2)
-          library(dplyr)
-          library(modelr)
-          "# TODO: can/should we make it easier to 'reuse' this non-reactive code?"
-          data <- mtcars
-          data <- tibble::rownames_to_column(data, var = ".row_ids")
-          "# Row ids of the points removed"
-          outliers <- !!outliers()
-          "# Data for the points removed"
-          dataDiscard <- !!data_discard()
-          "# Data for the points remaining"
-          dataKept <- !!data_kept()
-          "# Fit the model"
-          modelFit <- !!model_fit()
-          "# Plot it!"
-          !!plot_model()
-        },
-        patchCalls = list(
-          outliers = quote(outliers),
-          data_discard = quote(dataDiscard),
-          data_kept = quote(dataKept),
-          model_fit = quote(modelFit)
-        )
+  observeEvent(input$plot_shinymeta_icon, {
+    code <- expandCode(
+      {
+        library(ggplot2)
+        library(dplyr)
+        library(modelr)
+        # TODO: make it easier to capture 'setup' code
+        # https://github.com/rstudio/shinymeta/issues/16
+        data <- mtcars
+        data <- tibble::rownames_to_column(data, var = ".row_ids")
+        "# Row ids of the points removed"
+        outliers <- !!outliers()
+        "# Data for the points removed"
+        dataDiscard <- !!data_discard()
+        "# Data for the points remaining"
+        dataKept <- !!data_kept()
+        "# Fit the model"
+        modelFit <- !!model_fit()
+        "# Plot it!"
+        !!output$plot()
+      },
+      patchCalls = list(
+        outliers = quote(outliers),
+        data_discard = quote(dataDiscard),
+        data_kept = quote(dataKept),
+        model_fit = quote(modelFit)
       )
     )
+
+    displayEditor(
+      code = code,
+      title = "Code to reproduce data and plot"
+    )
   })
-
-
-  observeEvent(input$code, {
-    showModal(modalDialog(
-      title = "Code to reproduce data and plot",
-      aceEditor(
-        outputId = "ace",
-        value = user_code(),
-        mode = "r",
-        theme = "ambiance"
-      ),
-      footer = shiny::tagList(
-        actionButton("copy", icon("clipboard")),
-        shiny::modalButton("Dismiss")
-      )
-    ))
-  })
-
-  observeEvent(input$copy, {
-    clipr::write_clip(user_code())
-  })
-
 }
 
 shinyApp(ui, server)
