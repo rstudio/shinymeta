@@ -45,7 +45,7 @@ This vignette covers the nuts and bolts of generating code with **shinymeta**.
 
 ## Meta-fying the cranview app {#example}
 
-Here's a reduced version of the cranview **shiny** app (from the last vignette) that allows you to enter an R package name to generate a plot of its CRAN downloads over the past year. This app will help us demonstrates how **shinymeta** can help us create a **shiny** app that generates R code to reproduce the things within the shiny app (for example, `output$plot`), without having to repeat any of the app's essential logic.
+Here's a reduced version of the [cranview](https://github.com/cpsievert/cranview) **shiny** app that allows you to enter an R package name to generate a plot of its CRAN downloads over the past year. This app will help us demonstrates how **shinymeta** can help us create a **shiny** app that generates R code to reproduce the things within the shiny app (for example, `output$plot`), without having to repeat any of the app's essential logic.
 
 ```{r, eval = FALSE}
 library(shiny)
@@ -77,7 +77,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-Below is the source code (and a screencast) of a **shiny** app that generates code (via **shinymeta**) to reproduce `output$plot` in a new R session. Notice how both the `output$plot` and `output$code` update dynamically in response to new package names without having to repeat the logic behind the original app. To keep the focus on code generation, we've presented the `output$code` as simple as possible here (by using `verbatimTextOutput()` and `renderPrint()`), but the next vignette outlines the various options for presenting and distributing code to users with **shinymeta**.
+Below is one way the app above could be modified to generate code that reproduces `output$plot` outside of the shiny session. Notice how both the `output$plot` and `output$code` update dynamically in response to new package names without having to repeat the logic behind the original app. To keep the focus on code generation, we've presented the `output$code` as simple as possible here (by using `verbatimTextOutput()` and `renderPrint()`), but the [next vignette](03-code-distribution.html) outlines the various options for presenting and distributing code to users with **shinymeta**.
 
 ```{r, eval = FALSE}
 library(shiny)
@@ -251,7 +251,9 @@ withMetaMode(downloads_rolling())
 
 So far we've learned how to manage reactive values (e.g., `input$package`) and reactive expressions (e.g., `downloads()`), but what about code captured in the endpoints of shiny's reactivity model (i.e. observers and outputs)?
 
-<img src="reactivity-graph-00.png" width=80% />
+<div align="center" >
+  <img src="reactivity-graph-00.png" width="60%" />
+</div>
 
 #### Observers
 
@@ -292,7 +294,9 @@ Often times, for more sophisticated apps, you'll want to completely ignore part(
 
 To demonstrate, our example app could make use of `validate()` and `need()` to improve the user experience of our app, since currently, it errors out when a user hasn't specified a package name.
 
-[gif of the error]
+<div align="center">
+  <img src="cranview-error.gif" width="80%" />
+</div>
 
 To ignore the `validate` and `need()` calls, change `metaRender()` to `metaRender2()`, then wrap the plot generation code in `metaExpr()`:
 
@@ -432,9 +436,7 @@ expandCode(
 )
 ```
 
-You might be thinking, `expandCode()` is weird and complicated, why should I even bother knowing about it? For one, `expandCode()` gives you the abilty to 'short-cut' reactive logic, which is probably most useful for distributing reports that leverage    
-
-There are likely other use cases, but we think it's most useful when building a report that relies on some sort of state that doesn't exist in your app. For a simple example, say for some reason, you want to 
+You might be thinking, `expandCode()` seems weird and complicated (it is!), why should I even bother learning how to use it? For one, you might want to generate code that combines multiple outputs in some custom way, like [this example in the next vignette](03-code-distribution.html#numerous-outputs). Also, `expandCode()` gives you the abilty to 'short-cut' reactive logic, which is probably most useful for generating code for [reports](03-code-distribution.html#bundling) where it's not ideal to expose all your code, just some portion of it (whether it's for proprietary and/or efficiency reasons). For example, when a user downloads the report, you might want to save an R object to disk (e.g., `saveRDS()`), then have the generated code read in that object.
 
 ```{r, class.output='R', comment = ''}
 expandCode(
@@ -449,12 +451,7 @@ expandCode(
 )
 ```
 
-
-
-With great power come great responsibilty, so make sure to test that the code you're generating runs successfully!
-
-TODO: discuss more ways this can go wrong?
-
+There are likely many other use cases where the low-level meta-programming capabilties of `expandCode()` becomes useful, but we think these will be the most common use cases. Remember, as with `expandObjects()`, it's pretty easy to generate code that's incorrect to make sure to test that the code you're generating runs successfully!
 
 ## Future work
 
