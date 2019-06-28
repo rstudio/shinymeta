@@ -1,10 +1,10 @@
 ---
-title: "Using shinymeta"
-author: "Joe Cheng & Carson Sievert"
+title: "Code generation"
+author: "Carson Sievert & Joe Cheng"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{3. Using shinymeta}
+  %\VignetteIndexEntry{2. Code generation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -41,15 +41,11 @@ pre.R {
 }
 ```
 
-Our goal: allow the creation of Shiny apps that you use interactively, then produce reproducible scripts/report from.
+This vignette covers the nuts and bolts of generating code with **shinymeta**.
 
-Our inspiration: the concepts of metaprogramming, i.e., code that generates code.
+## Meta-fying the cranview app {#example}
 
-Our solution: shinymeta!
-
-## Motivating example {#example}
-
-Here's a basic **shiny** app that allows you to enter an R package name to generate a plot of its CRAN downloads over the past year. This app will help us demonstrates how **shinymeta** can help us create a **shiny** app that generates R code to reproduce the things within the shiny app (for example, `output$plot`), without having to repeat any logic.
+Here's a reduced version of the cranview **shiny** app (from the last vignette) that allows you to enter an R package name to generate a plot of its CRAN downloads over the past year. This app will help us demonstrates how **shinymeta** can help us create a **shiny** app that generates R code to reproduce the things within the shiny app (for example, `output$plot`), without having to repeat any of the app's essential logic.
 
 ```{r, eval = FALSE}
 library(shiny)
@@ -421,19 +417,41 @@ expandCode(
 
 For this example, `patchCalls` has a single entry: `downloads = quote(d)`. This means, "anytime `downloads()` is invoked by a meta-reactive object (or, put another way, anytime `!!downloads()` appears in another meta-reactive), return the symbol `d` (instead of the result of `withMetaMode(downloads())`). This meaning subtly implies that unquoting at the top-level of `expandCode()` is not affected by `patchCalls` (i.e., it's only the unquoting that happens *inside* `downloads_rolling()` that is affected).
 
-TODO: deliver a pay-off for understanding `expandCode()` (e.g., saving/reading file to disk?)
-
-<h4 style="color:red"> CAUTION: </h4> As with `expandObjects()`, it's entirely possible to produce code that's incorrect (it suffers from the same ordering issue):
+<h4 style="color:red"> CAUTION: </h4> As with `expandObjects()`, it's entirely possible to produce code that's incorrect (it suffers from the same ordering issue). In fact, it's much easier to produce incorrect code with `expandCode()` since you have complete control over the expression you're building.
 
 ```{r, class.output='R', comment = ''}
-expandCode({
-  downloads_rolling <- !!downloads_rolling()
-  pkg_downloads <- !!downloads()
-  !!output$plot()
-})
+expandCode(
+  {
+    downloads_rolling <- !!downloads_rolling()
+    pkg_downloads <- !!downloads()
+    !!output$plot()
+  }, 
+  patchCalls = list(
+    downloads = quote(d)
+  )
+)
 ```
 
-In fact, it's much easier to produce incorrect code with `expandCode()` since you have complete control over the expression you're building. With great power come great responsibilty, so make sure to test that the code you're generating runs successfully!
+You might be thinking, `expandCode()` is weird and complicated, why should I even bother knowing about it? For one, `expandCode()` gives you the abilty to 'short-cut' reactive logic, which is probably most useful for distributing reports that leverage    
+
+There are likely other use cases, but we think it's most useful when building a report that relies on some sort of state that doesn't exist in your app. For a simple example, say for some reason, you want to 
+
+```{r, class.output='R', comment = ''}
+expandCode(
+  {
+    library("ggplot2")
+    d <- readRDS("downloads_rolling.rds")
+    !!output$plot()
+  }, 
+  patchCalls = list(
+    downloads_rolling = quote(d)
+  )
+)
+```
+
+
+
+With great power come great responsibilty, so make sure to test that the code you're generating runs successfully!
 
 TODO: discuss more ways this can go wrong?
 

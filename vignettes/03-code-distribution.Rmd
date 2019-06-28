@@ -1,0 +1,32 @@
+---
+title: "Code distribution"
+author: "Carson Sievert & Joe Cheng"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{3. Code distribution}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Presenting code
+
+* Methods for displaying code directly for the user to copy/paste
+  * Mention basic `renderPrint()` method from previous vignette
+  * Our own shinyAce based approach?
+  * Handroll your own?
+    * Maybe discuss how we implemented the shinyAce editor?
+    
+## Distributing code, reports, and artifacts
+
+As demonstrated in the introductory example, one of the most powerful ways to put code in the hands of your users is in the form of a [dynamic document](). 
+
+### `buildRmdBundle()`
+
+
+
+### `buildScriptBundle()`
