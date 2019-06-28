@@ -13,7 +13,7 @@ vignette: >
 
 ## Showing code {#showing-code}
 
-### For an output
+### For an output 
 
 If your Shiny app has lots of outputs, then you probably want a subtle yet intuitive way to obtain the code for specific output(s). For this purpose, **shinymeta** provides `metaIcon()` function, which overlays a [fontawesome](https://fontawesome.com/) `shiny::icon()` on a shiny output (upon hover). The icon works similar to an `shiny::actionButton()`, where an input value, tied to the icon, increases by one each time it is pressed. The name of that input is determined by the `outputId` of the shiny output it's overlaying: `input$OUTPUTID_shinymeta_icon`. We recommend showing code for an output by supplying that code to `displayCode()` (which shows a `shiny::modalDialog()` that contains a `shinyAce::aceEditor()`) when the relevant `metaIcon()` is clicked:
   
@@ -46,7 +46,7 @@ TODO:
 2. Downloading via icon?
 -->
 
-### For numerous outputs
+### For numerous outputs {#numerous-outputs}
 
 If you want to show code for a collection of outputs at once, we recommend using a `shiny::actionButton()` instead of `metaIcon()` to trigger the code display. Note that with `displayEditor()`, you are able to control both the `modalDialog()` as well as the `shinyAce::aceEditor()` that it contains.  
 
