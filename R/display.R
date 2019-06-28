@@ -13,22 +13,24 @@
 #' @seealso [metaIcon]
 #' @examples
 #'
-#' library(shiny)
-#' ui <- fluidPage(
-#'   sliderInput("n", label = "Number of samples", min = 10, max = 100, value = 30),
-#'   actionButton("code", icon("code")),
-#'   plotOutput("p")
-#' )
-#' server <- function(input, output) {
-#'   output$p <- metaRender(renderPlot, {
-#'     plot(sample(!!input$n))
-#'   })
-#'   observeEvent(input$code, {
-#'     code <- expandObjects(output$p)
-#'     displayEditor(code)
-#'   })
+#' if (interactive()) {
+#'   library(shiny)
+#'   ui <- fluidPage(
+#'     sliderInput("n", label = "Number of samples", min = 10, max = 100, value = 30),
+#'     actionButton("code", icon("code")),
+#'     plotOutput("p")
+#'   )
+#'   server <- function(input, output) {
+#'     output$p <- metaRender(renderPlot, {
+#'       plot(sample(!!input$n))
+#'     })
+#'     observeEvent(input$code, {
+#'       code <- expandObjects(output$p)
+#'       displayEditor(code)
+#'     })
+#'   }
+#'   shinyApp(ui, server)
 #' }
-#' shinyApp(ui, server)
 #'
 displayEditor <- function(code, title = NULL, clip = "clipboard",
                           footer = modalButton("Dismiss"), size = c("m", "s", "l"),
