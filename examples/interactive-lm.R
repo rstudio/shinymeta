@@ -78,7 +78,8 @@ server <- function(input, output) {
         library(ggplot2)
         library(dplyr)
         library(modelr)
-        "# TODO: can/should we make it easier to 'reuse' this non-reactive code?"
+        # TODO: make it easier to capture 'setup' code
+        # https://github.com/rstudio/shinymeta/issues/16
         data <- mtcars
         data <- tibble::rownames_to_column(data, var = ".row_ids")
         "# Row ids of the points removed"
