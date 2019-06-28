@@ -73,10 +73,28 @@
   </a>
 </li>
 <li>
-  <a href="../articles/shinymeta.html">Get started</a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/01-motivation.html">shinymeta overview</a>
+    </li>
+    <li>
+      <a href="../articles/02-code-generation.html">Code generation</a>
+    </li>
+    <li>
+      <a href="../articles/03-code-distribution.html">Code distribution</a>
+    </li>
+    <li>
+      <a href="../articles/04-case-studies.html">Case studies</a>
+    </li>
+  </ul>
 </li>
       </ul>
       
@@ -115,15 +133,63 @@
       <tr>
         
         <td>
-          <p><code><a href="metaReactive.html">metaReactive()</a></code> </p>
+          <p><code><a href="buildScriptBundle.html">buildScriptBundle()</a></code> <code><a href="buildScriptBundle.html">buildRmdBundle()</a></code> </p>
+        </td>
+        <td><p>Produce a zip bundle of code and results</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="displayEditor.html">displayEditor()</a></code> </p>
+        </td>
+        <td><p>Display a shinyAce code editor via shiny modal</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="expandCode.html">expandCode()</a></code> <code><a href="expandCode.html">expandObjects()</a></code> </p>
+        </td>
+        <td><p>Expand meta primitives into user code</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="formatCode.html">formatCode()</a></code> <code><a href="formatCode.html">styleText()</a></code> <code><a href="formatCode.html">deparseCode()</a></code> </p>
+        </td>
+        <td><p>Deparse and format shinymeta expressions</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="metaExpr.html">metaExpr()</a></code> </p>
+        </td>
+        <td><p>Mark an expression as a meta-expression</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="metaIcon.html">metaIcon()</a></code> </p>
+        </td>
+        <td><p>Overlay an icon on a shiny output</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="metaObserve.html">metaObserve()</a></code> <code><a href="metaObserve.html">metaObserve2()</a></code> </p>
+        </td>
+        <td><p>Create a meta-reactive observer</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="metaReactive.html">metaReactive()</a></code> <code><a href="metaReactive.html">metaReactive2()</a></code> </p>
         </td>
         <td><p>Create a meta-reactive expression</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="print.shinyMetaExpr.html">print(<i>&lt;shinyMetaExpr&gt;</i>)</a></code> </p>
+          <p><code><a href="metaRender.html">metaRender()</a></code> </p>
         </td>
-        <td><p>Print method for shinymeta metaExpression</p></td>
+        <td><p>Create a meta-reactive output</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="withMetaMode.html">withMetaMode()</a></code> </p>
+        </td>
+        <td><p>Evaluate an expression with meta mode activated</p></td>
       </tr>
     </tbody>
     </table>
@@ -139,7 +205,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Joe Cheng.</p>
+  <p>Developed by Joe Cheng, Carson Sievert.</p>
 </div>
 
 <div class="pkgdown">

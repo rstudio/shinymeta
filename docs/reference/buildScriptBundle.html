@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Articles • shinymeta</title>
+<title>Produce a zip bundle of code and results — buildScriptBundle • shinymeta</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,7 +30,10 @@
 
 
 
-<meta property="og:title" content="Articles" />
+<meta property="og:title" content="Produce a zip bundle of code and results — buildScriptBundle" />
+
+<meta property="og:description" content="Produce a zip bundle of code and results" />
+<meta name="twitter:card" content="summary" />
 
 
 
@@ -47,7 +50,7 @@
   </head>
 
   <body>
-    <div class="container template-article-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -112,20 +115,75 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Articles</h1>
+    <h1>Produce a zip bundle of code and results</h1>
+    
+    <div class="hidden name"><code>buildScriptBundle.Rd</code></div>
     </div>
 
-    <div class="section ">
-      <h3>All vignettes</h3>
-      <p class="section-desc"></p>
-
-      <ul>
-        <li><a href="01-motivation.html">shinymeta overview</a></li>
-        <li><a href="02-code-generation.html">Code generation</a></li>
-        <li><a href="03-code-distribution.html">Code distribution</a></li>
-        <li><a href="04-case-studies.html">Case studies</a></li>
-      </ul>
+    <div class="ref-description">
+    
+    <p>Produce a zip bundle of code and results</p>
+    
     </div>
+
+    <pre class="usage"><span class='fu'>buildScriptBundle</span>(<span class='kw'>code</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>output_zip_path</span>,
+  <span class='kw'>script_name</span> <span class='kw'>=</span> <span class='st'>"script.R"</span>, <span class='kw'>include_files</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(), <span class='kw'>render</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>render_args</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>())
+
+<span class='fu'>buildRmdBundle</span>(<span class='no'>report_template</span>, <span class='no'>output_zip_path</span>, <span class='kw'>vars</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(),
+  <span class='kw'>include_files</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(), <span class='kw'>render</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>render_args</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>())</pre>
+    
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>code</th>
+      <td><p>A language object.</p></td>
+    </tr>
+    <tr>
+      <th>output_zip_path</th>
+      <td><p>A filename for the resulting zip bundle.</p></td>
+    </tr>
+    <tr>
+      <th>script_name</th>
+      <td><p>A name for the R script in the zip bundle.</p></td>
+    </tr>
+    <tr>
+      <th>include_files</th>
+      <td><p>Other files to include with the zip bundle.</p></td>
+    </tr>
+    <tr>
+      <th>render</th>
+      <td><p>Whether or not to call <code><a href='https://www.rdocumentation.org/packages/rmarkdown/topics/render'>rmarkdown::render()</a></code> on the R script.</p></td>
+    </tr>
+    <tr>
+      <th>render_args</th>
+      <td><p>Arguments to provide to <code><a href='https://www.rdocumentation.org/packages/rmarkdown/topics/render'>rmarkdown::render()</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>report_template</th>
+      <td><p>Filename of an Rmd template to be expanded by <code><a href='https://www.rdocumentation.org/packages/knitr/topics/knit_expand'>knitr::knit_expand()</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>vars</th>
+      <td><p>A named list of variables passed along to <code>...</code> in <code><a href='https://www.rdocumentation.org/packages/knitr/topics/knit_expand'>knitr::knit_expand()</a></code>.</p></td>
+    </tr>
+    </table>
+    
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>knitr::knit_expand</p></div>
+    
+
+  </div>
+  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+    <h2>Contents</h2>
+    <ul class="nav nav-pills nav-stacked">
+      <li><a href="#arguments">Arguments</a></li>
+      
+      <li><a href="#see-also">See also</a></li>
+          </ul>
+
   </div>
 </div>
 

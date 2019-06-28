@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Print method for shinymeta metaExpression — print.shinyMetaExpr • shinymeta</title>
+<title>Create a meta-reactive observer — metaObserve • shinymeta</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,13 @@
 
 
 
-<meta property="og:title" content="Print method for shinymeta metaExpression — print.shinyMetaExpr" />
+<meta property="og:title" content="Create a meta-reactive observer — metaObserve" />
 
-<meta property="og:description" content="Print method for shinymeta metaExpression" />
+<meta property="og:description" content="Create a observe()r that, when invoked with meta-mode activated
+(i.e. called within withMetaMode() or expandCode()), returns a
+partially evaluated code expression. Outside of meta-mode,
+metaObserve() is equivalent to observe()
+(it fully evaluates the given expression)." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -115,32 +119,77 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Print method for shinymeta metaExpression</h1>
+    <h1>Create a meta-reactive observer</h1>
     
-    <div class="hidden name"><code>print.shinyMetaExpr.Rd</code></div>
+    <div class="hidden name"><code>metaObserve.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Print method for shinymeta metaExpression</p>
+    <p>Create a <code>observe()</code>r that, when invoked with meta-mode activated
+(i.e. called within <code><a href='withMetaMode.html'>withMetaMode()</a></code> or <code><a href='expandCode.html'>expandCode()</a></code>), returns a
+partially evaluated code expression. Outside of meta-mode,
+<code>metaObserve()</code> is equivalent to <code>observe()</code>
+(it fully evaluates the given expression).</p>
     
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for shinyMetaExpr</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>metaObserve</span>(<span class='no'>expr</span>, <span class='kw'>env</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sys.parent'>parent.frame</a></span>(), <span class='kw'>quoted</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>domain</span> <span class='kw'>=</span> <span class='fu'>getDefaultReactiveDomain</span>(), <span class='kw'>localize</span> <span class='kw'>=</span> <span class='st'>"auto"</span>,
+  <span class='kw'>bindToReturn</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+
+<span class='fu'>metaObserve2</span>(<span class='no'>expr</span>, <span class='kw'>env</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sys.parent'>parent.frame</a></span>(), <span class='kw'>quoted</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>label</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>domain</span> <span class='kw'>=</span> <span class='fu'>getDefaultReactiveDomain</span>())</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>an object of class shinyMetaExpr.</p></td>
+      <th>expr</th>
+      <td><p>An expression (quoted or unquoted).</p></td>
     </tr>
     <tr>
-      <th>...</th>
-      <td><p>arguments passed along to <code><a href='formatCode.html'>formatCode()</a></code>.</p></td>
+      <th>env</th>
+      <td><p>The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression.</p></td>
+    </tr>
+    <tr>
+      <th>quoted</th>
+      <td><p>Is the expression quoted? By default, this is <code>FALSE</code>.
+This is useful when you want to use an expression that is stored in a
+variable; to do so, it must be quoted with <code><a href='https://www.rdocumentation.org/packages/base/topics/substitute'>quote()</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>label</th>
+      <td><p>A label for the observer, useful for debugging.</p></td>
+    </tr>
+    <tr>
+      <th>domain</th>
+      <td><p>See domains.</p></td>
+    </tr>
+    <tr>
+      <th>localize</th>
+      <td><p>Whether or not to wrap the returned expression in <code><a href='https://www.rdocumentation.org/packages/base/topics/eval'>local()</a></code>.
+The default, <code>"auto"</code>, only wraps expressions with a top-level <code><a href='https://www.rdocumentation.org/packages/base/topics/function'>return()</a></code>
+statement (i.e., return statements in anonymized functions are ignored).</p></td>
+    </tr>
+    <tr>
+      <th>bindToReturn</th>
+      <td><p>For non-<code>localize</code>d expressions, should an assignment
+of a meta expression be applied to the <em>last child</em> of the top-level <code>{</code> call?</p></td>
     </tr>
     </table>
+    
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>If you wish to capture specific code inside of <code>expr</code> (e.g. ignore code
+that has no meaning outside shiny, like <code>req()</code>), use <code>metaObserve2()</code> in combination
+with <code><a href='metaExpr.html'>metaExpr()</a></code>. When using <code>metaObserve2()</code>, <code>expr</code> must return a <code><a href='metaExpr.html'>metaExpr()</a></code>.</p>
+    
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='metaExpr.html'>metaExpr()</a></code></p></div>
     
 
   </div>
@@ -148,7 +197,11 @@
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-                </ul>
+      
+      <li><a href="#details">Details</a></li>
+
+      <li><a href="#see-also">See also</a></li>
+          </ul>
 
   </div>
 </div>
