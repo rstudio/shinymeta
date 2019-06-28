@@ -27,7 +27,9 @@ RoxygenNote: 6.1.1
 Suggests: 
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    shinyAce,
+    clipr
 Remotes:
     rstudio/shiny@joe/feature/readable-outputs,
     r-lib/fastmap
