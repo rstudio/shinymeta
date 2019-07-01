@@ -1,6 +1,6 @@
 Package: shinymeta
 Type: Package
-Title: Create reproducible R scripts via Shiny apps, using metaprogramming
+Title: Record and expose Shiny app logic using metaprogramming
 Version: 0.1.0
 Authors@R: c(
     person("Joe", "Cheng", email = "joe@rstudio.com", role = "cre"),
