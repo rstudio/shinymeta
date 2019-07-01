@@ -8,18 +8,17 @@
 #' `input$OUTPUTID_shinymeta_icon`.
 #'
 #' @param outputObj A shiny output.
-#' @param icon_ A shiny [icon()].
-#' @param color A CSS color.
+#' @param heading A shiny [tags] object for placing in the header panel.
 #'
 #' @export
-#' @seealso [displayCode]
+#' @seealso [displayCodeModal]
 #' @examples
 #'
 #' if (interactive()) {
 #'   library(shiny)
 #'   ui <- fluidPage(
 #'     sliderInput("n", label = "Number of samples", min = 10, max = 100, value = 30),
-#'     metaIcon(plotOutput("p"))
+#'     outputCode(plotOutput("p"))
 #'   )
 #'   server <- function(input, output) {
 #'     output$p <- metaRender(renderPlot, {
@@ -27,18 +26,13 @@
 #'     })
 #'     observeEvent(input$p_shinymeta_icon, {
 #'       code <- expandObjects(output$p)
-#'       displayEditor(code)
+#'       displayCodeModal(code)
 #'     })
 #'   }
 #'   shinyApp(ui, server)
 #' }
 #'
-metaIcon <- function(outputObj,
-                     icon_ = tags$span(style = "color: #707070", icon("code")),
-                     tooltip = "Show Code",
-                     tooltip_placement = c("bottom", "top", "right", "left")) {
-
-  # TODO: controlable icon positioning
+outputCode <- function(outputObj, heading = tags$span(style = "color: #707070", "Show code", icon("code"))) {
 
   if (!inherits(outputObj, c("shiny.tag", "shiny.tag.list"))) {
     stop("outputObj must be a shiny.tag or shiny.tag.list object")
@@ -50,10 +44,8 @@ metaIcon <- function(outputObj,
   )
 
   div(
-    class = "shinymeta-icon-container",
+    class = "panel panel-default",
     tags$head(
-      # https://getbootstrap.com/docs/4.0/components/tooltips/
-      if (length(tooltip)) tags$script("$(function () { $('[data-toggle=\"tooltip\"]').tooltip(); });"),
       tags$script(src = "shinymeta-icon/shinymeta-icon.js"),
       tags$link(
         rel = "stylesheet",
@@ -62,12 +54,12 @@ metaIcon <- function(outputObj,
       )
     ),
     div(
-      class = "shinymeta-icon",
-      `data-toggle` = "tooltip",
-      `data-placement` = match.arg(tooltip_placement, tooltip_placement),
-      title = tooltip,
-      icon_
+      class = "panel-heading shinymeta-icon",
+      a(heading)
     ),
-    outputObj
+    div(
+      class = "panel-body",
+      outputObj
+    )
   )
 }

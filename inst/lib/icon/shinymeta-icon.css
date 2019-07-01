@@ -1,17 +1,3 @@
-.shinymeta-icon-container {
-  position: relative
-}
-
-.shinymeta-icon {
-  position: absolute;
-  opacity: 0;
-  transition: .3s ease;
-}
-
-.shinymeta-icon-container:hover .shinymeta-icon {
-  opacity: 1;
-}
-
 .shinymeta-icon:hover {
   cursor: pointer;
 }

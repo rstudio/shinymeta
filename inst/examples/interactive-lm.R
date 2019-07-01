@@ -17,7 +17,7 @@ ui <- fluidPage(
       selectInput("degree", "Polynomial degree", c(1, 2, 3, 4))
     ),
     mainPanel(
-      metaIcon(plotOutput("plot", click = "plot_click"))
+      outputCode(plotOutput("plot", click = "plot_click"))
     )
   )
 )
@@ -101,7 +101,7 @@ server <- function(input, output) {
       )
     )
 
-    displayEditor(
+    displayCodeModal(
       code = code,
       title = "Code to reproduce data and plot"
     )
