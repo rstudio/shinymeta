@@ -4,7 +4,10 @@ author: "Carson Sievert & Joe Cheng"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{4. Case studies}
+  %\VignetteIndexEntry{3. Case studies}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+
+Coming soon

@@ -5,11 +5,11 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Create reproducible R scripts via Shiny apps, using metaprogramming • shinymeta</title>
+<title>Record and expose Shiny app logic using metaprogramming • shinymeta</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="Create reproducible R scripts via Shiny apps, using metaprogramming">
+<script src="pkgdown.js"></script><meta property="og:title" content="Record and expose Shiny app logic using metaprogramming">
 <meta property="og:description" content="Provides functions that make it easier to construct Shiny apps
     that can dynamically construct reproducible R scripts.">
 <meta name="twitter:card" content="summary">
@@ -54,16 +54,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/01-motivation.html">shinymeta overview</a>
+      <a href="articles/01-code-generation.html">Code generation</a>
     </li>
     <li>
-      <a href="articles/02-code-generation.html">Code generation</a>
+      <a href="articles/02-code-distribution.html">Code distribution</a>
     </li>
     <li>
-      <a href="articles/03-code-distribution.html">Code distribution</a>
-    </li>
-    <li>
-      <a href="articles/04-case-studies.html">Case studies</a>
+      <a href="articles/03-case-studies.html">Case studies</a>
     </li>
   </ul>
 </li>
@@ -82,10 +79,110 @@
 <div id="shinymeta" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#shinymeta" class="anchor"></a>shinymeta</h1></div>
-<p>This <strong>highly experimental</strong> package provides metaprogramming helper functions and abstractions for use with Shiny. The goal is to make it easier to write Shiny apps that can generate standalone/reproducible R scripts or Rmd documents whose code generates similar outputs to what is seen in the Shiny app.</p>
-<p>Some slides about the motivation can be seen <a href="https://speakerdeck.com/jcheng5/using-shiny-responsibly-in-pharma?slide=5">here</a>, though the solutions outlined in the post are precursors of the ideas in shinymeta.</p>
-<p>For another experimental but promising solution to this problem, see <a href="https://github.com/dgkf/scriptgloss">dgkf/scriptgloss</a>.</p>
-<p>Acknowledgements (TODO): Adrian Waddell (especially), Eric Nantz, Xiao Ni, Doug Keklhoff</p>
+<p>The <strong>shinymeta</strong> R package provides tools for capturing logic in a Shiny app and exposing it as code that can be run outside of Shiny (e.g., from an R console). It also provides tools for bundling both the code and results to the end user.</p>
+<div id="installation" class="section level2">
+<h2 class="hasAnchor">
+<a href="#installation" class="anchor"></a>Installation</h2>
+<p><strong>shinymeta</strong> is not yet on CRAN, but you can install it via the <strong>remotes</strong> package:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">"rstudio/shinymeta"</span>)</span></code></pre></div>
+</div>
+<div id="motivating-example" class="section level2">
+<h2 class="hasAnchor">
+<a href="#motivating-example" class="anchor"></a>Motivating example</h2>
+<p>Below is a screen-recording of a Shiny app which allows you to obtain CRAN download statistics for any combination of CRAN packages, look at those downloads using different aggregations, and produce a Rmd-based report with code to reproduce the visualization. This Shiny app is different from most in that it generates R code to reproduce what the user sees in the Shiny app (i.e., notice how the generated report reflects the user’s input).</p>
+<p><img src="https://rstudio.github.io/shinymeta/articles/cranview-intro.gif"></p>
+<p>We hope this example helps to illustrate several reasons why you might want to generate standalone R code that mimics logic in your Shiny app:</p>
+<ul>
+<li><p><strong>Automation</strong>: Shiny apps often use data that changes over time: stock quotes, sensor readings, centralized databases, etc. By providing users with reproducible R code, you enable them to take that logic into other workflows, such as creating a <a href="https://docs.rstudio.com/connect/1.7.4/user/r-markdown-schedule.html">periodic R Markdown email using RStudio Connect</a> (e.g., the R code generated by the Shiny app above has been tailored so that anyone can re-run the code to acquire the latest download statistics).</p></li>
+<li><p><strong>Permanence</strong>: Using a Shiny app can have an ephemeral feeling to it; what happens in the future if the server goes down, or the app’s features change? With a reproducible report, your users can download a more permanent artifact that can be saved locally.</p></li>
+<li>
+<p><strong>Transparency</strong>: By generating code that exposes the core logic of your <strong>shiny</strong> app, you make things more transparent for yourself and others, which has numerous benefits:</p>
+<ul>
+<li><p><strong>Reassurance</strong>: In the domain of data analysis, it’s usually enough hard to know exactly how a result is derived, and be confident that it’s 100% correct. Unfortunately, wrapping your analysis code in a user interface like Shiny make the situation even worse: the analysis code is now embedded inside a larger system making the overall logic even more error prone and difficult to fully understand. Export the core logic of your analysis can help reassure others (and yourself!) that your work is correct.</p></li>
+<li><p><strong>Education</strong>: For example, in the classroom, a student might use a Shiny app interactively to gain intuitive understanding of a statistical concept, then use the code to learn how to use the corresponding function from their own R scripts.</p></li>
+<li><p><strong>Enabling</strong>: Shiny is great for enabling others to interface with an R script you’ve written, but what if your users wish to explore things that your interface doesn’t allow for? By exposing the core logic of your app, you make it easier for motivated users to modify and build upon your work in ways you never thought about.</p></li>
+<li><p><strong>Documentation</strong>: This one is especially relevant for exploratory analysis apps that allow you to derive insight from a dataset. A great example is the ANOVA example app in the <a href="04-case-studies.html#ANOVA">case studies vignette</a>, where you can upload a dataset, run an ANOVA analysis, then download a report with all ANOVA results as well as the code to reproduce it.</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div id="generating-code-with-shinymeta" class="section level2">
+<h2 class="hasAnchor">
+<a href="#generating-code-with-shinymeta" class="anchor"></a>Generating code with shinymeta</h2>
+<p>In overly simplified terms, <strong>shinymeta</strong> provides variants of <strong>shiny</strong>’s reactive execution contexts (e.g., <code><a href="https://www.rdocumentation.org/packages/shiny/topics/reactive">reactive()</a></code> -&gt; <code><a href="reference/metaReactive.html">metaReactive()</a></code>, <code><a href="https://www.rdocumentation.org/packages/shiny/topics/observe">observe()</a></code> -&gt; <code><a href="reference/metaObserve.html">metaObserve()</a></code>, <code>render()</code> -&gt; <code><a href="reference/metaRender.html">metaRender()</a></code>). When called with <strong>shinymeta</strong>’s meta mode enabled, these variants return <a href="https://adv-r.hadley.nz/quasiquotation.html">quasi-quoted</a> expressions, providing the <strong>shiny</strong> app author a flexible way to construct code expressions without duplication of the app’s core logic. Here’s a very basic example:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(shiny)</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(shinymeta)</span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a>ui &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/fluidPage">fluidPage</a></span>(</span>
+<span id="cb2-5"><a href="#cb2-5"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/sliderInput">sliderInput</a></span>(<span class="st">"n"</span>, <span class="st">"Number of samples"</span>, <span class="dt">min =</span> <span class="dv">1</span>, <span class="dt">value =</span> <span class="dv">30</span>, <span class="dt">max =</span> <span class="dv">100</span>),</span>
+<span id="cb2-6"><a href="#cb2-6"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/plotOutput">plotOutput</a></span>(<span class="st">"p"</span>),</span>
+<span id="cb2-7"><a href="#cb2-7"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/verbatimTextOutput">verbatimTextOutput</a></span>(<span class="st">"code"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8"></a>)</span>
+<span id="cb2-9"><a href="#cb2-9"></a></span>
+<span id="cb2-10"><a href="#cb2-10"></a>server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output) {</span>
+<span id="cb2-11"><a href="#cb2-11"></a>  output<span class="op">$</span>p &lt;-<span class="st"> </span><span class="kw"><a href="reference/metaRender.html">metaRender</a></span>(renderPlot, {</span>
+<span id="cb2-12"><a href="#cb2-12"></a>    <span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/hist">hist</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/Normal">rnorm</a></span>(<span class="op">!!</span>input<span class="op">$</span>n))</span>
+<span id="cb2-13"><a href="#cb2-13"></a>  })</span>
+<span id="cb2-14"><a href="#cb2-14"></a>  output<span class="op">$</span>code &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/renderPrint">renderPrint</a></span>({</span>
+<span id="cb2-15"><a href="#cb2-15"></a>    <span class="kw"><a href="reference/withMetaMode.html">withMetaMode</a></span>(output<span class="op">$</span><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/builder">p</a></span>())</span>
+<span id="cb2-16"><a href="#cb2-16"></a>  })</span>
+<span id="cb2-17"><a href="#cb2-17"></a>}</span>
+<span id="cb2-18"><a href="#cb2-18"></a></span>
+<span id="cb2-19"><a href="#cb2-19"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
+<p>Generating code with <strong>shinymeta</strong> that is correct and clean is not necessarily straight-forward. It requires a good grasp of <strong>shiny</strong> and metaprogramming. To learn more, read the article on <a href="http://rstudio.github.io/shinymeta/articles/01-code-generation.html">code generation</a>.</p>
+</div>
+<div id="compared-to-alternatives" class="section level2">
+<h2 class="hasAnchor">
+<a href="#compared-to-alternatives" class="anchor"></a>Compared to alternatives</h2>
+<p>Combining interactivity and reproducibility is generally a very hard problem in computing. Shiny provides a great foundation for producing interactive artifacts, but reproducing those artifacts in another context is difficult. We do see <strong>shinymeta</strong> as a step forward for the reproducibility problem, but it is by no means <em>the solution</em>. As with most things, there are tradeoffs and other approaches you may want to consider. We think there are roughly three tradeoff categories:</p>
+<ol>
+<li>
+<strong>Quality of output:</strong> Does the generated code look clean, like a human would write it; or is it awkwardly structured and/or contain random boilerplate?</li>
+<li>
+<strong>Ease of implementation</strong> How hard is it to add code generation to your app? This includes learning and maintenance of the codebase.</li>
+<li>
+<strong>Generality:</strong> Can code generation features be added to <em>any</em> Shiny app, or only apps that follow certain conventions? Does it work as well for large, complex apps as for small ones?</li>
+</ol>
+<p>Furthermore, there are roughly three different approaches one could take, each scoring differently on the tradeoff categories (more stars means better):</p>
+<div id="approach-1-copy-and-paste" class="section level3">
+<h3 class="hasAnchor">
+<a href="#approach-1-copy-and-paste" class="anchor"></a>Approach 1: Copy and paste</h3>
+<blockquote>
+<p>Quality of output: *****</p>
+<p>Ease of implementation: ** (but highly variable)</p>
+<p>Generality: **</p>
+</blockquote>
+<p>The simplest approach is to simply duplicate your logic. You have an <code>app.R</code> file that contains your Shiny app, and a separate <code>script.R</code> or <code>report.Rmd</code> file that contains the same logic in linear form (i.e. minus any of the structure that Shiny imposes). The <code>script.R</code> or <code>report.Rmd</code> contains placeholders that will be replaced by input values selected by the user.</p>
+<p>This approach is easy to understand, but it means that you are stuck maintaining a parallel codebase that you must manually keep in sync; over the long term, this can be a source of not only tedium but also bugs. On the plus side, because you’re maintaining <code>script.R</code>/<code>report.Rmd</code> by hand, the level of code quality is limited only by your own skill.</p>
+</div>
+<div id="approach-2-mechanical-transformation-scriptgloss" class="section level3">
+<h3 class="hasAnchor">
+<a href="#approach-2-mechanical-transformation-scriptgloss" class="anchor"></a>Approach 2: Mechanical transformation (scriptgloss)</h3>
+<blockquote>
+<p>Quality of output: **</p>
+<p>Ease of implementation: ****</p>
+<p>Generality: **</p>
+</blockquote>
+<p>This approach automatically transforms your reactives, outputs, and observers into linearized code, using predefined algorithms/heuristics. You as the app author are neither required nor able to influence the code generation process very much. The nice thing about this is how little effort it is – you can add <a href="https://github.com/dgkf/scriptgloss">scriptgloss</a> to your app in a couple of minutes!</p>
+<p>The price you pay for all this automation is that the generated code looks pretty unnatural, with some Shiny-related wires sticking out. Plus, there are several common situations that will lead to the script not working; then the onus is on either the app author to gain a deeper understanding of scriptgloss and restructure the app to suit, or on the user to take the slightly broken code and fix it.</p>
+</div>
+<div id="approach-3-metaprogramming-shinymeta" class="section level3">
+<h3 class="hasAnchor">
+<a href="#approach-3-metaprogramming-shinymeta" class="anchor"></a>Approach 3: Metaprogramming (shinymeta)</h3>
+<blockquote>
+<p>Quality of output: ****</p>
+<p>Ease of implementation: **</p>
+<p>Generality: *****</p>
+</blockquote>
+<p>Of these three techniques, metaprogramming is by far the most conceptually challenging to get started with. In exchange for climbing the considerable learning curve, you get much more control over how the code output is generated. We also believe (but can’t yet prove) that this approach can scale to larger, more complex apps, including ones that use Shiny modules.</p>
+</div>
+</div>
+<div id="acknowledgements" class="section level2">
+<h2 class="hasAnchor">
+<a href="#acknowledgements" class="anchor"></a>Acknowledgements</h2>
+<p>Adrian Waddell (especially), Eric Nantz, Xiao Ni, Doug Keklhoff</p>
+<p>intRo? <a href="https://github.com/gammarama/intRo/blob/papers/jcgs-paper-2016/paper-original.pdf" class="uri">https://github.com/gammarama/intRo/blob/papers/jcgs-paper-2016/paper-original.pdf</a> <a href="https://github.com/hadley/15-student-papers/blob/master/student-papers.pdf" class="uri">https://github.com/hadley/15-student-papers/blob/master/student-papers.pdf</a></p>
+</div>
 </div>
   </div>
 

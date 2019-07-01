@@ -4,10 +4,20 @@ author: "Carson Sievert & Joe Cheng"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{3. Code distribution}
+  %\VignetteIndexEntry{2. Code distribution}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE,
+  message = FALSE,
+  fig.align = "center",
+  out.width = "80%"
+)
+```
 
 **shinymeta** helps you distribute code to your users in two different ways: by either showing a code editor or by [bundling](#bundling) both the code and results in a zip file for downloading.
 
@@ -36,9 +46,9 @@ server <- function(input, output) {
 shinyApp(ui, server)
 ```
 
-<div align="center">
-  <img src="meta-icon.gif" width="80%" />
-</div>
+```{r, echo = FALSE, out.width="80%"}
+knitr::include_graphics("meta-icon.gif")
+```
 
 <!--
 TODO: 
@@ -87,9 +97,9 @@ server <- function(input, output) {
 shinyApp(ui, server)
 ```
 
-<div align="center">
-  <img src="show-code.gif" width="80%" />
-</div>
+```{r, echo = FALSE, out.width="80%"}
+knitr::include_graphics("show-code.gif")
+```
 
 ## Bundling code and results {#bundling}
 

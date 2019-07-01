@@ -2,9 +2,8 @@ pandoc: 2.7.3
 pkgdown: 1.3.0
 pkgdown_sha: ~
 articles:
-  01-motivation: 01-motivation.html
-  02-code-generation: 02-code-generation.html
-  03-code-distribution: 03-code-distribution.html
-  04-case-studies: 04-case-studies.html
+  01-code-generation: 01-code-generation.html
+  02-code-distribution: 02-code-distribution.html
+  03-case-studies: 03-case-studies.html
   _report: _report.html
 
