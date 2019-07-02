@@ -297,11 +297,9 @@ To demonstrate, our example app could make use of `validate()` and `need()` to i
 knitr::include_graphics("cranview-error.gif")
 ```
 
+To ignore the `validate` and `need()` calls, change `metaRender()` to `metaRender2()`, then wrap the plot generation code in `metaExpr()`. It's worth noting that, with any of the `-2` variants, _only the code inside of a `metaExpr()` is evaluated with meta-mode enabled_, which means, in the example below, `downloads()` always returns a data frame, and never the code expression that generates it.
 
-To ignore the `validate` and `need()` calls, change `metaRender()` to `metaRender2()`, then wrap the plot generation code in `metaExpr()`:
-
-```{r, eval = FALSE}
-# TODO: this doesn't yield the right thing!
+```{r}
 output$plot <- metaRender2(renderPlot, {
   validate(
     need(input$package, "Please provide a package name"),
