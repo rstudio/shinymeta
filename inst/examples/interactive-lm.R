@@ -17,7 +17,7 @@ ui <- fluidPage(
       selectInput("degree", "Polynomial degree", c(1, 2, 3, 4))
     ),
     mainPanel(
-      outputCode(plotOutput("plot", click = "plot_click"))
+      outputCodeButton(plotOutput("plot", click = "plot_click"))
     )
   )
 )
