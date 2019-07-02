@@ -153,3 +153,58 @@ describe("make_assign_expr", {
     )
   })
 })
+
+describe("mixed mode", isolate({
+  # A bunch of different kinds of metaReactive objects that should all
+  # yield quote(1+1) in meta mode.
+  srcs <- list(
+    metaReactive(1 + 1),
+    metaReactive2(metaExpr(1 + 1)),
+    metaObserve(1 + 1),
+    metaObserve2(metaExpr(1 + 1)),
+    metaRender(renderText, 1 + 1),
+    metaRender2(renderText, metaExpr(1 + 1))
+  )
+
+  # Try this scenario with each of the different kinds of objects.
+  lapply(srcs, function(src) {
+
+    mr <- metaReactive(!!src())
+    expect_equal(withMetaMode(mr()), quote(1 + 1))
+
+    v <- reactiveVal(0) # cache busting reactive val
+    mr2 <- metaReactive2({
+      v()
+      if (inherits(src, "shinymeta_observer")) {
+        expect_error(src())
+      } else {
+        expect_identical(as.character(src()), "2")
+      }
+      withMetaMode(src())
+    })
+    expect_equal(withMetaMode(mr2()), quote(1 + 1))
+    # Cached
+    expect_equal(withMetaMode(mr2()), quote(1 + 1))
+
+
+    # Test nesting deeper than one level
+
+    v(isolate(v()) + 1) # bust cache for mr2
+    mr3 <- metaReactive({
+      !!mr2()
+    })
+    expect_equal(withMetaMode(mr3()), quote(1 + 1))
+
+
+    # Test observer
+    v(isolate(v()) + 1) # bust cache for mr2
+    mr4 <- metaObserve(!!src())
+    expect_equal(withMetaMode(mr4()), quote(1 + 1))
+    mr4$destroy()  # Otherwise throws errors on next flushReact
+
+    # Test renderer
+    v(isolate(v()) + 1) # bust cache for mr2
+    mr5 <- metaRender(renderText, !!src())
+    expect_equal(withMetaMode(mr5()), quote(1 + 1))
+  })
+}))

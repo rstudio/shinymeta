@@ -91,28 +91,104 @@ metaReactiveImpl <- function(expr, env, label, domain) {
 
   structure(
     function() {
-      if (metaMode()) {
-        # r_meta cache varies by dynamicVars
-        r_meta(.globals$dynamicVars)
-      } else {
-        r_normal()
-      }
+      metaDispatch(
+        normal = {
+          r_normal()
+        },
+        meta = {
+          # r_meta cache varies by dynamicVars
+          r_meta(metaCacheKey())
+        }
+      )
     },
     class = c("shinymeta_reactive", "function")
   )
 }
 
-#' @export
+# A global variable that can be one of three values:
+# 1. FALSE - metaExpr() should return its EVALUATED expr
+# 2. TRUE - metaExpr() should return its QUOTED expr
+# 3. "mixed" - same as TRUE, but see below
+#
+# The "mixed" exists to serve cases like metaReactive2. In cases
+# where calls to metaReactives are encountered inside of metaReactive2
+# but outside of metaExpr, those metaReactives should be evaluated in
+# non-meta mode (i.e. metaMode(FALSE)).
+#
+# See metaDispatch for more details on mixed mode.
 metaMode <- local({
-  isMetaMode <- FALSE
-  function(value) {
-    if (missing(value)) {
-      isMetaMode
+  value <- FALSE
+  function(x) {
+    if (missing(x)) {
+      value
     } else {
-      isMetaMode <<- value
+      if (!isTRUE(x) && !isFALSE(x) && !identical(x, "mixed")) {
+        stop("Invalid metaMode() value: legal values are TRUE, FALSE, and \"mixed\"")
+      }
+      value <<- x
     }
   }
 })
+
+# More-specific replacement for switch() on the value of metaMode().
+#
+# This gives us a single place to update if we need to modify the set of
+# supported metaMode values.
+switchMetaMode <- function(normal, meta, mixed) {
+  if (missing(normal) || missing(meta) || missing(mixed)) {
+    stop("switchMetaMode call was missing required argument(s)")
+  }
+
+  mode <- metaMode()
+  if (isTRUE(mode)) {
+    meta
+  } else if (isFALSE(mode)) {
+    normal
+  } else if (identical(mode, "mixed")) {
+    mixed
+  } else {
+    stop("Illegal metaMode detected: ", format(mode))
+  }
+}
+
+# metaDispatch implements the innermost if/switch for meta-reactive objects:
+# metaReactive/metaReactive2, metaObserve/metaObserve2, metaRender/metaRender2.
+#
+# We basically want to detect nested calls to `metaDispatch` without an
+# intervening `withMetaMode(TRUE)` or `metaExpr`, and treat those cases as
+# metaMode(FALSE).
+#
+# mr1 <- metaReactive({
+#   1 + 1
+# })
+#
+# mr2 <- metaReactive2({
+#   mr1() # returns 2
+#   !!mr1() # `!!`` is treated as double-boolean (NOT unquote), so: TRUE
+#   metaExpr(
+#     !!mr1() # returns quote(1 + 1)
+#   )
+# })
+#
+# withMetaMode(mr2())
+metaDispatch <- function(normal, meta) {
+  switchMetaMode(
+    normal = {
+      force(normal)
+    },
+    meta = {
+      withMetaMode(meta, "mixed")
+    },
+    mixed = {
+      withMetaMode(normal, FALSE)
+    }
+  )
+}
+
+metaCacheKey <- function() {
+  list(.globals$dynamicVars, metaMode())
+}
+
 
 #' Evaluate an expression with meta mode activated
 #'
@@ -125,7 +201,7 @@ withMetaMode <- function(expr, mode = TRUE) {
   origVal <- metaMode()
   if (!identical(origVal, mode)) {
     metaMode(mode)
-    on.exit(metaMode(!mode), add = TRUE)
+    on.exit(metaMode(origVal), add = TRUE)
   }
 
   if (!getOption("shiny.allowoutputreads", FALSE)) {
@@ -133,13 +209,11 @@ withMetaMode <- function(expr, mode = TRUE) {
     on.exit(options(op), add = TRUE)
   }
 
-
-
-  if (mode) {
+  if (switchMetaMode(normal = FALSE, meta = TRUE, mixed = FALSE)) {
     expr <- prefix_class(expr, "shinyMetaExpr")
   }
 
-  expr
+  force(expr)
 }
 
 #' Mark an expression as a meta-expression
@@ -174,34 +248,38 @@ metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "au
     quoted <- TRUE
   }
 
-  if (!metaMode()) {
+  if (switchMetaMode(normal = TRUE, meta = FALSE, mixed = FALSE)) {
     expr <- expandExpr(expr, list(), env)
     return(rlang::eval_tidy(expr, env = env))
   }
 
-  expr <- comment_flags(expr)
-  expr <- expandExpr(expr, if (topLevelDynVars) .globals$dynamicVars, env)
-  expr <- strip_outer_brace(expr)
+  withMetaMode(mode = TRUE, {
+    expr <- comment_flags(expr)
+    expr <- expandExpr(expr, if (topLevelDynVars) .globals$dynamicVars, env)
+    expr <- strip_outer_brace(expr)
 
-  # Note that bindToReturn won't make sense for a localized call,
-  # so determine we need local scope first, then add a special class
-  # (we don't yet have the name for binding the return value)
-  expr <- add_local_scope(expr, localize)
+    # Note that bindToReturn won't make sense for a localized call,
+    # so determine we need local scope first, then add a special class
+    # (we don't yet have the name for binding the return value)
+    expr <- add_local_scope(expr, localize)
 
-  # Apply bindToReturn rules, if relevant
-  expr <- bind_to_return(expr)
+    # Apply bindToReturn rules, if relevant
+    expr <- bind_to_return(expr)
 
-  # TODO: let user opt-out of comment elevation
-  # (I _think_ this is always safe)?
-  expr <- elevate_comments(expr)
+    # TODO: let user opt-out of comment elevation
+    # (I _think_ this is always safe)?
+    expr <- elevate_comments(expr)
 
-  # flag the call so that we know to bind next time we see this call
-  # inside an assign call, we should modify it
-  if (bindToReturn && rlang::is_call(expr, "{")) {
-    expr <- prefix_class(expr, "bindToReturn")
-  }
+    # flag the call so that we know to bind next time we see this call
+    # inside an assign call, we should modify it
+    if (bindToReturn && rlang::is_call(expr, "{")) {
+      expr <- prefix_class(expr, "bindToReturn")
+    }
 
-  expr
+    expr <- prefix_class(expr, "shinyMetaExpr")
+
+    expr
+  })
 }
 
 withDynamicScope <- function(expr, ..., .list = list(...)) {
