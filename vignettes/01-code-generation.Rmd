@@ -15,7 +15,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   message = FALSE,
   fig.align = "center",
-  out.width = "80%"
+  out.width = "80%",
+  fig.path = "man/figures/"
 )
 library(shiny)
 library(shinymeta)
