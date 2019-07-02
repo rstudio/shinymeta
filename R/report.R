@@ -1,5 +1,14 @@
 # TODO: Unit tests for this whole file
 
+#' Produce a zip bundle of code and results
+#'
+#' @param code A language object.
+#' @param output_zip_path A filename for the resulting zip bundle.
+#' @param script_name A name for the R script in the zip bundle.
+#' @param include_files Other files to include with the zip bundle.
+#' @param render Whether or not to call [rmarkdown::render()] on the R script.
+#' @param render_args Arguments to provide to [rmarkdown::render()].
+#'
 #' @export
 buildScriptBundle <- function(code = NULL, output_zip_path, script_name = "script.R",
   include_files = list(), render = TRUE, render_args = list()) {
@@ -17,7 +26,14 @@ buildScriptBundle <- function(code = NULL, output_zip_path, script_name = "scrip
     render_args = render_args, progress = progress)
 }
 
+
+#' @inheritParams buildScriptBundle
+#' @param report_template Filename of an Rmd template to be expanded by [knitr::knit_expand()].
+#' @param vars A named list of variables passed along to `...` in [knitr::knit_expand()].
 #' @export
+#' @rdname buildScriptBundle
+#' @seealso knitr::knit_expand
+#'
 buildRmdBundle <- function(report_template, output_zip_path, vars = list(),
   include_files = list(), render = TRUE, render_args = list()) {
 

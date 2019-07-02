@@ -5,7 +5,7 @@
 \title{Overlay an icon on a shiny output}
 \usage{
 metaIcon(outputObj, icon_ = tags$span(style = "color: #707070",
-  icon("code")), tooltip = "Get Code", tooltip_placement = c("bottom",
+  icon("code")), tooltip = "Show Code", tooltip_placement = c("bottom",
   "top", "right", "left"))
 }
 \arguments{

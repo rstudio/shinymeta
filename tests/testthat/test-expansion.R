@@ -81,7 +81,14 @@ describe("expandObjects", isolate({
       `obs with tricky name`,
       output$plot
     )
-    x2 <- expandCode({
+    x2 <- expandObjects(
+      one,
+      two,
+      "# top-level comment",
+      `obs with tricky name`,
+      output[["plot"]]
+    )
+    x3 <- expandCode({
       one <- !!one()
       two <- !!two()
       "# top-level comment"
@@ -89,6 +96,7 @@ describe("expandObjects", isolate({
       !!output$plot()
     }, patchCalls = list(one = quote(one), two = quote(two)))
     expect_equal(x1, x2)
+    expect_equal(x2, x3)
   })
 
   it("works with calls", {
