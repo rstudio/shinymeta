@@ -9,5 +9,17 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+The **shinymeta** package ships with a number of examples to demonstrate it
 
-Coming soon
+## cranview
+
+## Interactive lm
+
+
+## Contingency app
+
+
+
+## DIY ANOVA app
+
+

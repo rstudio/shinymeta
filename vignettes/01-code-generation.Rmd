@@ -15,8 +15,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   message = FALSE,
   fig.align = "center",
-  out.width = "80%",
-  fig.path = "man/figures/"
+  out.width = "80%"
 )
 library(shiny)
 library(shinymeta)
@@ -39,15 +38,20 @@ registerS3method("knit_print", "data.frame", knit_print.data.frame)
 ```
 
 ```{css echo=FALSE}
+pre {
+  border: 1px solid #eee;
+}
+
 pre.r {
   background-color: #ffffff;
-  border-radius: 0px;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
+}
+
+pre.r code {
+  background-color: #ffffff;
 }
 
 pre.R {
-  background-color: #e7e7e7;
+  background-color: #f8f8f8;
   border-radius: 0px;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
@@ -173,7 +177,7 @@ In normal usage, the behavior of `downloads()` doesn't change at all -- it still
 downloads()
 ```
 
-However, when invoked with **shinymeta**'s meta-mode enabled (i.e., `withMetaMode()`), the behavior changes: Instead of evaluating the reactive expression and returning the value (a data frame), it returns a code expression. To make it visually clear when we're generating a code expression, this article sets the background color of generated code to <svg width="1em" height="1em"><rect width="1em" height="1em" style="fill: #d3f3df"/></svg>.
+However, when invoked with **shinymeta**'s meta-mode enabled (i.e., `withMetaMode()`), the behavior changes: Instead of evaluating the reactive expression and returning the value (a data frame), it returns a code expression.
 
 ```{r, class.output='R', comment = ''}
 withMetaMode(downloads())

@@ -15,8 +15,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   message = FALSE,
   fig.align = "center",
-  out.width = "80%",
-  fig.path = "man/figures/"
+  out.width = "80%"
 )
 ```
 
