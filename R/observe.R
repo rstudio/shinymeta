@@ -62,12 +62,15 @@ metaObserveImpl <- function(expr, env, label, domain) {
 
   structure(
     function() {
-      if (metaMode()) {
-        # r_meta cache varies by dynamicVars
-        r_meta(.globals$dynamicVars)
-      } else {
-        stop("Meta mode must be activated when calling the function returned by `metaObserve()`: did you mean to call this function inside of `shinymeta::withMetaMode()`?")
-      }
+      metaDispatch(
+        normal = {
+          stop("Meta mode must be activated when calling the function returned by `metaObserve()`: did you mean to call this function inside of `shinymeta::withMetaMode()`?")
+        },
+        meta = {
+          # r_meta cache varies by dynamicVars
+          r_meta(metaCacheKey())
+        }
+      )
     },
     observer_impl = o_normal,
     class = c("shinymeta_observer", "function")

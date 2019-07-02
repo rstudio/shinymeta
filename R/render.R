@@ -62,14 +62,17 @@ metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FA
   }
 
   function(...) {
-    if (metaMode()) {
-      # TODO: Verify that length(list(...)) == 0?
-      meta()
-    } else {
-      if (is.null(formals(normal)))
-        normal()
-      else
-        normal(...)
-    }
+    metaDispatch(
+      normal = {
+        if (is.null(formals(normal)))
+          normal()
+        else
+          normal(...)
+      },
+      meta = {
+        # TODO: Verify that length(list(...)) == 0?
+        meta()
+      }
+    )
   }
 }
