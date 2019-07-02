@@ -253,6 +253,7 @@ metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "au
     return(rlang::eval_tidy(expr, env = env))
   }
 
+  # metaExpr() moves us from mixed to meta state
   withMetaMode(mode = TRUE, {
     expr <- comment_flags(expr)
     expr <- expandExpr(expr, if (topLevelDynVars) .globals$dynamicVars, env)
