@@ -35,3 +35,16 @@ Remotes:
     r-lib/fastmap
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
+Collate: 
+    'archive.R'
+    'display.R'
+    'format.R'
+    'icon.R'
+    'imports.R'
+    'utils.R'
+    'metareactive.R'
+    'observe.R'
+    'print.R'
+    'render.R'
+    'report.R'
+    'utils-format.R'
