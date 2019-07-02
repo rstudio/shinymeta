@@ -1,0 +1,15 @@
+---
+title: "My ggplot2 code"
+output: 
+  html_document:
+    code_folding: "hide"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+
+```{r, out.width="100%"}
+{{code}}
+```

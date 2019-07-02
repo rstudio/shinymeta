@@ -1,0 +1,25 @@
+---
+title: "Case studies"
+author: "Carson Sievert & Joe Cheng"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{3. Case studies}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The **shinymeta** package ships with a number of examples to demonstrate it
+
+## cranview
+
+## Interactive lm
+
+
+## Contingency app
+
+
+
+## DIY ANOVA app
+
+
