@@ -153,7 +153,7 @@
 <p>Generality: **</p>
 </blockquote>
 <p>The simplest approach is to simply duplicate your logic. You have an <code>app.R</code> file that contains your Shiny app, and a separate <code>script.R</code> or <code>report.Rmd</code> file that contains the same logic in linear form (i.e. minus any of the structure that Shiny imposes). The <code>script.R</code> or <code>report.Rmd</code> contains placeholders that will be replaced by input values selected by the user.</p>
-<p>This approach is easy to understand, but it means that you are stuck maintaining a parallel codebase that you must manually keep in sync; over the long term, this can be a source of not only tedium but also bugs. On the plus side, because you’re maintaining <code>script.R</code>/<code>report.Rmd</code> by hand, the level of code quality is limited only by your own skill.</p>
+<p>This approach is easy to understand, but it means that you are stuck maintaining a parallel codebase that you must manually keep in sync. Over the long term, this can be a source of not only tedium but also bugs. On the plus side, because you’re maintaining <code>script.R</code>/<code>report.Rmd</code> by hand, the level of code quality is limited only by your own skill.</p>
 </div>
 <div id="approach-2-mechanical-transformation-scriptgloss" class="section level3">
 <h3 class="hasAnchor">
