@@ -278,9 +278,13 @@ expandCode <- function(expr, env = parent.frame(), quoted = FALSE, patchCalls = 
 }
 
 is_output_read <- function(expr) {
-  rlang::is_call(expr, name = "$", n = 2) &&
+  is_dollar <- rlang::is_call(expr, name = "$", n = 2) &&
     rlang::is_symbol(expr[[2]], "output") &&
     rlang::is_symbol(expr[[3]])
+  is_bracket <- rlang::is_call(expr, name = "[[", n = 2) &&
+    rlang::is_symbol(expr[[2]], "output") &&
+    is.character(expr[[3]])
+  is_dollar || is_bracket
 }
 
 # Create an `lhs <- rhs` expression, unless lhs == "", in which case
