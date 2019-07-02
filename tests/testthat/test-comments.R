@@ -179,6 +179,7 @@ describe("various edge cases", isolate({
 
 
   mr <- metaReactive({
+    message("got here")
     "# This is not a comment"
   })
 
@@ -195,6 +196,7 @@ describe("various edge cases", isolate({
   expect_equal(
     out,
     c(
+      "message(\"got here\")",
       "\"# This is not a comment\"",
       "NULL"
     )
