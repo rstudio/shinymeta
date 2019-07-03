@@ -19,13 +19,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-Once you're able to [generate code](01-code-generation.html) that replicates desired logic in your Shiny app, you'll need some way to distribute the code (and the results!) to users. **shinymeta** provides a few utilties to make all these things a bit easier to implement.
+Once you're able to [generate code](01-code-generation.html) that replicates desired logic in your Shiny app, you'll need some way to distribute the code (and the results!) to users. **shinymeta** provides a few utilties to make all these things a bit easier to implement, including [downloading code and results](#bundles) as well as [showing code](#show-code) in the Shiny app itself.
 
 <!--
 One of the downsides to just showing code is that it doesn't guarantee the result will be reproduced, because the user may not have easy access to a suitable computational environment for running the code. One way to combat this is to provide both the code and the results as one deliverable. Moreover, by leveraging the power of **rmarkdown**, you can insert your code into a larger template that produces a high-quality HTML/pdf/word report of your user's Shiny experience. 
 -->
 
-## Generating reports {#reports}
+## Downloading code and results {#bundles}
 
 **shinymeta** provides helpers for generating [**rmarkdown** reports](https://rmarkdown.rstudio.com/) from both R scripts (`buildScriptBundle()`) and Rmd templates (`buildRmdBundle()`). Both of these functions use code that you provide to produce a source file, then they (optionally) run `rmarkdown::render()` on that source file, compress the code & results into a zip file, and provide `shiny::Progress` indications to the user throughout all these steps. These functions are best used inside a `downloadHandler()` that's linked to either a `downloadButton()` or `downloadLink()`, so the user can generate and download these reports on demand.
 
@@ -169,7 +169,7 @@ knitr::include_graphics("upload-download.gif")
 ```
 
 
-## Showing code {#showing-code}
+## Showing code {#showicode}
 
 ### For an output 
 
@@ -221,9 +221,9 @@ library(shiny)
 library(shinymeta)
 library(ggplot2)
 ui <- fluidPage(
-  plotOutput("p1", height = 200),
-  plotOutput("p2", height = 200),
-  actionButton("code", div(icon("code"), " R code"))
+  plotOutput("p1"),
+  plotOutput("p2"),
+  actionButton("code", "R code", icon("code"))
 )
 server <- function(input, output) {
   output$p1 <- metaRender(renderPlot, {
