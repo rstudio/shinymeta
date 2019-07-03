@@ -2,10 +2,14 @@
 % Please edit documentation in R/render.R
 \name{metaRender}
 \alias{metaRender}
+\alias{metaRender2}
 \title{Create a meta-reactive output}
 \usage{
 metaRender(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE,
   localize = "auto", bindToReturn = FALSE)
+
+metaRender2(renderFunc, expr, ..., env = parent.frame(),
+  quoted = FALSE)
 }
 \arguments{
 \item{renderFunc}{A reactive output function (e.g., \link[shiny:renderPlot]{shiny::renderPlot}, \link[shiny:renderText]{shiny::renderText}, \link[shiny:renderUI]{shiny::renderUI}, etc).}

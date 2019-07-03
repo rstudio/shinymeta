@@ -80,6 +80,8 @@
 <div id="shinymeta" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#shinymeta" class="anchor"></a>shinymeta</h1></div>
+<!-- badges: start -->
+
 <p>The <strong>shinymeta</strong> R package provides tools for capturing logic in a Shiny app and exposing it as code that can be run outside of Shiny (e.g., from an R console). It also provides tools for bundling both the code and results to the end user.</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
@@ -138,51 +140,23 @@
 <p>Combining interactivity and reproducibility is generally a very hard problem in computing. Shiny provides a great foundation for producing interactive artifacts, but reproducing those artifacts in another context is difficult. We do see <strong>shinymeta</strong> as a step forward for the reproducibility problem, but it is by no means <em>the solution</em>. As with most things, there are tradeoffs and other approaches you may want to consider. We think there are roughly three tradeoff categories:</p>
 <ol>
 <li>
-<strong>Quality of output:</strong> Does the generated code look clean, like a human would write it; or is it awkwardly structured and/or contain random boilerplate?</li>
+<strong>Quality of output</strong>: Does the generated code look clean, like a human would write it; or is it awkwardly structured and/or contain random boilerplate?</li>
 <li>
-<strong>Ease of implementation</strong> How hard is it to add code generation to your app? This includes learning and maintenance of the codebase.</li>
+<strong>Ease of implementation</strong>: How hard is it to add code generation to your app? This includes learning and maintenance of the codebase.</li>
 <li>
-<strong>Generality:</strong> Can code generation features be added to <em>any</em> Shiny app, or only apps that follow certain conventions? Does it work as well for large, complex apps as for small ones?</li>
+<strong>Generality</strong>: Can code generation features be added to <em>any</em> Shiny app, or only apps that follow certain conventions? Does it work as well for large, complex apps as for small ones?</li>
 </ol>
 <p>Furthermore, there are roughly three different approaches one could take, each scoring differently on the tradeoff categories (more stars means better):</p>
-<div id="approach-1-copy-and-paste" class="section level3">
-<h3 class="hasAnchor">
-<a href="#approach-1-copy-and-paste" class="anchor"></a>Approach 1: Copy and paste</h3>
-<blockquote>
-<p>Quality of output: *****</p>
-<p>Ease of implementation: ** (but highly variable)</p>
-<p>Generality: **</p>
-</blockquote>
-<p>The simplest approach is to simply duplicate your logic. You have an <code>app.R</code> file that contains your Shiny app, and a separate <code>script.R</code> or <code>report.Rmd</code> file that contains the same logic in linear form (i.e. minus any of the structure that Shiny imposes). The <code>script.R</code> or <code>report.Rmd</code> contains placeholders that will be replaced by input values selected by the user.</p>
-<p>This approach is easy to understand, but it means that you are stuck maintaining a parallel codebase that you must manually keep in sync. Over the long term, this can be a source of not only tedium but also bugs. On the plus side, because you’re maintaining <code>script.R</code>/<code>report.Rmd</code> by hand, the level of code quality is limited only by your own skill.</p>
-</div>
-<div id="approach-2-mechanical-transformation-scriptgloss" class="section level3">
-<h3 class="hasAnchor">
-<a href="#approach-2-mechanical-transformation-scriptgloss" class="anchor"></a>Approach 2: Mechanical transformation (scriptgloss)</h3>
-<blockquote>
-<p>Quality of output: **</p>
-<p>Ease of implementation: ****</p>
-<p>Generality: **</p>
-</blockquote>
-<p>This approach automatically transforms your reactives, outputs, and observers into linearized code, using predefined algorithms/heuristics. You as the app author are neither required nor able to influence the code generation process very much. The nice thing about this is how little effort it is – you can add <a href="https://github.com/dgkf/scriptgloss">scriptgloss</a> to your app in a couple of minutes!</p>
-<p>The price you pay for all this automation is that the generated code looks pretty unnatural, with some Shiny-related wires sticking out. Plus, there are several common situations that will lead to the script not working; then the onus is on either the app author to gain a deeper understanding of scriptgloss and restructure the app to suit, or on the user to take the slightly broken code and fix it.</p>
-</div>
-<div id="approach-3-metaprogramming-shinymeta" class="section level3">
-<h3 class="hasAnchor">
-<a href="#approach-3-metaprogramming-shinymeta" class="anchor"></a>Approach 3: Metaprogramming (shinymeta)</h3>
-<blockquote>
-<p>Quality of output: ****</p>
-<p>Ease of implementation: **</p>
-<p>Generality: *****</p>
-</blockquote>
-<p>Of these three techniques, metaprogramming is by far the most conceptually challenging to get started with. In exchange for climbing the considerable learning curve, you get much more control over how the code output is generated. We also believe (but can’t yet prove) that this approach can scale to larger, more complex apps, including ones that use Shiny modules.</p>
-</div>
+<ol>
+<li><p><strong>Copy and paste</strong>: The simplest approach is to simply duplicate your logic. You have an <code>app.R</code> file that contains your Shiny app, and a separate <code>script.R</code> or <code>report.Rmd</code> file that contains the same logic in linear form (i.e. minus any of the structure that Shiny imposes). The <code>script.R</code> or <code>report.Rmd</code> contains placeholders that will be replaced by input values selected by the user. This approach is easy to understand, but it means that you are stuck maintaining a parallel codebase that you must manually keep in sync. Over the long term, this can be a source of not only tedium but also bugs. On the plus side, because you’re maintaining <code>script.R</code>/<code>report.Rmd</code> by hand, the level of code quality is limited only by your own skill.</p></li>
+<li><p><strong>Mechanical transformation (scriptgloss)</strong>: This approach automatically transforms your reactives, outputs, and observers into linearized code, using predefined algorithms/heuristics. You as the app author are neither required nor able to influence the code generation process very much. The nice thing about this is how little effort it is – you can add <a href="https://github.com/dgkf/scriptgloss">scriptgloss</a> to your app in a couple of minutes! The price you pay for all this automation is that the generated code looks pretty unnatural, with some Shiny-related wires sticking out. Plus, there are several common situations that will lead to the script not working; then the onus is on either the app author to gain a deeper understanding of <strong>scriptgloss</strong> and restructure the app to suit, or on the user to take the slightly broken code and fix it.</p></li>
+<li><p><strong>Metaprogramming (shinymeta)</strong>: Of these three techniques, metaprogramming is by far the most conceptually challenging to get started with. In exchange for climbing the considerable learning curve, you get much more control over how the code output is generated. We also believe (but can’t yet prove) that this approach can scale to larger, more complex apps, including ones that use Shiny modules.</p></li>
+</ol>
 </div>
 <div id="acknowledgements" class="section level2">
 <h2 class="hasAnchor">
 <a href="#acknowledgements" class="anchor"></a>Acknowledgements</h2>
-<p>Adrian Waddell (especially), Eric Nantz, Xiao Ni, Doug Keklhoff</p>
-<p>intRo? <a href="https://github.com/gammarama/intRo/blob/papers/jcgs-paper-2016/paper-original.pdf" class="uri">https://github.com/gammarama/intRo/blob/papers/jcgs-paper-2016/paper-original.pdf</a> <a href="https://github.com/hadley/15-student-papers/blob/master/student-papers.pdf" class="uri">https://github.com/hadley/15-student-papers/blob/master/student-papers.pdf</a></p>
+<p>Many people projects provided motivation, inspiration, and ideas that have lead to <strong>shinymeta</strong>. Thanks especially to Adrian Waddell for inspiring the over-overarching metaprogramming approach and Doug Keklhoff for his work on <strong>scriptgloss</strong>. Also thanks to Eric Nantz and Xiao Ni for providing feedback and insight on potential applications. We’d also like to acknowledge and highlight other work towards this same goal such as <a href="http://intro-stats.com" class="uri">http://intro-stats.com</a> (Eric Hare and Andee Kaplan) and <a href="https://radiant-rstats.github.io" class="uri">https://radiant-rstats.github.io</a> (Vincent Nijs).</p>
 </div>
 </div>
   </div>
@@ -203,7 +177,15 @@
 </ul>
 </div>
 
-  </div>
+  <div class="dev-status">
+<h2>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://travis-ci.org/rstudio/shinymeta"><img src="https://travis-ci.org/rstudio/shinymeta.svg?branch=master" alt="Travis build status"></a></li>
+<li><a href="https://cran.r-project.org/package=shinymeta"><img src="https://www.r-pkg.org/badges/version/shinymeta" alt="CRAN status"></a></li>
+<li><a href="https://www.tidyverse.org/lifecycle/#experimental"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+</ul>
+</div>
+</div>
 </div>
 
       <footer><div class="copyright">

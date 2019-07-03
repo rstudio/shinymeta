@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Overlay an icon on a shiny output — metaIcon • shinymeta</title>
+<title>Overlay an icon on a shiny output — outputCodeButton • shinymeta</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -32,14 +32,14 @@
 
   <link href="../extra.css" rel="stylesheet">
   
-<meta property="og:title" content="Overlay an icon on a shiny output — metaIcon" />
+<meta property="og:title" content="Overlay an icon on a shiny output — outputCodeButton" />
 
-<meta property="og:description" content="Intended for overlaying an icon over a shiny output, that when clicked,
-displays or downloads code for reproducing that output. The icon
-works similar to an shiny::actionButton(), where an input value,
-tied to the icon, increases by one each time it is pressed. The name
+<meta property="og:description" content="Intended for overlaying a button over a shiny output, that when clicked,
+displays code for reproducing that output. The button is
+similar to an shiny::actionButton(), but instead of providing an inputId,
+the id is determined by the id of the outputObj. The name
 of that input is a function of outputObj's outputId:
-input$OUTPUTID_shinymeta_icon." />
+input$OUTPUTID_output_code." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,44 +121,53 @@ input$OUTPUTID_shinymeta_icon." />
     <div class="page-header">
     <h1>Overlay an icon on a shiny output</h1>
     
-    <div class="hidden name"><code>metaIcon.Rd</code></div>
+    <div class="hidden name"><code>outputCodeButton.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Intended for overlaying an icon over a shiny output, that when clicked,
-displays or downloads code for reproducing that output. The icon
-works similar to an <code><a href='https://www.rdocumentation.org/packages/shiny/topics/actionButton'>shiny::actionButton()</a></code>, where an input value,
-tied to the icon, increases by one each time it is pressed. The name
+    <p>Intended for overlaying a button over a shiny output, that when clicked,
+displays code for reproducing that output. The button is
+similar to an <code><a href='https://www.rdocumentation.org/packages/shiny/topics/actionButton'>shiny::actionButton()</a></code>, but instead of providing an <code>inputId</code>,
+the id is determined by the id of the <code>outputObj</code>. The name
 of that input is a function of <code>outputObj</code>'s <code>outputId</code>:
-<code>input$OUTPUTID_shinymeta_icon</code>.</p>
+<code>input$OUTPUTID_output_code</code>.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>metaIcon</span>(<span class='no'>outputObj</span>, <span class='kw'>icon_</span> <span class='kw'>=</span> <span class='no'>tags</span>$<span class='fu'>span</span>(<span class='kw'>style</span> <span class='kw'>=</span> <span class='st'>"color: #707070"</span>,
-  <span class='fu'>icon</span>(<span class='st'>"code"</span>)), <span class='kw'>tooltip</span> <span class='kw'>=</span> <span class='st'>"Show Code"</span>, <span class='kw'>tooltip_placement</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"bottom"</span>,
-  <span class='st'>"top"</span>, <span class='st'>"right"</span>, <span class='st'>"left"</span>))</pre>
+    <pre class="usage"><span class='fu'>outputCodeButton</span>(<span class='no'>outputObj</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"Show code"</span>,
+  <span class='kw'>icon</span> <span class='kw'>=</span> <span class='kw pkg'>shiny</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/icon'>icon</a></span>(<span class='st'>"code"</span>), <span class='kw'>width</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>outputObj</th>
-      <td><p>A shiny output.</p></td>
+      <td><p>A shiny output container (e.g., <a href='https://www.rdocumentation.org/packages/shiny/topics/plotOutput'>shiny::plotOutput</a>, <a href='https://www.rdocumentation.org/packages/shiny/topics/textOutput'>shiny::textOutput</a>, etc)</p></td>
     </tr>
     <tr>
-      <th>icon_</th>
-      <td><p>A shiny <code>icon()</code>.</p></td>
+      <th>label</th>
+      <td><p>The contents of the button or link--usually a text label, but
+you could also use any other HTML, like an image.</p></td>
     </tr>
     <tr>
-      <th>color</th>
-      <td><p>A CSS color.</p></td>
+      <th>icon</th>
+      <td><p>An optional <code>icon</code> to appear on the button.</p></td>
+    </tr>
+    <tr>
+      <th>width</th>
+      <td><p>The width of the input, e.g. <code>'400px'</code>, or <code>'100%'</code>;
+see <code>validateCssUnit</code>.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Named attributes to be applied to the button or link.</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p>displayCode</p></div>
+    <div class='dont-index'><p><a href='displayCodeModal.html'>displayCodeModal</a></p></div>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -167,15 +176,15 @@ of that input is a function of <code>outputObj</code>'s <code>outputId</code>:
   <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>shiny</span>)
   <span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/fluidPage'>fluidPage</a></span>(
     <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/sliderInput'>sliderInput</a></span>(<span class='st'>"n"</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"Number of samples"</span>, <span class='kw'>min</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>max</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>value</span> <span class='kw'>=</span> <span class='fl'>30</span>),
-    <span class='fu'>metaIcon</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/plotOutput'>plotOutput</a></span>(<span class='st'>"p"</span>))
+    <span class='fu'>outputCodeButton</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/plotOutput'>plotOutput</a></span>(<span class='st'>"p"</span>))
   )
   <span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>) {
     <span class='no'>output</span>$<span class='no'>p</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaRender.html'>metaRender</a></span>(<span class='no'>renderPlot</span>, {
       <span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(!!<span class='no'>input</span>$<span class='no'>n</span>))
     })
-    <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/observeEvent'>observeEvent</a></span>(<span class='no'>input</span>$<span class='no'>p_shinymeta_icon</span>, {
+    <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/observeEvent'>observeEvent</a></span>(<span class='no'>input</span>$<span class='no'>p_output_code</span>, {
       <span class='no'>code</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='expandCode.html'>expandObjects</a></span>(<span class='no'>output</span>$<span class='no'>p</span>)
-      <span class='fu'><a href='displayEditor.html'>displayEditor</a></span>(<span class='no'>code</span>)
+      <span class='fu'><a href='displayCodeModal.html'>displayCodeModal</a></span>(<span class='no'>code</span>)
     })
   }
   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/shinyApp'>shinyApp</a></span>(<span class='no'>ui</span>, <span class='no'>server</span>)

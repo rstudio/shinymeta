@@ -1,1 +1,28 @@
 destination: docs
+
+reference:
+- title: Meta-reactives
+  description: |
+    These functions create meta-reactive(s), for capturing domain logic within a reactive expression
+  contents:
+    - metaReactive
+    - metaObserve
+    - metaRender
+    - metaExpr
+
+- title: Code generation
+  description: |
+    Functions for generating code from meta-reactives.
+  contents:
+     - expandObjects
+     - expandCode
+     - formatCode
+
+- title: Code distribution
+  description: |
+    Functions for distributing code to users.
+  contents:
+     - buildRmdBundle
+     - buildScriptBundle
+     - outputCodeButton
+     - displayCodeModal

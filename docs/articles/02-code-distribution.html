@@ -252,13 +252,13 @@ And the second one:
 <div id="for-an-output" class="section level3">
 <h3 class="hasAnchor">
 <a href="#for-an-output" class="anchor"></a>For an output</h3>
-<p>If your Shiny app has lots of outputs, then you may want an intuitive way for users to obtain the code for specific output(s). For this purpose, <strong>shinymeta</strong> provides <code>outputCodeButton()</code>, which wraps an output in a container with a button. The button works in a similar way to an <code><a href="https://www.rdocumentation.org/packages/shiny/topics/actionButton">shiny::actionButton()</a></code>, except the input is determined by the <code>outputId</code> of the shiny output it’s overlaying: <code>input$OUTPUTID_output_code</code>. When this button is clicked, we recommend showing code for an output by supplying that code to <code>displayCodeModal()</code> (which shows a <code><a href="https://www.rdocumentation.org/packages/shiny/topics/modalDialog">shiny::modalDialog()</a></code> that contains a <code><a href="https://www.rdocumentation.org/packages/shinyAce/topics/aceEditor">shinyAce::aceEditor()</a></code>).</p>
+<p>If your Shiny app has lots of outputs, then you may want an intuitive way for users to obtain the code for specific output(s). For this purpose, <strong>shinymeta</strong> provides <code><a href="../reference/outputCodeButton.html">outputCodeButton()</a></code>, which wraps an output in a container with a button. The button works in a similar way to an <code><a href="https://www.rdocumentation.org/packages/shiny/topics/actionButton">shiny::actionButton()</a></code>, except the input is determined by the <code>outputId</code> of the shiny output it’s overlaying: <code>input$OUTPUTID_output_code</code>. When this button is clicked, we recommend showing code for an output by supplying that code to <code><a href="../reference/displayCodeModal.html">displayCodeModal()</a></code> (which shows a <code><a href="https://www.rdocumentation.org/packages/shiny/topics/modalDialog">shiny::modalDialog()</a></code> that contains a <code><a href="https://www.rdocumentation.org/packages/shinyAce/topics/aceEditor">shinyAce::aceEditor()</a></code>).</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(shiny)</span>
 <span id="cb4-2"><a href="#cb4-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(shinymeta)</span>
 <span id="cb4-3"><a href="#cb4-3"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)</span>
 <span id="cb4-4"><a href="#cb4-4"></a>ui &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/fluidPage">fluidPage</a></span>(</span>
-<span id="cb4-5"><a href="#cb4-5"></a>  <span class="kw">outputCodeButton</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/plotOutput">plotOutput</a></span>(<span class="st">"p1"</span>, <span class="dt">height =</span> <span class="dv">200</span>)),</span>
-<span id="cb4-6"><a href="#cb4-6"></a>  <span class="kw">outputCodeButton</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/plotOutput">plotOutput</a></span>(<span class="st">"p2"</span>, <span class="dt">height =</span> <span class="dv">200</span>))</span>
+<span id="cb4-5"><a href="#cb4-5"></a>  <span class="kw"><a href="../reference/outputCodeButton.html">outputCodeButton</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/plotOutput">plotOutput</a></span>(<span class="st">"p1"</span>, <span class="dt">height =</span> <span class="dv">200</span>)),</span>
+<span id="cb4-6"><a href="#cb4-6"></a>  <span class="kw"><a href="../reference/outputCodeButton.html">outputCodeButton</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/plotOutput">plotOutput</a></span>(<span class="st">"p2"</span>, <span class="dt">height =</span> <span class="dv">200</span>))</span>
 <span id="cb4-7"><a href="#cb4-7"></a>)</span>
 <span id="cb4-8"><a href="#cb4-8"></a>server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output) {</span>
 <span id="cb4-9"><a href="#cb4-9"></a>  output<span class="op">$</span>p1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/metaRender.html">metaRender</a></span>(renderPlot, {</span>
@@ -269,11 +269,11 @@ And the second one:
 <span id="cb4-14"><a href="#cb4-14"></a>  })</span>
 <span id="cb4-15"><a href="#cb4-15"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/observeEvent">observeEvent</a></span>(input<span class="op">$</span>p1_output_code, {</span>
 <span id="cb4-16"><a href="#cb4-16"></a>    code &lt;-<span class="st"> </span><span class="kw"><a href="../reference/expandCode.html">expandObjects</a></span>(output<span class="op">$</span>p1, <span class="dt">.pkgs =</span> <span class="st">"ggplot2"</span>)</span>
-<span id="cb4-17"><a href="#cb4-17"></a>    <span class="kw">displayCodeModal</span>(code)</span>
+<span id="cb4-17"><a href="#cb4-17"></a>    <span class="kw"><a href="../reference/displayCodeModal.html">displayCodeModal</a></span>(code)</span>
 <span id="cb4-18"><a href="#cb4-18"></a>  })</span>
 <span id="cb4-19"><a href="#cb4-19"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/observeEvent">observeEvent</a></span>(input<span class="op">$</span>p2_output_code, {</span>
 <span id="cb4-20"><a href="#cb4-20"></a>    code &lt;-<span class="st"> </span><span class="kw"><a href="../reference/expandCode.html">expandObjects</a></span>(output<span class="op">$</span>p2, <span class="dt">.pkgs =</span> <span class="st">"ggplot2"</span>)</span>
-<span id="cb4-21"><a href="#cb4-21"></a>    <span class="kw">displayCodeModal</span>(code)</span>
+<span id="cb4-21"><a href="#cb4-21"></a>    <span class="kw"><a href="../reference/displayCodeModal.html">displayCodeModal</a></span>(code)</span>
 <span id="cb4-22"><a href="#cb4-22"></a>  })</span>
 <span id="cb4-23"><a href="#cb4-23"></a>}</span>
 <span id="cb4-24"><a href="#cb4-24"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
@@ -287,7 +287,7 @@ TODO:
 <div id="numerous-outputs" class="section level3">
 <h3 class="hasAnchor">
 <a href="#numerous-outputs" class="anchor"></a>For numerous outputs</h3>
-<p>If you want to show code for a collection of outputs at once, we recommend using a <code><a href="https://www.rdocumentation.org/packages/shiny/topics/actionButton">shiny::actionButton()</a></code> instead of <code>outputCodeButton()</code> to trigger the code display. Note that with <code>displayCodeModal()</code>, you are able to control both the <code><a href="https://www.rdocumentation.org/packages/shiny/topics/modalDialog">modalDialog()</a></code> as well as the <code><a href="https://www.rdocumentation.org/packages/shinyAce/topics/aceEditor">shinyAce::aceEditor()</a></code> that it contains.</p>
+<p>If you want to show code for a collection of outputs at once, we recommend using a <code><a href="https://www.rdocumentation.org/packages/shiny/topics/actionButton">shiny::actionButton()</a></code> instead of <code><a href="../reference/outputCodeButton.html">outputCodeButton()</a></code> to trigger the code display. Note that with <code><a href="../reference/displayCodeModal.html">displayCodeModal()</a></code>, you are able to control both the <code><a href="https://www.rdocumentation.org/packages/shiny/topics/modalDialog">modalDialog()</a></code> as well as the <code><a href="https://www.rdocumentation.org/packages/shinyAce/topics/aceEditor">shinyAce::aceEditor()</a></code> that it contains.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(shiny)</span>
 <span id="cb5-2"><a href="#cb5-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(shinymeta)</span>
 <span id="cb5-3"><a href="#cb5-3"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)</span>
@@ -311,7 +311,7 @@ TODO:
 <span id="cb5-21"><a href="#cb5-21"></a>        <span class="op">!!</span>output<span class="op">$</span><span class="kw">p2</span>()</span>
 <span id="cb5-22"><a href="#cb5-22"></a>      )</span>
 <span id="cb5-23"><a href="#cb5-23"></a>    })</span>
-<span id="cb5-24"><a href="#cb5-24"></a>    <span class="kw">displayCodeModal</span>(</span>
+<span id="cb5-24"><a href="#cb5-24"></a>    <span class="kw"><a href="../reference/displayCodeModal.html">displayCodeModal</a></span>(</span>
 <span id="cb5-25"><a href="#cb5-25"></a>      code, </span>
 <span id="cb5-26"><a href="#cb5-26"></a>      <span class="dt">title =</span> <span class="st">"ggplot2 code"</span>,</span>
 <span id="cb5-27"><a href="#cb5-27"></a>      <span class="dt">size =</span> <span class="st">"s"</span>, </span>

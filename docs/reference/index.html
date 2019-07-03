@@ -125,23 +125,43 @@
     <tbody>
       <tr>
         <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
+          <h2 id="section-meta-reactives" class="hasAnchor"><a href="#section-meta-reactives" class="anchor"></a>Meta-reactives</h2>
+          <p class="section-desc"><p>These functions capture logic</p></p>
         </th>
       </tr>
       <tr>
         
         <td>
-          <p><code><a href="buildScriptBundle.html">buildScriptBundle()</a></code> <code><a href="buildScriptBundle.html">buildRmdBundle()</a></code> </p>
+          <p><code><a href="metaReactive.html">metaReactive()</a></code> <code><a href="metaReactive.html">metaReactive2()</a></code> </p>
         </td>
-        <td><p>Produce a zip bundle of code and results</p></td>
+        <td><p>Create a meta-reactive expression</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="displayEditor.html">displayEditor()</a></code> </p>
+          <p><code><a href="metaObserve.html">metaObserve()</a></code> <code><a href="metaObserve.html">metaObserve2()</a></code> </p>
         </td>
-        <td><p>Display a shinyAce code editor via shiny modal</p></td>
+        <td><p>Create a meta-reactive observer</p></td>
       </tr><tr>
+        
+        <td>
+          <p><code><a href="metaRender.html">metaRender()</a></code> <code><a href="metaRender.html">metaRender2()</a></code> </p>
+        </td>
+        <td><p>Create a meta-reactive output</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="metaExpr.html">metaExpr()</a></code> </p>
+        </td>
+        <td><p>Mark an expression as a meta-expression</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-code-generation" class="hasAnchor"><a href="#section-code-generation" class="anchor"></a>Code generation</h2>
+          <p class="section-desc"><p>Functions for generating code from meta-reactives.</p></p>
+        </th>
+      </tr>
+      <tr>
         
         <td>
           <p><code><a href="expandCode.html">expandCode()</a></code> <code><a href="expandCode.html">expandObjects()</a></code> </p>
@@ -153,42 +173,32 @@
           <p><code><a href="formatCode.html">formatCode()</a></code> <code><a href="formatCode.html">styleText()</a></code> <code><a href="formatCode.html">deparseCode()</a></code> </p>
         </td>
         <td><p>Deparse and format shinymeta expressions</p></td>
-      </tr><tr>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-code-distribution" class="hasAnchor"><a href="#section-code-distribution" class="anchor"></a>Code distribution</h2>
+          <p class="section-desc"><p>Functions for distributing code to users.</p></p>
+        </th>
+      </tr>
+      <tr>
         
         <td>
-          <p><code><a href="metaExpr.html">metaExpr()</a></code> </p>
+          <p><code><a href="buildScriptBundle.html">buildScriptBundle()</a></code> <code><a href="buildScriptBundle.html">buildRmdBundle()</a></code> </p>
         </td>
-        <td><p>Mark an expression as a meta-expression</p></td>
+        <td><p>Produce a zip bundle of code and results</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="metaIcon.html">metaIcon()</a></code> </p>
+          <p><code><a href="outputCodeButton.html">outputCodeButton()</a></code> </p>
         </td>
         <td><p>Overlay an icon on a shiny output</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="metaObserve.html">metaObserve()</a></code> <code><a href="metaObserve.html">metaObserve2()</a></code> </p>
+          <p><code><a href="displayCodeModal.html">displayCodeModal()</a></code> </p>
         </td>
-        <td><p>Create a meta-reactive observer</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="metaReactive.html">metaReactive()</a></code> <code><a href="metaReactive.html">metaReactive2()</a></code> </p>
-        </td>
-        <td><p>Create a meta-reactive expression</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="metaRender.html">metaRender()</a></code> </p>
-        </td>
-        <td><p>Create a meta-reactive output</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="withMetaMode.html">withMetaMode()</a></code> </p>
-        </td>
-        <td><p>Evaluate an expression with meta mode activated</p></td>
+        <td><p>Display a shinyAce code editor via shiny modal</p></td>
       </tr>
     </tbody>
     </table>
@@ -197,7 +207,9 @@
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#section-all-functions">All functions</a></li>
+      <li><a href="#section-meta-reactives">Meta-reactives</a></li>
+      <li><a href="#section-code-generation">Code generation</a></li>
+      <li><a href="#section-code-distribution">Code distribution</a></li>
     </ul>
   </div>
 </div>
