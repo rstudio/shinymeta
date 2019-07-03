@@ -1,0 +1,27 @@
+---
+title: "Some ggplot2 code"
+author: ""
+output: 
+  pdf_document: default
+  html_document:
+    code_folding: "hide"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  out.width="100%", 
+  tidy = TRUE
+)
+```
+
+Here is the first output:
+
+```{r}
+{{plot1}}
+```
+
+And the second one:
+
+```{r}
+{{plot2}}
+```
