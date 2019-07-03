@@ -10,7 +10,7 @@
 #' @param ... arguments passed along to `shinyAce::aceEditor()`
 #'
 #' @export
-#' @seealso [metaIcon]
+#' @seealso [outputCode]
 #' @examples
 #'
 #' if (interactive()) {
@@ -32,9 +32,9 @@
 #'   shinyApp(ui, server)
 #' }
 #'
-displayEditor <- function(code, title = NULL, clip = "clipboard",
+displayCodeModal <- function(code, title = NULL, clip = "clipboard",
                           footer = modalButton("Dismiss"), size = c("m", "s", "l"),
-                          easyClose = FALSE, fade = TRUE,
+                          easyClose = TRUE, fade = TRUE,
                           session = shiny::getDefaultReactiveDomain(), ...) {
 
   if (system.file(package = "shinyAce") == "") {
