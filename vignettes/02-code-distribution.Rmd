@@ -180,22 +180,30 @@ library(shiny)
 library(shinymeta)
 library(ggplot2)
 ui <- fluidPage(
-  outputCodeButton(plotOutput("p"))
+  outputCodeButton(plotOutput("p1", height = 200)),
+  outputCodeButton(plotOutput("p2", height = 200))
 )
 server <- function(input, output) {
-  output$p <- metaRender(renderPlot, {
+  output$p1 <- metaRender(renderPlot, {
     qplot(data = diamonds, x = carat) + ylab("Number of diamonds")
   })
-  observeEvent(input$p_output_code, {
-    code <- expandObjects(output$p(), .pkgs = "ggplot2")
-    displayEditor(code)
+  output$p2 <- metaRender(renderPlot, {
+    qplot(data = diamonds, x = price) + ylab("Number of diamonds")
+  })
+  observeEvent(input$p1_output_code, {
+    code <- expandObjects(output$p1, .pkgs = "ggplot2")
+    displayCodeModal(code)
+  })
+  observeEvent(input$p2_output_code, {
+    code <- expandObjects(output$p2, .pkgs = "ggplot2")
+    displayCodeModal(code)
   })
 }
 shinyApp(ui, server)
 ```
 
 ```{r, echo = FALSE, out.width="80%"}
-knitr::include_graphics("meta-icon.gif")
+knitr::include_graphics("output-code.gif")
 ```
 
 <!--
@@ -206,7 +214,7 @@ TODO:
 
 ### For numerous outputs {#numerous-outputs}
 
-If you want to show code for a collection of outputs at once, we recommend using a `shiny::actionButton()` instead of `metaIcon()` to trigger the code display. Note that with `displayEditor()`, you are able to control both the `modalDialog()` as well as the `shinyAce::aceEditor()` that it contains.  
+If you want to show code for a collection of outputs at once, we recommend using a `shiny::actionButton()` instead of `outputCodeButton()` to trigger the code display. Note that with `displayCodeModal()`, you are able to control both the `modalDialog()` as well as the `shinyAce::aceEditor()` that it contains.  
 
 ```{r, eval = FALSE}
 library(shiny)
@@ -232,7 +240,7 @@ server <- function(input, output) {
         !!output$p2()
       )
     })
-    displayEditor(
+    displayCodeModal(
       code, 
       title = "ggplot2 code",
       size = "s", 
