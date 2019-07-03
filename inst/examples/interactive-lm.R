@@ -72,7 +72,7 @@ server <- function(input, output) {
       theme_bw(base_size = 14)
   })
 
-  observeEvent(input$plot_shinymeta_icon, {
+  observeEvent(input$plot_output_code, {
     code <- expandCode(
       {
         library(ggplot2)
