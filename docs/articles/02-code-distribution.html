@@ -242,7 +242,7 @@ And the second one:
 <span id="cb3-49"><a href="#cb3-49"></a>}</span>
 <span id="cb3-50"><a href="#cb3-50"></a></span>
 <span id="cb3-51"><a href="#cb3-51"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
-<p><img src="upload-download.gif" width="810%" style="display: block; margin: auto;"></p>
+<p><img src="upload-download.gif" width="100%" style="display: block; margin: auto;"></p>
 </div>
 </div>
 <div id="showing-code" class="section level2">
@@ -256,19 +256,27 @@ And the second one:
 <span id="cb4-2"><a href="#cb4-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(shinymeta)</span>
 <span id="cb4-3"><a href="#cb4-3"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)</span>
 <span id="cb4-4"><a href="#cb4-4"></a>ui &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/fluidPage">fluidPage</a></span>(</span>
-<span id="cb4-5"><a href="#cb4-5"></a>  <span class="kw">outputCodeButton</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/plotOutput">plotOutput</a></span>(<span class="st">"p"</span>))</span>
-<span id="cb4-6"><a href="#cb4-6"></a>)</span>
-<span id="cb4-7"><a href="#cb4-7"></a>server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output) {</span>
-<span id="cb4-8"><a href="#cb4-8"></a>  output<span class="op">$</span>p &lt;-<span class="st"> </span><span class="kw"><a href="../reference/metaRender.html">metaRender</a></span>(renderPlot, {</span>
-<span id="cb4-9"><a href="#cb4-9"></a>    <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/qplot.html">qplot</a></span>(<span class="dt">data =</span> diamonds, <span class="dt">x =</span> carat) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span>(<span class="st">"Number of diamonds"</span>)</span>
-<span id="cb4-10"><a href="#cb4-10"></a>  })</span>
-<span id="cb4-11"><a href="#cb4-11"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/observeEvent">observeEvent</a></span>(input<span class="op">$</span>p_shinymeta_icon, {</span>
-<span id="cb4-12"><a href="#cb4-12"></a>    code &lt;-<span class="st"> </span><span class="kw"><a href="../reference/expandCode.html">expandObjects</a></span>(output<span class="op">$</span><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/builder">p</a></span>(), <span class="dt">.pkgs =</span> <span class="st">"ggplot2"</span>)</span>
-<span id="cb4-13"><a href="#cb4-13"></a>    <span class="kw"><a href="../reference/displayEditor.html">displayEditor</a></span>(code)</span>
+<span id="cb4-5"><a href="#cb4-5"></a>  <span class="kw">outputCodeButton</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/plotOutput">plotOutput</a></span>(<span class="st">"p1"</span>, <span class="dt">height =</span> <span class="dv">200</span>)),</span>
+<span id="cb4-6"><a href="#cb4-6"></a>  <span class="kw">outputCodeButton</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/plotOutput">plotOutput</a></span>(<span class="st">"p2"</span>, <span class="dt">height =</span> <span class="dv">200</span>))</span>
+<span id="cb4-7"><a href="#cb4-7"></a>)</span>
+<span id="cb4-8"><a href="#cb4-8"></a>server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output) {</span>
+<span id="cb4-9"><a href="#cb4-9"></a>  output<span class="op">$</span>p1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/metaRender.html">metaRender</a></span>(renderPlot, {</span>
+<span id="cb4-10"><a href="#cb4-10"></a>    <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/qplot.html">qplot</a></span>(<span class="dt">data =</span> diamonds, <span class="dt">x =</span> carat) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span>(<span class="st">"Number of diamonds"</span>)</span>
+<span id="cb4-11"><a href="#cb4-11"></a>  })</span>
+<span id="cb4-12"><a href="#cb4-12"></a>  output<span class="op">$</span>p2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/metaRender.html">metaRender</a></span>(renderPlot, {</span>
+<span id="cb4-13"><a href="#cb4-13"></a>    <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/qplot.html">qplot</a></span>(<span class="dt">data =</span> diamonds, <span class="dt">x =</span> price) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span>(<span class="st">"Number of diamonds"</span>)</span>
 <span id="cb4-14"><a href="#cb4-14"></a>  })</span>
-<span id="cb4-15"><a href="#cb4-15"></a>}</span>
-<span id="cb4-16"><a href="#cb4-16"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
-<p><img src="meta-icon.gif" width="80%" style="display: block; margin: auto;"></p>
+<span id="cb4-15"><a href="#cb4-15"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/observeEvent">observeEvent</a></span>(input<span class="op">$</span>p1_output_code, {</span>
+<span id="cb4-16"><a href="#cb4-16"></a>    code &lt;-<span class="st"> </span><span class="kw"><a href="../reference/expandCode.html">expandObjects</a></span>(output<span class="op">$</span>p1, <span class="dt">.pkgs =</span> <span class="st">"ggplot2"</span>)</span>
+<span id="cb4-17"><a href="#cb4-17"></a>    <span class="kw">displayCodeModal</span>(code)</span>
+<span id="cb4-18"><a href="#cb4-18"></a>  })</span>
+<span id="cb4-19"><a href="#cb4-19"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/observeEvent">observeEvent</a></span>(input<span class="op">$</span>p2_output_code, {</span>
+<span id="cb4-20"><a href="#cb4-20"></a>    code &lt;-<span class="st"> </span><span class="kw"><a href="../reference/expandCode.html">expandObjects</a></span>(output<span class="op">$</span>p2, <span class="dt">.pkgs =</span> <span class="st">"ggplot2"</span>)</span>
+<span id="cb4-21"><a href="#cb4-21"></a>    <span class="kw">displayCodeModal</span>(code)</span>
+<span id="cb4-22"><a href="#cb4-22"></a>  })</span>
+<span id="cb4-23"><a href="#cb4-23"></a>}</span>
+<span id="cb4-24"><a href="#cb4-24"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
+<p><img src="output-code.gif" width="80%" style="display: block; margin: auto;"></p>
 <!--
 TODO: 
 1. styling the icon?
