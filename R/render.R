@@ -50,6 +50,7 @@ metaRender <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FAL
 }
 
 #' @export
+#' @rdname metaRender
 metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE) {
   if (!quoted) {
     expr <- substitute(expr)
