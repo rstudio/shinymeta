@@ -20,7 +20,7 @@ remotes::install_github("rstudio/shinymeta")
 
 Below is a screen-recording of a Shiny app which allows you to obtain CRAN download statistics for any combination of CRAN packages, look at those downloads using different aggregations, and produce a Rmd-based report with code to reproduce the visualization. This Shiny app is different from most in that it generates R code to reproduce what the user sees in the Shiny app (i.e., notice how the generated report reflects the user's input).
 
-<img src="https://rstudio.github.io/shinymeta/readme-images/cranview-intro.gif" />
+<img src="https://rstudio.github.io/shinymeta/reference/figures/cranview-intro.gif" />
 
 We hope this example helps to illustrate several reasons why you might want to generate standalone R code that mimics logic in your Shiny app:
 
