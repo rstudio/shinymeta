@@ -1,5 +1,11 @@
 # shinymeta
 
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.org/rstudio/shinymeta.svg?branch=master)](https://travis-ci.org/rstudio/shinymeta)
+[![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/package=shinymeta)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+<!-- badges: end -->
+
 The **shinymeta** R package provides tools for capturing logic in a Shiny app and exposing it as code that can be run outside of Shiny (e.g., from an R console). It also provides tools for bundling both the code and results to the end user.
 
 ## Installation
@@ -14,7 +20,7 @@ remotes::install_github("rstudio/shinymeta")
 
 Below is a screen-recording of a Shiny app which allows you to obtain CRAN download statistics for any combination of CRAN packages, look at those downloads using different aggregations, and produce a Rmd-based report with code to reproduce the visualization. This Shiny app is different from most in that it generates R code to reproduce what the user sees in the Shiny app (i.e., notice how the generated report reflects the user's input).
 
-<img src="https://rstudio.github.io/shinymeta/articles/cranview-intro.gif" />
+<img src="https://rstudio.github.io/shinymeta/readme-images/cranview-intro.gif" />
 
 We hope this example helps to illustrate several reasons why you might want to generate standalone R code that mimics logic in your Shiny app:
 
