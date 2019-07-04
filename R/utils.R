@@ -67,3 +67,46 @@ reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domai
     map$get(hash)()
   }
 }
+
+# Given the srcref to a metaReactive expression, attempts to figure out what the
+# name of the reactive expression is. This isn't foolproof, as it literally
+# scans the line of code that started the reactive block and looks for something
+# that looks like assignment. If we fail, fall back to a default value (likely
+# the block of code in the body of the reactive).
+mrexprSrcrefToLabel <- function(srcref, defaultLabel) {
+  if (is.null(srcref))
+    return(defaultLabel)
+
+  srcfile <- attr(srcref, "srcfile", exact = TRUE)
+  if (is.null(srcfile))
+    return(defaultLabel)
+
+  if (is.null(srcfile$lines))
+    return(defaultLabel)
+
+  lines <- srcfile$lines
+  # When pasting at the Console, srcfile$lines is not split
+  if (length(lines) == 1) {
+    lines <- strsplit(lines, "\n")[[1]]
+  }
+
+  if (length(lines) < srcref[1]) {
+    return(defaultLabel)
+  }
+
+  firstLine <- substring(lines[srcref[1]], 1, srcref[2] - 1)
+
+  m <- regexec("(.*)(<-|=)\\s*metaReactive2?\\s*\\($", firstLine)
+  if (m[[1]][1] == -1) {
+    return(defaultLabel)
+  }
+  sym <- regmatches(firstLine, m)[[1]][2]
+  res <- try(parse(text = sym), silent = TRUE)
+  if (inherits(res, "try-error"))
+    return(defaultLabel)
+
+  if (length(res) != 1)
+    return(defaultLabel)
+
+  return(as.character(res))
+}

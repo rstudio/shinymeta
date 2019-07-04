@@ -1,5 +1,16 @@
 .globals <- new.env(parent = emptyenv())
 .globals$dynamicVars <- list()
+.globals$nextId = 0L
+
+# This is a global hook for intercepting meta-mode reads of metaReactive/2.
+# The first argument is the (delayed eval) code result, and rexpr is the
+# metaReactive/2 object itself. If evaluation of x is not triggered by the
+# hook function, then the metaReactive/2 code will not execute/be expanded.
+#
+# The return value should be a code object.
+.globals$rexprMetaReadFilter <- function(x, rexpr) {
+  x
+}
 
 #' Create a meta-reactive expression
 #'
@@ -52,6 +63,11 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
     quoted <- TRUE
   }
 
+  if (is.null(label)) {
+    srcref <- attr(expr, "srcref", exact = TRUE)
+    label <- mrexprSrcrefToLabel(srcref[[1]], "")
+  }
+
   # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
   # so, because we want to keep any `!!` contained in expr intact (i.e. too
   # early to perform expansion of expr here).
@@ -74,6 +90,11 @@ metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
     quoted <- TRUE
   }
 
+  if (is.null(label)) {
+    srcref <- attr(expr, "srcref", exact = TRUE)
+    label <- mrexprSrcrefToLabel(srcref[[1]], "")
+  }
+
   metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
 }
 
@@ -89,20 +110,26 @@ metaReactiveImpl <- function(expr, env, label, domain) {
 
   r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = label, domain = domain)
 
-  structure(
+  self <- structure(
     function() {
       metaDispatch(
         normal = {
           r_normal()
         },
         meta = {
+          filterFunc <- .globals$rexprMetaReadFilter
           # r_meta cache varies by dynamicVars
-          r_meta(metaCacheKey())
+          filterFunc({
+            r_meta(metaCacheKey())
+          }, self)
         }
       )
     },
-    class = c("shinymeta_reactive", "function")
+    class = c("shinymeta_reactive", "function"),
+    shinymetaLabel = label,
+    shinymetaUID = paste0("__shinymetaUID_", (.globals$nextId <- .globals$nextId + 1))
   )
+  self
 }
 
 # A global variable that can be one of three values:
@@ -466,6 +493,129 @@ expandObjects <- function(..., .env = parent.frame(), .pkgs) {
 
   expr <- do.call(call, c(list("{"), objs), quote = TRUE)
   expandCode(!!expandExpr(expr, NULL, .env), patchCalls = patchCalls)
+}
+
+#' @export
+expandChain <- function(...) {
+  # As we come across previously unseen objects (i.e. the UID has not been
+  # encountered before) we have to make some decisions about what variable name
+  # (i.e. label) to use to represent that object. Usually this label name is
+  # either auto-detected based on the metaReactive's variable name, or provided
+  # explicitly by the user when the metaReactive is created.
+  #
+  # There are a couple of reasons this could fail:
+  #
+  # 1. The variable name could not be auto-detected (and the user didn't provide
+  # one explicitly). In this case, the label will be "". We need to create a
+  # label out of thin air in this case, so we make one in the pattern of var_1,
+  # var_2, etc.
+  #
+  # 2. The desired variable name might already have been used by a different
+  # metaReactive (i.e. two objects have the same label). In this case, we can
+  # also use a var_1, var_2, etc. (and this is what the code currently does)
+  # but it'd be even better to try to disambiguate by:
+  #   a. If in a Shiny module, use session$ns(label) (and convert - to _)
+  #   b. Use the desired name plus _1, _2, etc. (keep going til you find one
+  #      that hasn't been used yet).
+  #
+  # IDEA:
+  # A different strategy we could use is to generate a gensym as the label at
+  # first, keeping track of the metadata for every gensym (label, module id).
+  # Then after the code generation is done, we can go back and see what the
+  # best overall set of variable names is. For example, if the same variable
+  # name "df" is used within module IDs "one" and "two", we can use "one_df"
+  # and "two_df"; but if only module ID "one" is used, we can just leave it
+  # as "df". (As opposed to the current strategy, where if "one" and "two"
+  # are both used, we end up with "df" and "df_two".)
+
+  # Keep track of what label we have used for each UID we have previously
+  # encountered. If a UID isn't found in this map, then we haven't yet
+  # encountered it.
+  uidToLabel <- fastmap::fastmap(missing_default = NULL)
+  # Keep track of what labels we have used, so we can be sure we don't
+  # reuse them.
+  seenLabel <- fastmap::fastmap(missing_default = FALSE)
+
+  # Function to make a (hopefully but not guaranteed to be new) label
+  makeVarName <- local({
+    nextVarId <- 0L
+    function() {
+      nextVarId <<- nextVarId + 1L
+      paste0("var_", nextVarId)
+    }
+  })
+
+  # As we encounter metaReactives that we depend on (directly or indirectly),
+  # we'll append their code to this list (including assigning them to a label).
+  dependencyCode <- list()
+
+  # Override the rexprMetaReadFilter while we generate code. This is a filter
+  # function that metaReactive/metaReactive2 will call when someone asks them
+  # for their meta value. The `x` is the (lazily evaluated) logic for actually
+  # generating their code (or retrieving it from cache).
+  oldFilter <- .globals$rexprMetaReadFilter
+  .globals$rexprMetaReadFilter <- function(x, rexpr) {
+    # Read this object's UID.
+    uid <- attr(rexpr, "shinymetaUID", exact = TRUE)
+
+    # Check if we've seen this UID before, and if so, just return the same label
+    # (i.e. varname) as we used last time.
+    label <- uidToLabel$get(uid)
+    if (!is.null(label)) {
+      return(as.symbol(label))
+    }
+
+    # OK, we haven't seen this UID before. We need to figure out what variable
+    # name to use.
+
+    # Our first choice would be whatever label the object itself has (the true
+    # var name of this metaReactive, or a name the user explicitly provided).
+    label <- attr(rexpr, "shinymetaLabel", exact = TRUE)
+
+    # If there wasn't either a varname or explicitly provided name, just make
+    # a totally generic one up.
+    if (is.null(label) || label == "" || length(label) != 1) {
+      label <- makeVarName()
+    }
+
+    # Make sure we don't use a variable name that has already been used.
+    while (seenLabel$get(label)) {
+      label <- makeVarName()
+    }
+
+    # Remember this UID/label combination for the future.
+    uidToLabel$set(uid, label)
+    # Make sure this label doesn't get used again.
+    seenLabel$set(label, TRUE)
+
+    # Since this is the first time we're seeing this object, now we need to
+    # generate its code and store it in our running list of dependencies.
+    expr <- rlang::expr(`<-`(!!as.symbol(label), !!x))
+    dependencyCode <<- c(dependencyCode, list(expr))
+
+    # This is what we're returning to the caller; whomever wanted the code for
+    # this metaReactive is going to get this variable name instead.
+    as.symbol(label)
+  }
+  on.exit(.globals$rexprMetaReadFilter <- oldFilter, add = TRUE, after = FALSE)
+
+  withMetaMode({
+    # Trigger evaluation of the ..., which will also cause dependencyCode to be
+    # populated. The value of list(...) should all be code expressions, unless
+    # the user passed in something wrong.
+    # TODO: Validate that all values are code expressions
+    # TODO: If arguments are named, turn those into assignment, probably?
+    # TODO: If we turn named arguments into assignment, we need to make sure
+    #   that downstream objects use that variable name instead of the one based
+    #   on the object's label.
+    # TODO: Filter out NULL values in res.
+    res <- list(...)
+
+    # Put the dependency code and res together in a block of code.
+    metaExpr({
+      !!!c(dependencyCode, res)
+    })
+  })
 }
 
 prefix_class <- function (x, y) {
