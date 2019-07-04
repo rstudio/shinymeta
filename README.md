@@ -69,53 +69,15 @@ Generating code with **shinymeta** that is correct and clean is not necessarily 
 
 ## Compared to alternatives
 
-Combining interactivity and reproducibility is generally a very hard problem in computing. Shiny provides a great foundation for producing interactive artifacts, but reproducing those artifacts in another context is difficult. We do see **shinymeta** as a step forward for the reproducibility problem, but it is by no means *the solution*. As with most things, there are tradeoffs and other approaches you may want to consider. We think there are roughly three tradeoff categories:
+Combining interactivity and reproducibility is generally a very hard problem in computing. Shiny provides a great foundation for producing interactive artifacts, but reproducing those artifacts in another context is difficult. We do see **shinymeta** as a step forward for the reproducibility problem, but it is by no means *the solution*. As with most things, there are numerous ways to attack the problem, each with it's own set of tradeoffs and considerations:
 
- 1. **Quality of output:** Does the generated code look clean, like a human would write it; or is it awkwardly structured and/or contain random boilerplate?
-2. **Ease of implementation** How hard is it to add code generation to your app? This includes learning and maintenance of the codebase.
-3. **Generality:** Can code generation features be added to _any_ Shiny app, or only apps that follow certain conventions? Does it work as well for large, complex apps as for small ones?
+1. **Copy and paste**: The simplest approach is to simply duplicate your logic. You have an `app.R` file that contains your Shiny app, and a separate `script.R` or `report.Rmd` file that contains the same logic in linear form (i.e. minus any of the structure that Shiny imposes). The `script.R` or `report.Rmd` contains placeholders that will be replaced by input values selected by the user. This approach is easy to understand, but it means that you are stuck maintaining a parallel codebase that you must manually keep in sync. Over the long term, this can be a source of not only tedium but also bugs. On the plus side, because you're maintaining `script.R`/`report.Rmd` by hand, the level of code quality is limited only by your own skill.
 
-Furthermore, there are roughly three different approaches one could take, each scoring differently on the tradeoff categories (more stars means better):
+2. **Mechanical transformation**: This approach automatically transforms your reactives, outputs, and observers into linearized code, using predefined algorithms/heuristics. You as the app author are neither required nor able to influence the code generation process very much. The nice thing about this is how little effort it is -- you can add [scriptgloss](https://github.com/dgkf/scriptgloss) to your app in a couple of minutes! The price you pay for all this automation is that the generated code looks pretty unnatural, with some Shiny-related wires sticking out. Plus, there are several common situations that will lead to the script not working; then the onus is on either the app author to gain a deeper understanding of **scriptgloss** and restructure the app to suit, or on the user to take the slightly broken code and fix it.
 
-### Approach 1: Copy and paste
-
-> Quality of output: \*\*\*\*\*
->
-> Ease of implementation: \*\* (but highly variable)
->
-> Generality: \*\*
-
-The simplest approach is to simply duplicate your logic. You have an `app.R` file that contains your Shiny app, and a separate `script.R` or `report.Rmd` file that contains the same logic in linear form (i.e. minus any of the structure that Shiny imposes). The `script.R` or `report.Rmd` contains placeholders that will be replaced by input values selected by the user.
-
-This approach is easy to understand, but it means that you are stuck maintaining a parallel codebase that you must manually keep in sync. Over the long term, this can be a source of not only tedium but also bugs. On the plus side, because you're maintaining `script.R`/`report.Rmd` by hand, the level of code quality is limited only by your own skill.
-
-### Approach 2: Mechanical transformation (scriptgloss)
-
-> Quality of output: \*\*
->
-> Ease of implementation: \*\*\*\*
->
-> Generality: \*\*
- 
-This approach automatically transforms your reactives, outputs, and observers into linearized code, using predefined algorithms/heuristics. You as the app author are neither required nor able to influence the code generation process very much. The nice thing about this is how little effort it is -- you can add [scriptgloss](https://github.com/dgkf/scriptgloss) to your app in a couple of minutes!
-
-The price you pay for all this automation is that the generated code looks pretty unnatural, with some Shiny-related wires sticking out. Plus, there are several common situations that will lead to the script not working; then the onus is on either the app author to gain a deeper understanding of scriptgloss and restructure the app to suit, or on the user to take the slightly broken code and fix it.
-
-### Approach 3: Metaprogramming (shinymeta)
-
-> Quality of output: \*\*\*\*
->
-> Ease of implementation: \*\*
->
-> Generality: \*\*\*\*\*
-
-Of these three techniques, metaprogramming is by far the most conceptually challenging to get started with. In exchange for climbing the considerable learning curve, you get much more control over how the code output is generated. We also believe (but can't yet prove) that this approach can scale to larger, more complex apps, including ones that use Shiny modules.
+3. **Metaprogramming**: Of these three techniques, metaprogramming is by far the most conceptually challenging to get started with. In exchange for climbing the considerable learning curve, you get much more control over how the code output is generated. We also believe (but can't yet prove) that this approach can scale to larger, more complex apps, including ones that use Shiny modules.
 
 
 ## Acknowledgements
 
-Adrian Waddell (especially), Eric Nantz, Xiao Ni, Doug Keklhoff
-
-intRo?
-https://github.com/gammarama/intRo/blob/papers/jcgs-paper-2016/paper-original.pdf
-https://github.com/hadley/15-student-papers/blob/master/student-papers.pdf
+Many people projects provided motivation, inspiration, and ideas that have lead to **shinymeta**. Thanks especially to Adrian Waddell for inspiring the over-overarching metaprogramming approach and Doug Keklhoff for his work on **scriptgloss**. Also thanks to Eric Nantz and Xiao Ni for providing feedback and insight on potential applications. We'd also like to acknowledge and highlight other work towards this same goal such as <http://intro-stats.com> (Eric Hare and Andee Kaplan) and <https://radiant-rstats.github.io> (Vincent Nijs).
