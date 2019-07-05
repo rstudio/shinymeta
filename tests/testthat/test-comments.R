@@ -230,5 +230,21 @@ describe("various edge cases", isolate({
     )
   )
 
+  code <- expandCode({
+    {
+      "# A comment"
+      a
+    } + b
+  })
+  expect_equal(
+    capturePrint(code),
+    c(
+      "{",
+      "  # A comment",
+      "  a",
+      "} + b"
+    )
+  )
+
   # TODO: What should happen if \n appears in a string-comment?
 }))
