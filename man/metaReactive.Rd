@@ -7,10 +7,11 @@
 \usage{
 metaReactive(expr, env = parent.frame(), quoted = FALSE,
   label = NULL, domain = shiny::getDefaultReactiveDomain(),
-  localize = "auto", bindToReturn = FALSE)
+  inline = FALSE, localize = "auto", bindToReturn = FALSE)
 
 metaReactive2(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain())
+  label = NULL, domain = shiny::getDefaultReactiveDomain(),
+  inline = FALSE)
 }
 \arguments{
 \item{expr}{An expression (quoted or unquoted).}
@@ -26,6 +27,10 @@ variable; to do so, it must be quoted with \code{quote()}.}
 \item{label}{A label for the reactive expression, useful for debugging.}
 
 \item{domain}{See \link{domains}.}
+
+\item{inline}{If \code{TRUE}, during code expansion, do not declare a variable for
+this object; instead, inline the code into every call site. Use this to avoid
+introducing variables for very simple expressions.}
 
 \item{localize}{Whether or not to wrap the returned expression in \code{\link[=local]{local()}}.
 The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[=return]{return()}}

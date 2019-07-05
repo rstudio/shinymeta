@@ -22,6 +22,10 @@
 #' that has no meaning outside shiny, like [req()]), use `metaReactive2()` in combination
 #' with `metaExpr()`. When using `metaReactive2()`, `expr` must return a `metaExpr()`.
 #'
+#' @param inline If `TRUE`, during code expansion, do not declare a variable for
+#' this object; instead, inline the code into every call site. Use this to avoid
+#' introducing variables for very simple expressions.
+#'
 #' @inheritParams shiny::reactive
 #' @inheritParams metaExpr
 #' @export
@@ -55,8 +59,8 @@
 #' expandCode(y <- !!y())
 #'
 metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
-                         label = NULL, domain = shiny::getDefaultReactiveDomain(),
-                         localize = "auto", bindToReturn = FALSE) {
+  label = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE,
+  localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
@@ -76,14 +80,14 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
   expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
 
-  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
+  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain, inline = inline)
 }
 
 
 #' @export
 #' @rdname metaReactive
 metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain()) {
+  label = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
@@ -95,14 +99,15 @@ metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
     label <- mrexprSrcrefToLabel(srcref[[1]], "")
   }
 
-  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
+  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain, inline = inline)
 }
 
-metaReactiveImpl <- function(expr, env, label, domain) {
+metaReactiveImpl <- function(expr, env, label, domain, inline) {
   force(expr)
   force(env)
   force(label)
   force(domain)
+  force(inline)
 
   r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = label, domain = domain)
   r_meta <- function() {
@@ -128,7 +133,9 @@ metaReactiveImpl <- function(expr, env, label, domain) {
     },
     class = c("shinymeta_reactive", "function"),
     shinymetaLabel = label,
-    shinymetaUID = as.character(.globals$nextId <- .globals$nextId + 1)
+    shinymetaUID = as.character(.globals$nextId <- .globals$nextId + 1),
+    shinymetaDomain = domain,
+    shinymetaInline = inline
   )
   self
 }
@@ -566,6 +573,13 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
   .globals$rexprMetaReadFilter <- function(x, rexpr) {
     # Read this object's UID.
     uid <- attr(rexpr, "shinymetaUID", exact = TRUE)
+    domain <- attr(rexpr, "shinymetaDomain", exact = TRUE)
+    inline <- attr(rexpr, "shinymetaInline", exact = TRUE)
+
+    if (isTRUE(inline)) {
+      # The metaReactive doesn't want to have its own variable
+      return(x)
+    }
 
     # Check if we've seen this UID before, and if so, just return the same label
     # (i.e. varname) as we used last time.
@@ -585,6 +599,10 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     # a totally generic one up.
     if (is.null(label) || label == "" || length(label) != 1) {
       label <- makeVarName()
+    } else {
+      if (!is.null(domain)) {
+        label <- gsub("-", "_", domain$ns(label))
+      }
     }
 
     # Make sure we don't use a variable name that has already been used.
