@@ -115,10 +115,10 @@ exprToVarname <- function(expr, varname = NULL, inline, objectType = "metaReacti
     )
   } else {
     if (!is.character(varname) || length(varname) != 1 || is.na(varname) || nchar(varname) == 0) {
-      stop("Invalid varname for ", objectType, call. = FALSE)
+      stop("varname must be a non-empty string", call. = FALSE)
     }
     if (varname != make.names(varname)) {
-      stop("Invalid varname for ", objectType, ": '", varname, "'", call. = FALSE)
+      stop("varname must be a valid R identifier (was '", varname, "')", call. = FALSE)
     }
   }
   varname
