@@ -6,11 +6,11 @@
 \title{Create a meta-reactive expression}
 \usage{
 metaReactive(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain(),
+  varname = NULL, domain = shiny::getDefaultReactiveDomain(),
   inline = FALSE, localize = "auto", bindToReturn = FALSE)
 
 metaReactive2(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain(),
+  varname = NULL, domain = shiny::getDefaultReactiveDomain(),
   inline = FALSE)
 }
 \arguments{
@@ -24,7 +24,8 @@ non-reactive expression.}
 This is useful when you want to use an expression that is stored in a
 variable; to do so, it must be quoted with \code{quote()}.}
 
-\item{label}{A label for the reactive expression, useful for debugging.}
+\item{varname}{An R variable name that this object prefers to be named when
+its code is extracted into an R script.}
 
 \item{domain}{See \link{domains}.}
 
@@ -48,6 +49,8 @@ code expression (instead of evaluating that expression and returning the value).
 If you wish to capture specific code inside of \code{expr} (e.g. ignore code
 that has no meaning outside shiny, like \code{\link[=req]{req()}}), use \code{metaReactive2()} in combination
 with \code{metaExpr()}. When using \code{metaReactive2()}, \code{expr} must return a \code{metaExpr()}.
+
+TODO: Document reasons why varname detection might fail.
 }
 \examples{
 
