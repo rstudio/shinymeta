@@ -166,8 +166,8 @@ describe("mixed mode", isolate({
   # A bunch of different kinds of metaReactive objects that should all
   # yield quote(1+1) in meta mode.
   srcs <- list(
-    metaReactive(1 + 1),
-    metaReactive2(metaExpr(1 + 1)),
+    metaReactive(1 + 1, inline = TRUE),
+    metaReactive2(metaExpr(1 + 1), inline = TRUE),
     metaObserve(1 + 1),
     metaObserve2(metaExpr(1 + 1)),
     metaRender(renderText, 1 + 1),
@@ -177,7 +177,7 @@ describe("mixed mode", isolate({
   # Try this scenario with each of the different kinds of objects.
   lapply(srcs, function(src) {
 
-    mr <- metaReactive(!!src())
+    mr <- metaReactive(!!src(), inline = TRUE)
     expect_equal(withMetaMode(mr()), quote(1 + 1))
 
     v <- reactiveVal(0) # cache busting reactive val
