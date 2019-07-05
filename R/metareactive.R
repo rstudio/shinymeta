@@ -22,9 +22,14 @@
 #' that has no meaning outside shiny, like [req()]), use `metaReactive2()` in combination
 #' with `metaExpr()`. When using `metaReactive2()`, `expr` must return a `metaExpr()`.
 #'
+#' TODO: Document reasons why varname detection might fail.
+#'
 #' @param inline If `TRUE`, during code expansion, do not declare a variable for
 #' this object; instead, inline the code into every call site. Use this to avoid
 #' introducing variables for very simple expressions.
+#'
+#' @param varname An R variable name that this object prefers to be named when
+#' its code is extracted into an R script.
 #'
 #' @inheritParams shiny::reactive
 #' @inheritParams metaExpr
@@ -59,7 +64,7 @@
 #' expandCode(y <- !!y())
 #'
 metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE,
+  varname = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE,
   localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
@@ -67,10 +72,7 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
     quoted <- TRUE
   }
 
-  if (is.null(label)) {
-    srcref <- attr(expr, "srcref", exact = TRUE)
-    label <- mrexprSrcrefToLabel(srcref[[1]], "")
-  }
+  varname <- exprToVarname(expr, varname, "metaReactive")
 
   # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
   # so, because we want to keep any `!!` contained in expr intact (i.e. too
@@ -80,36 +82,53 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
   expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
 
-  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain, inline = inline)
+  metaReactiveImpl(expr = expr, env = env, varname = varname, domain = domain, inline = inline)
 }
 
 
 #' @export
 #' @rdname metaReactive
 metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE) {
+  varname = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
   }
 
-  if (is.null(label)) {
-    srcref <- attr(expr, "srcref", exact = TRUE)
-    label <- mrexprSrcrefToLabel(srcref[[1]], "")
-  }
+  varname <- exprToVarname(expr, varname, "metaReactive2")
 
-  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain, inline = inline)
+  metaReactiveImpl(expr = expr, env = env, varname = varname, domain = domain, inline = inline)
 }
 
-metaReactiveImpl <- function(expr, env, label, domain, inline) {
+exprToVarname <- function(expr, varname = NULL, objectType = "metaReactive") {
+  if (is.null(varname)) {
+    srcref <- attr(expr, "srcref", exact = TRUE)
+    if (is.null(srcref)) {
+      stop("No srcref available; is your ", objectType, " code missing {curly braces}?")
+    }
+    varname <- mrexprSrcrefToLabel(srcref[[1]],
+      stop("Failed to infer variable name for ", objectType, "; see the Details section of ?metaReactive for suggestions")
+    )
+  } else {
+    if (!is.character(varname) || length(varname) != 1 || is.na(varname) || nchar(varname) == 0) {
+      stop("Invalid varname for ", objectType)
+    }
+    if (varname != make.names(varname)) {
+      stop("Invalid varname for ", objectType, ": '", varname, "'")
+    }
+  }
+  varname
+}
+
+metaReactiveImpl <- function(expr, env, varname, domain, inline) {
   force(expr)
   force(env)
-  force(label)
+  force(varname)
   force(domain)
   force(inline)
 
-  r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = label, domain = domain)
+  r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = varname, domain = domain)
   r_meta <- function() {
     shiny::withReactiveDomain(domain, {
       rlang::eval_tidy(expr, NULL, env)
@@ -132,12 +151,17 @@ metaReactiveImpl <- function(expr, env, label, domain, inline) {
       )
     },
     class = c("shinymeta_reactive", "function"),
-    shinymetaLabel = label,
+    shinymetaVarname = varname,
     shinymetaUID = shiny:::createUniqueId(8),
     shinymetaDomain = domain,
     shinymetaInline = inline
   )
   self
+}
+
+#' @export
+print.shinymeta_reactive <- function(x, ...) {
+  cat("metaReactive:", attr(x, "shinymetaVarname"), "\n", sep = "")
 }
 
 # A global variable that can be one of three values:
@@ -507,10 +531,10 @@ expandObjects <- function(..., .env = parent.frame(), .pkgs) {
 newExpansionContext <- function() {
   structure(
     list(
-      uidToLabel = fastmap::fastmap(missing_default = NULL),
-      seenLabel = fastmap::fastmap(missing_default = FALSE),
-      # Function to make a (hopefully but not guaranteed to be new) label
-      makeVarName = local({
+      uidToVarname = fastmap::fastmap(missing_default = NULL),
+      seenVarname = fastmap::fastmap(missing_default = FALSE),
+      # Function to make a (hopefully but not guaranteed to be new) varname
+      makeVarname = local({
         nextVarId <- 0L
         function() {
           nextVarId <<- nextVarId + 1L
@@ -524,7 +548,7 @@ newExpansionContext <- function() {
 
 #' @export
 print.shinymetaExpansionContext <- function(x, ...) {
-  map <- x$uidToLabel
+  map <- x$uidToVarname
   cat(sprintf("%s [id: %s]", map$mget(map$keys()), map$keys()), sep = "\n")
 }
 
@@ -532,24 +556,16 @@ print.shinymetaExpansionContext <- function(x, ...) {
 expandChain <- function(..., .expansionContext = newExpansionContext()) {
   # As we come across previously unseen objects (i.e. the UID has not been
   # encountered before) we have to make some decisions about what variable name
-  # (i.e. label) to use to represent that object. Usually this label name is
-  # either auto-detected based on the metaReactive's variable name, or provided
-  # explicitly by the user when the metaReactive is created.
+  # (i.e. varname) to use to represent that object. This varname is either
+  # auto-detected based on the metaReactive's variable name, or provided
+  # explicitly by the user when the metaReactive is created. (If the object
+  # belongs to a module, then we use the module ID to prefix the varname.)
   #
-  # There are a couple of reasons this could fail:
-  #
-  # 1. The variable name could not be auto-detected (and the user didn't provide
-  # one explicitly). In this case, the label will be "". We need to create a
-  # label out of thin air in this case, so we make one in the pattern of var_1,
-  # var_2, etc.
-  #
-  # 2. The desired variable name might already have been used by a different
+  # But, the desired variable name might already have been used by a different
   # metaReactive (i.e. two objects have the same label). In this case, we can
   # also use a var_1, var_2, etc. (and this is what the code currently does)
-  # but it'd be even better to try to disambiguate by:
-  #   a. If in a Shiny module, use session$ns(label) (and convert - to _)
-  #   b. Use the desired name plus _1, _2, etc. (keep going til you find one
-  #      that hasn't been used yet).
+  # but it'd be even better to try to disambiguate by using the desired name
+  # plus _1, _2, etc. (keep going til you find one that hasn't been used yet).
   #
   # IDEA:
   # A different strategy we could use is to generate a gensym as the label at
@@ -564,10 +580,10 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
   # Keep track of what label we have used for each UID we have previously
   # encountered. If a UID isn't found in this map, then we haven't yet
   # encountered it.
-  uidToLabel <- .expansionContext$uidToLabel
+  uidToVarname <- .expansionContext$uidToVarname
   # Keep track of what labels we have used, so we can be sure we don't
   # reuse them.
-  seenLabel <- .expansionContext$seenLabel
+  seenVarname <- .expansionContext$seenVarname
 
   # As we encounter metaReactives that we depend on (directly or indirectly),
   # we'll append their code to this list (including assigning them to a label).
@@ -589,48 +605,48 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
       return(x)
     }
 
-    # Check if we've seen this UID before, and if so, just return the same label
-    # (i.e. varname) as we used last time.
-    label <- uidToLabel$get(uid)
-    if (!is.null(label)) {
-      return(as.symbol(label))
+    # Check if we've seen this UID before, and if so, just return the same
+    # varname as we used last time.
+    varname <- uidToVarname$get(uid)
+    if (!is.null(varname)) {
+      return(as.symbol(varname))
     }
 
     # OK, we haven't seen this UID before. We need to figure out what variable
     # name to use.
 
-    # Our first choice would be whatever label the object itself has (the true
+    # Our first choice would be whatever varname the object itself has (the true
     # var name of this metaReactive, or a name the user explicitly provided).
-    label <- attr(rexpr, "shinymetaLabel", exact = TRUE)
+    varname <- attr(rexpr, "shinymetaVarname", exact = TRUE)
 
     # If there wasn't either a varname or explicitly provided name, just make
     # a totally generic one up.
-    if (is.null(label) || label == "" || length(label) != 1) {
-      label <- .expansionContext$makeVarName()
+    if (is.null(varname) || varname == "" || length(varname) != 1) {
+      varname <- .expansionContext$makeVarname()
     } else {
       if (!is.null(domain)) {
-        label <- gsub("-", "_", domain$ns(label))
+        varname <- gsub("-", "_", domain$ns(varname))
       }
     }
 
     # Make sure we don't use a variable name that has already been used.
-    while (seenLabel$get(label)) {
-      label <- .expansionContext$makeVarName()
+    while (seenVarname$get(varname)) {
+      varname <- .expansionContext$makeVarname()
     }
 
-    # Remember this UID/label combination for the future.
-    uidToLabel$set(uid, label)
-    # Make sure this label doesn't get used again.
-    seenLabel$set(label, TRUE)
+    # Remember this UID/varname combination for the future.
+    uidToVarname$set(uid, varname)
+    # Make sure this varname doesn't get used again.
+    seenVarname$set(varname, TRUE)
 
     # Since this is the first time we're seeing this object, now we need to
     # generate its code and store it in our running list of dependencies.
-    expr <- rlang::expr(`<-`(!!as.symbol(label), !!x))
+    expr <- rlang::expr(`<-`(!!as.symbol(varname), !!x))
     dependencyCode <<- c(dependencyCode, list(expr))
 
     # This is what we're returning to the caller; whomever wanted the code for
     # this metaReactive is going to get this variable name instead.
-    as.symbol(label)
+    as.symbol(varname)
   }
   on.exit(.globals$rexprMetaReadFilter <- oldFilter, add = TRUE, after = FALSE)
 
@@ -642,7 +658,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     # TODO: If arguments are named, turn those into assignment, probably?
     # TODO: If we turn named arguments into assignment, we need to make sure
     #   that downstream objects use that variable name instead of the one based
-    #   on the object's label.
+    #   on the object's varname.
     # TODO: Filter out NULL values in res.
     dot_args <- eval(substitute(alist(...)))
     res <- lapply(seq_along(dot_args), function(i) {
