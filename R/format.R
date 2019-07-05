@@ -105,9 +105,9 @@ comment_remove_enclosing <- function(x) {
     stop("Expected a string (character vector of length 1).")
   }
   txt <- strsplit(x, "\n")[[1]]
-  comment_index <- grep(paste0('^"', comment_start), txt)
+  comment_index <- grep(paste0('^\\s*"', comment_start), txt)
   if (!length(comment_index)) return(txt)
-  txt[comment_index] <- sub(paste0('^"', comment_start), "", txt[comment_index])
+  txt[comment_index] <- sub(paste0('^(\\s*)"', comment_start), "\\1", txt[comment_index])
   txt[comment_index] <- sub(paste0(comment_end, '"$'), "", txt[comment_index])
   # e.g. `deparse("a \"string\"")` -> "\"a \\\"string\\\"\""
   txt[comment_index] <- gsub("\\\"", "\"", txt[comment_index], fixed = TRUE)
