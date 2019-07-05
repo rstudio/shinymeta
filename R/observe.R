@@ -55,7 +55,7 @@ metaObserveImpl <- function(expr, env, label, domain) {
   force(domain)
 
   r_meta <- function() {
-    withReactiveDomain(domain, {
+    shiny::withReactiveDomain(domain, {
       rlang::eval_tidy(expr, NULL, env)
     })
   }

@@ -111,7 +111,7 @@ metaReactiveImpl <- function(expr, env, label, domain, inline) {
 
   r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = label, domain = domain)
   r_meta <- function() {
-    withReactiveDomain(domain, {
+    shiny::withReactiveDomain(domain, {
       rlang::eval_tidy(expr, NULL, env)
     })
   }
@@ -133,7 +133,7 @@ metaReactiveImpl <- function(expr, env, label, domain, inline) {
     },
     class = c("shinymeta_reactive", "function"),
     shinymetaLabel = label,
-    shinymetaUID = as.character(.globals$nextId <- .globals$nextId + 1),
+    shinymetaUID = shiny:::createUniqueId(8),
     shinymetaDomain = domain,
     shinymetaInline = inline
   )
@@ -505,10 +505,27 @@ expandObjects <- function(..., .env = parent.frame(), .pkgs) {
 
 #' @export
 newExpansionContext <- function() {
-  list(
-    uidToLabel = fastmap::fastmap(missing_default = NULL),
-    seenLabel = fastmap::fastmap(missing_default = FALSE)
+  structure(
+    list(
+      uidToLabel = fastmap::fastmap(missing_default = NULL),
+      seenLabel = fastmap::fastmap(missing_default = FALSE),
+      # Function to make a (hopefully but not guaranteed to be new) label
+      makeVarName = local({
+        nextVarId <- 0L
+        function() {
+          nextVarId <<- nextVarId + 1L
+          paste0("var_", nextVarId)
+        }
+      })
+    ),
+    class = "shinymetaExpansionContext"
   )
+}
+
+#' @export
+print.shinymetaExpansionContext <- function(x, ...) {
+  map <- x$uidToLabel
+  cat(sprintf("%s [id: %s]", map$mget(map$keys()), map$keys()), sep = "\n")
 }
 
 #' @export
@@ -552,15 +569,6 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
   # reuse them.
   seenLabel <- .expansionContext$seenLabel
 
-  # Function to make a (hopefully but not guaranteed to be new) label
-  makeVarName <- local({
-    nextVarId <- 0L
-    function() {
-      nextVarId <<- nextVarId + 1L
-      paste0("var_", nextVarId)
-    }
-  })
-
   # As we encounter metaReactives that we depend on (directly or indirectly),
   # we'll append their code to this list (including assigning them to a label).
   dependencyCode <- list()
@@ -598,7 +606,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     # If there wasn't either a varname or explicitly provided name, just make
     # a totally generic one up.
     if (is.null(label) || label == "" || length(label) != 1) {
-      label <- makeVarName()
+      label <- .expansionContext$makeVarName()
     } else {
       if (!is.null(domain)) {
         label <- gsub("-", "_", domain$ns(label))
@@ -607,7 +615,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
 
     # Make sure we don't use a variable name that has already been used.
     while (seenLabel$get(label)) {
-      label <- makeVarName()
+      label <- .expansionContext$makeVarName()
     }
 
     # Remember this UID/label combination for the future.
@@ -636,12 +644,18 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     #   that downstream objects use that variable name instead of the one based
     #   on the object's label.
     # TODO: Filter out NULL values in res.
-    res <- list(...)
-
-    # Put the dependency code and res together in a block of code.
-    metaExpr({
-      !!!c(dependencyCode, res)
+    dot_args <- eval(substitute(alist(...)))
+    res <- lapply(seq_along(dot_args), function(i) {
+      this_code <- eval(as.symbol(paste0("..", i)), envir = environment())
+      myDependencyCode <- dependencyCode
+      dependencyCode <<- list()
+      c(myDependencyCode, list(this_code))
     })
+    res <- unlist(res, recursive = FALSE)
+    res <- res[!vapply(res, is.null, logical(1))]
+
+    # Expand into a block of code
+    metaExpr({!!!res})
   })
 }
 
