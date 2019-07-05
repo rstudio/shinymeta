@@ -72,7 +72,7 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
     quoted <- TRUE
   }
 
-  varname <- exprToVarname(expr, varname, "metaReactive")
+  varname <- exprToVarname(expr, varname, inline, "metaReactive")
 
   # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
   # so, because we want to keep any `!!` contained in expr intact (i.e. too
@@ -96,26 +96,29 @@ metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
     quoted <- TRUE
   }
 
-  varname <- exprToVarname(expr, varname, "metaReactive2")
+  varname <- exprToVarname(expr, varname, inline, "metaReactive2")
 
   metaReactiveImpl(expr = expr, env = env, varname = varname, domain = domain, inline = inline)
 }
 
-exprToVarname <- function(expr, varname = NULL, objectType = "metaReactive") {
+exprToVarname <- function(expr, varname = NULL, inline, objectType = "metaReactive") {
   if (is.null(varname)) {
+    if (inline) {
+      return("anonymous")
+    }
     srcref <- attr(expr, "srcref", exact = TRUE)
     if (is.null(srcref)) {
-      stop("No srcref available; is your ", objectType, " code missing {curly braces}?")
+      stop("No srcref available; is your ", objectType, " code missing {curly braces}?", call. = FALSE)
     }
     varname <- mrexprSrcrefToLabel(srcref[[1]],
-      stop("Failed to infer variable name for ", objectType, "; see the Details section of ?metaReactive for suggestions")
+      stop("Failed to infer variable name for ", objectType, "; see the Details section of ?metaReactive for suggestions", call. = FALSE)
     )
   } else {
     if (!is.character(varname) || length(varname) != 1 || is.na(varname) || nchar(varname) == 0) {
-      stop("Invalid varname for ", objectType)
+      stop("Invalid varname for ", objectType, call. = FALSE)
     }
     if (varname != make.names(varname)) {
-      stop("Invalid varname for ", objectType, ": '", varname, "'")
+      stop("Invalid varname for ", objectType, ": '", varname, "'", call. = FALSE)
     }
   }
   varname
@@ -142,11 +145,7 @@ metaReactiveImpl <- function(expr, env, varname, domain, inline) {
           r_normal()
         },
         meta = {
-          filterFunc <- .globals$rexprMetaReadFilter
-          # r_meta cache varies by dynamicVars
-          filterFunc({
-            r_meta()
-          }, self)
+          .globals$rexprMetaReadFilter(r_meta(), self)
         }
       )
     },
