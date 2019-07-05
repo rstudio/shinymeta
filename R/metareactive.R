@@ -104,11 +104,12 @@ metaReactiveImpl <- function(expr, env, label, domain) {
   force(label)
   force(domain)
 
-  r_meta <- reactiveWithInputs({
-    rlang::eval_tidy(expr, NULL, env)
-  }, domain = domain)
-
   r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = label, domain = domain)
+  r_meta <- function() {
+    withReactiveDomain(domain, {
+      rlang::eval_tidy(expr, NULL, env)
+    })
+  }
 
   self <- structure(
     function() {
@@ -120,14 +121,14 @@ metaReactiveImpl <- function(expr, env, label, domain) {
           filterFunc <- .globals$rexprMetaReadFilter
           # r_meta cache varies by dynamicVars
           filterFunc({
-            r_meta(metaCacheKey())
+            r_meta()
           }, self)
         }
       )
     },
     class = c("shinymeta_reactive", "function"),
     shinymetaLabel = label,
-    shinymetaUID = paste0("__shinymetaUID_", (.globals$nextId <- .globals$nextId + 1))
+    shinymetaUID = as.character(.globals$nextId <- .globals$nextId + 1)
   )
   self
 }
@@ -496,7 +497,15 @@ expandObjects <- function(..., .env = parent.frame(), .pkgs) {
 }
 
 #' @export
-expandChain <- function(...) {
+newExpansionContext <- function() {
+  list(
+    uidToLabel = fastmap::fastmap(missing_default = NULL),
+    seenLabel = fastmap::fastmap(missing_default = FALSE)
+  )
+}
+
+#' @export
+expandChain <- function(..., .expansionContext = newExpansionContext()) {
   # As we come across previously unseen objects (i.e. the UID has not been
   # encountered before) we have to make some decisions about what variable name
   # (i.e. label) to use to represent that object. Usually this label name is
@@ -531,10 +540,10 @@ expandChain <- function(...) {
   # Keep track of what label we have used for each UID we have previously
   # encountered. If a UID isn't found in this map, then we haven't yet
   # encountered it.
-  uidToLabel <- fastmap::fastmap(missing_default = NULL)
+  uidToLabel <- .expansionContext$uidToLabel
   # Keep track of what labels we have used, so we can be sure we don't
   # reuse them.
-  seenLabel <- fastmap::fastmap(missing_default = FALSE)
+  seenLabel <- .expansionContext$seenLabel
 
   # Function to make a (hopefully but not guaranteed to be new) label
   makeVarName <- local({

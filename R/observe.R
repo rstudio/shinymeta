@@ -54,9 +54,11 @@ metaObserveImpl <- function(expr, env, label, domain) {
   force(label)
   force(domain)
 
-  r_meta <- reactiveWithInputs({
-    rlang::eval_tidy(expr, NULL, env)
-  }, domain = domain)
+  r_meta <- function() {
+    withReactiveDomain(domain, {
+      rlang::eval_tidy(expr, NULL, env)
+    })
+  }
 
   o_normal <- shiny::observe(expr, env = env, quoted = TRUE, label = label, domain = domain)
 
@@ -67,8 +69,7 @@ metaObserveImpl <- function(expr, env, label, domain) {
           stop("Meta mode must be activated when calling the function returned by `metaObserve()`: did you mean to call this function inside of `shinymeta::withMetaMode()`?")
         },
         meta = {
-          # r_meta cache varies by dynamicVars
-          r_meta(metaCacheKey())
+          r_meta()
         }
       )
     },
