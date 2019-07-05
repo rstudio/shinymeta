@@ -3,6 +3,7 @@
 S3method("$",shinymeta_observer)
 S3method("[[",shinymeta_observer)
 S3method(print,shinyMetaExpr)
+S3method(print,shinymetaExpansionContext)
 export(buildRmdBundle)
 export(buildScriptBundle)
 export(deparseCode)
