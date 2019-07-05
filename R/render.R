@@ -57,9 +57,13 @@ metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FA
     quoted <- TRUE
   }
 
+  domain <- getDefaultReactiveDomain()
+
   normal <- renderFunc(expr = expr, ..., env = env, quoted = quoted)
   meta <- function() {
-    rlang::eval_tidy(expr, env = env)
+    withReactiveDomain(domain, {
+      rlang::eval_tidy(expr, env = env)
+    })
   }
 
   function(...) {
