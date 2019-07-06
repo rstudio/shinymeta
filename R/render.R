@@ -66,18 +66,21 @@ metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FA
     })
   }
 
-  function(...) {
-    metaDispatch(
-      normal = {
-        if (is.null(formals(normal)))
-          normal()
-        else
-          normal(...)
-      },
-      meta = {
-        # TODO: Verify that length(list(...)) == 0?
-        meta()
-      }
-    )
-  }
+  structure(
+    function(...) {
+      metaDispatch(
+        normal = {
+          if (is.null(formals(normal)))
+            normal()
+          else
+            normal(...)
+        },
+        meta = {
+          # TODO: Verify that length(list(...)) == 0?
+          meta()
+        }
+      )
+    },
+    class = c("shinymeta_render", "shinymeta_object", "function")
+  )
 }
