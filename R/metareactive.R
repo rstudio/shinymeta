@@ -259,11 +259,6 @@ withMetaMode <- function(expr, mode = TRUE) {
     on.exit(metaMode(origVal), add = TRUE)
   }
 
-  if (!getOption("shiny.allowoutputreads", FALSE)) {
-    op <- options(shiny.allowoutputreads = TRUE)
-    on.exit(options(op), add = TRUE)
-  }
-
   if (switchMetaMode(normal = FALSE, meta = TRUE, mixed = FALSE)) {
     expr <- prefix_class(expr, "shinyMetaExpr")
   }
