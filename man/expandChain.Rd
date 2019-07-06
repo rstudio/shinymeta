@@ -148,3 +148,42 @@ quoted expression. This function will be invoked the first time the
 defined with \code{inline = TRUE}, then every time it is encountered).
 }
 
+\examples{
+input <- list(dataset = "cars")
+
+# Declare some meta objects
+
+mr <- metaReactive({
+  get(!!input$dataset, "package:datasets")
+})
+
+top <- metaReactive({
+  head(!!mr())
+})
+
+bottom <- metaReactive({
+  tail(!!mr())
+})
+
+obs <- metaObserve({
+  message("Top:")
+  summary(!!top())
+  message("Bottom:")
+  summary(!!bottom())
+})
+
+# Simple case
+expandChain(obs())
+
+# Explicitly print top
+expandChain(top(), obs())
+
+# Separate into two code chunks
+exp_ctx <- newExpansionContext()
+expandChain(.expansionContext = exp_ctx,
+  invisible(top()),
+  invisible(bottom()))
+expandChain(.expansionContext = exp_ctx,
+  obs())
+
+}

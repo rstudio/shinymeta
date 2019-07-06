@@ -25,13 +25,13 @@ This is useful when you want to use an expression that is stored in a
 variable; to do so, it must be quoted with \code{quote()}.}
 
 \item{varname}{An R variable name that this object prefers to be named when
-its code is extracted into an R script.}
+its code is extracted into an R script. (See also: \code{\link[=expandChain]{expandChain()}})}
 
 \item{domain}{See \link{domains}.}
 
 \item{inline}{If \code{TRUE}, during code expansion, do not declare a variable for
 this object; instead, inline the code into every call site. Use this to avoid
-introducing variables for very simple expressions.}
+introducing variables for very simple expressions. (See also: \code{\link[=expandChain]{expandChain()}})}
 
 \item{localize}{Whether or not to wrap the returned expression in \code{\link[=local]{local()}}.
 The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[=return]{return()}}

@@ -26,10 +26,10 @@
 #'
 #' @param inline If `TRUE`, during code expansion, do not declare a variable for
 #' this object; instead, inline the code into every call site. Use this to avoid
-#' introducing variables for very simple expressions.
+#' introducing variables for very simple expressions. (See also: [expandChain()])
 #'
 #' @param varname An R variable name that this object prefers to be named when
-#' its code is extracted into an R script.
+#' its code is extracted into an R script. (See also: [expandChain()])
 #'
 #' @inheritParams shiny::reactive
 #' @inheritParams metaExpr
@@ -730,6 +730,44 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' quoted expression. This function will be invoked the first time the
 #' `metaReactive` object is encountered (nit: or if the `metaReactive` is
 #' defined with `inline = TRUE`, then every time it is encountered).
+#'
+#' @examples
+#' input <- list(dataset = "cars")
+#'
+#' # Declare some meta objects
+#'
+#' mr <- metaReactive({
+#'   get(!!input$dataset, "package:datasets")
+#' })
+#'
+#' top <- metaReactive({
+#'   head(!!mr())
+#' })
+#'
+#' bottom <- metaReactive({
+#'   tail(!!mr())
+#' })
+#'
+#' obs <- metaObserve({
+#'   message("Top:")
+#'   summary(!!top())
+#'   message("Bottom:")
+#'   summary(!!bottom())
+#' })
+#'
+#' # Simple case
+#' expandChain(obs())
+#'
+#' # Explicitly print top
+#' expandChain(top(), obs())
+#'
+#' # Separate into two code chunks
+#' exp_ctx <- newExpansionContext()
+#' expandChain(.expansionContext = exp_ctx,
+#'   invisible(top()),
+#'   invisible(bottom()))
+#' expandChain(.expansionContext = exp_ctx,
+#'   obs())
 #'
 #' @export
 expandChain <- function(..., .expansionContext = newExpansionContext()) {
