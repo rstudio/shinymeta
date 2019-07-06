@@ -74,7 +74,7 @@ metaObserveImpl <- function(expr, env, label, domain) {
       )
     },
     observer_impl = o_normal,
-    class = c("shinymeta_observer", "function")
+    class = c("shinymeta_observer", "shinymeta_object", "function")
   )
 }
 

@@ -146,7 +146,7 @@ metaReactiveImpl <- function(expr, env, varname, domain, inline) {
         }
       )
     },
-    class = c("shinymeta_reactive", "function"),
+    class = c("shinymeta_reactive", "shinymeta_object", "function"),
     shinymetaVarname = varname,
     shinymetaUID = shiny:::createUniqueId(8),
     shinymetaDomain = domain,
@@ -653,10 +653,17 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     # TODO: Filter out NULL values in res.
     dot_args <- eval(substitute(alist(...)))
     res <- lapply(seq_along(dot_args), function(i) {
-      this_code <- eval(as.symbol(paste0("..", i)), envir = environment())
+      x <- eval(as.symbol(paste0("..", i)), envir = environment())
+      val <- if (is_comment(x)) {
+        do.call(metaExpr, list(rlang::expr({!!x; {}})))
+      } else if (is.language(x)) {
+        x
+      } else {
+        stop(call. = FALSE, "Invalid '", paste(class(x), collapse=","), "' argument to expandChain; please see ?expandChain for valid argument types.")
+      }
       myDependencyCode <- dependencyCode
       dependencyCode <<- list()
-      c(myDependencyCode, list(this_code))
+      c(myDependencyCode, list(val))
     })
     res <- unlist(res, recursive = FALSE)
     res <- res[!vapply(res, is.null, logical(1))]

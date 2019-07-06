@@ -49,3 +49,4 @@ Collate:
     'render.R'
     'report.R'
     'utils-format.R'
+    'zzz.R'
