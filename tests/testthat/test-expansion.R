@@ -25,14 +25,16 @@ describe("expansion", isolate({
     expect_equal(res2, quote(x))
   })
 
-  it("actually caches", {
+  # NOTE this used to cache in meta mode but with expandChain it no longer
+  # does, since fetching code can have side effects
+  it("metaMode doesn't cache in meta mode only", {
     rand <- metaReactive({
       !!runif(1)
     })
 
     x1 <- withMetaMode(metaExpr(!!rand()))
     x2 <- withMetaMode(metaExpr(!!rand()))
-    expect_identical(x1, x2)
+    expect_true(!identical(x1, x2))
 
     y1 <- rand()
     y2 <- rand()
