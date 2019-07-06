@@ -520,10 +520,11 @@ expandObjects <- function(..., .env = parent.frame(), .pkgs) {
 
 #' @export
 newExpansionContext <- function() {
-  structure(
+  self <- structure(
     list(
       uidToVarname = fastmap::fastmap(missing_default = NULL),
       seenVarname = fastmap::fastmap(missing_default = FALSE),
+      uidToSubstitute = fastmap::fastmap(missing_default = NULL),
       # Function to make a (hopefully but not guaranteed to be new) varname
       makeVarname = local({
         nextVarId <- 0L
@@ -531,10 +532,28 @@ newExpansionContext <- function() {
           nextVarId <<- nextVarId + 1L
           paste0("var_", nextVarId)
         }
-      })
+      }),
+      substituteMetaReactive = function(mrobj, callback) {
+        if (!inherits(mrobj, "shinymeta_reactive")) {
+          stop(call. = FALSE, "Attempted to substitute an object that wasn't a metaReactive")
+        }
+        if (!is.function(callback) || length(formals(callback)) != 0) {
+          stop(call. = FALSE, "Substitution callback should be a function that takes 0 args")
+        }
+
+        uid <- attr(mrobj, "shinymetaUID", exact = TRUE)
+
+        if (!is.null(self$uidToVarname$get(uid))) {
+          stop(call. = FALSE, "Attempt to substitute a metaReactive object that's already been rendered into code")
+        }
+
+        self$uidToSubstitute$set(uid, callback)
+        invisible(self)
+      }
     ),
     class = "shinymetaExpansionContext"
   )
+  self
 }
 
 #' @export
@@ -591,9 +610,18 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     domain <- attr(rexpr, "shinymetaDomain", exact = TRUE)
     inline <- attr(rexpr, "shinymetaInline", exact = TRUE)
 
+    exec <- function() {
+      subfunc <- .expansionContext$uidToSubstitute$get(uid)
+      result <- if (!is.null(subfunc)) {
+        subfunc()
+      } else {
+        x
+      }
+    }
+
     if (isTRUE(inline)) {
       # The metaReactive doesn't want to have its own variable
-      return(x)
+      return(exec())
     }
 
     # Check if we've seen this UID before, and if so, just return the same
@@ -632,7 +660,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
 
     # Since this is the first time we're seeing this object, now we need to
     # generate its code and store it in our running list of dependencies.
-    expr <- rlang::expr(`<-`(!!as.symbol(varname), !!x))
+    expr <- rlang::expr(`<-`(!!as.symbol(varname), !!exec()))
     dependencyCode <<- c(dependencyCode, list(expr))
 
     # This is what we're returning to the caller; whomever wanted the code for
@@ -653,17 +681,35 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     # TODO: Filter out NULL values in res.
     dot_args <- eval(substitute(alist(...)))
     res <- lapply(seq_along(dot_args), function(i) {
-      x <- eval(as.symbol(paste0("..", i)), envir = environment())
+      # Grab the nth element. We do it with this gross `..n` business because
+      # we want to make sure we trigger evaluation of the arguments one at a
+      # time. We can't use rlang's dots-related functions, because it eagerly
+      # expands the `!!` in arguments, which we want to leave alone.
+      #
+      # Use `withVisible` because invisible() arguments should have their
+      # deps inserted, but not their actual code. Note that metaReactives
+      # consider *themselves* their own dependencies, so for metaReactive
+      # this means the code that assigns it is created (`mr <- ...`),
+      # but the additional line for printing it (`mr`) will be suppressed.
+      x_vis <- withVisible(eval(as.symbol(paste0("..", i)), envir = environment()))
+      x <- x_vis$value
+
       val <- if (is_comment(x)) {
         do.call(metaExpr, list(rlang::expr({!!x; {}})))
       } else if (is.language(x)) {
+        x
+      } else if (is.null(x)) {
         x
       } else {
         stop(call. = FALSE, "Invalid '", paste(class(x), collapse=","), "' argument to expandChain; please see ?expandChain for valid argument types.")
       }
       myDependencyCode <- dependencyCode
       dependencyCode <<- list()
-      c(myDependencyCode, list(val))
+      if (x_vis$visible) {
+        c(myDependencyCode, list(val))
+      } else {
+        myDependencyCode
+      }
     })
     res <- unlist(res, recursive = FALSE)
     res <- res[!vapply(res, is.null, logical(1))]
