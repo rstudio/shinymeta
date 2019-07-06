@@ -880,13 +880,10 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     # Trigger evaluation of the ..., which will also cause dependencyCode to be
     # populated. The value of list(...) should all be code expressions, unless
     # the user passed in something wrong.
-    # TODO: Validate that all values are code expressions
-    # TODO: If arguments are named, turn those into assignment, probably?
-    # TODO: If we turn named arguments into assignment, we need to make sure
-    #   that downstream objects use that variable name instead of the one based
-    #   on the object's varname.
-    # TODO: Filter out NULL values in res.
     dot_args <- eval(substitute(alist(...)))
+    if (!is.null(names(dot_args))) {
+      stop(call. = FALSE, "Named ... arguments to expandChain are not supported")
+    }
     res <- lapply(seq_along(dot_args), function(i) {
       # Grab the nth element. We do it with this gross `..n` business because
       # we want to make sure we trigger evaluation of the arguments one at a
