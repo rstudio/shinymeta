@@ -62,6 +62,7 @@ describe("expandChain", {
     expect_error(expandChain(list()))
     expect_error(expandChain(mr)) # missing ()
     expect_error(expandChain(cars))
+    expect_error(expandChain(a = NULL), "Named")
   })
 })
 
