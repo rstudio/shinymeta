@@ -518,6 +518,8 @@ expandObjects <- function(..., .env = parent.frame(), .pkgs) {
   expandCode(!!expandExpr(expr, NULL, .env), patchCalls = patchCalls)
 }
 
+#' @rdname expandChain
+#' @name expandChain
 #' @export
 newExpansionContext <- function() {
   self <- structure(
@@ -562,6 +564,173 @@ print.shinymetaExpansionContext <- function(x, ...) {
   cat(sprintf("%s [id: %s]", map$mget(map$keys()), map$keys()), sep = "\n")
 }
 
+#' Expand code objects
+#'
+#' Use `expandChain` to write code out of one or more metaReactive objects.
+#' Each meta-reactive object (expression, observer, or renderer) will cause not
+#' only its own code to be written, but that of its dependencies as well.
+#'
+#' @param ... All arguments must be unnamed, and must be one of: 1) calls to
+#'   meta-reactive objects, 2) comment string (e.g. `"# A comment"`), 3)
+#'   language object (e.g. `quote(print(1 + 1))`), or 4) `NULL` (which will be
+#'   ignored). Calls to meta-reactive objects can optionally be [invisible()],
+#'   see Details.
+#'
+#' @return The return value is a code object that's suitable for printing or
+#' passing to [displayCodeModal()], [buildScriptBundle()], or
+#' [buildRmdBundle()].
+#'
+#' @details
+#'
+#' There are two ways to extract code from meta objects (i.e. [metaReactive()],
+#' [metaObserve()], and [metaRender()]). The simplest is `withMetaMode(obj())`,
+#' which crawls the tree of meta-reactive dependencies and expands each `!!`
+#' in place.
+#'
+#' For example, consider these meta objects:
+#'
+#' ```
+#'     nums <- metaReactive({ runif(100) })
+#'     obs <- metaObserve({
+#'       summary(!!nums())
+#'       hist(!!nums())
+#'     })
+#' ```
+#'
+#' When code is extracted using `withMetaMode`:
+#' ```
+#'     withMetaMode(obs())
+#' ```
+#'
+#' The result looks like this:
+#'
+#' ```
+#'     summary(runif(100))
+#'     plot(runif(100))
+#' ```
+#'
+#' Notice the `runif` code is inlined into the code wherever `!!nums()`
+#' appeared, which is not desirable.
+#'
+#' The `expandChain` function is more complicated, but gives cleaner results:
+#'
+#' ```
+#'     expandChain(obs())
+#' ```
+#'
+#' The resulting code gives a variable to the result of `read.csv`, using the
+#' variable name of the `df` meta reactive.
+#'
+#' ```
+#'     nums <- runif(100)
+#'     summary(nums)
+#'     plot(nums)
+#' ```
+#'
+#' You can pass multiple meta objects and/or comments to `expandChain`.
+#'
+#' ```
+#'     expandChain(
+#'       "# Generate values
+#'       nums(),
+#'       "# Summarize and plot",
+#'       obs()
+#'     )
+#' ```
+#'
+#' Output:
+#'
+#' ```
+#'     # Load data
+#'     nums <- runif(100)
+#'     nums
+#'     # Inspect data
+#'     summary(nums)
+#'     plot(nums)
+#' ```
+#'
+#' You can suppress the printing of the `nums` vector in the previous example by
+#' wrapping the `nums()` argument to `expandChain()` with `invisible(nums())`.
+#'
+#' @section Preserving dependencies between `expandChain()` calls:
+#'
+#' Sometimes we may have related meta objects that we want to generate code for,
+#' but we want the code for some objects in one code chunk, and the code for
+#' other objects in another code chunk; for example, you might be constructing
+#' an R Markdown report that has a specific place for each code chunk.
+#'
+#' Within a single `expandChain()` call, all `metaReactive` objects are
+#' guaranteed to only be declared once, even if they're declared on by multiple
+#' meta objects; but since we're making two `expandChain()` calls, we will end
+#' up with duplicated code. To remove this duplication, we need the second
+#' `expandChain` call to know what code was emitted in the first `expandChain`
+#' call.
+#'
+#' We can achieve this by creating an "expansion context" and sharing it between
+#' the two calls.
+#'
+#' ```
+#'     exp_ctx <- newExpansionContext()
+#'     chunk1 <- expandChain(.expansionContext = exp_ctx,
+#'       invisible(nums())
+#'     )
+#'     chunk2 <- expandChain(.expansionContext = exp_ctx,
+#'       obs()
+#'     )
+#' ```
+#'
+#' After this code is run, `chunk1` contains only the definition of `nums` and
+#' `chunk2` contains only the code for `obs`.
+#'
+#' @section Substituting `metaReactive` objects:
+#'
+#' Sometimes, when generating code, we want to completely replace the
+#' implementation of a `metaReactive`. For example, our Shiny app might contain
+#' this logic, using [shiny::fileInput()]:
+#'
+#' ```
+#'     data <- metaReactive2({
+#'       req(input$file_upload)
+#'       metaExpr(read.csv(!!input$file_upload$datapath))
+#'     })
+#'     obs <- metaObserve({
+#'       summary(!!data())
+#'     })
+#' ```
+#'
+#' Shiny's file input works by saving uploading files to a temp directory. The
+#' file referred to by `input$file_upload$datapath` won't be available when
+#' another user tries to run the generated code.
+#'
+#' You can use the expansion context object to swap out the implementation of
+#' `data`, or any other `metaReactive`:
+#'
+#' ```
+#'     ec <- newExpansionContext()
+#'     ec$substituteMetaReactive(data, function() {
+#'       quote(read.csv("data.csv"))
+#'     })
+#'
+#'     expandChain(.expansionContext = ec, obs())
+#' ```
+#'
+#' Result:
+#'
+#' ```
+#'     data <- read.csv("data.csv")
+#'     summary(data)
+#' ```
+#'
+#' Just make sure this code ends up in a script or Rmd bundle that includes the
+#' uploaded file as `data.csv`, and the user will be able to reproduce your
+#' analysis.
+#'
+#' The `substituteMetaReactive` method takes two arguments: the `metaReactive`
+#' object to substitute, and a function that takes zero arguments and returns a
+#' quoted expression. This function will be invoked the first time the
+#' `metaReactive` object is encountered (nit: or if the `metaReactive` is
+#' defined with `inline = TRUE`, then every time it is encountered).
+#'
 #' @export
 expandChain <- function(..., .expansionContext = newExpansionContext()) {
   # As we come across previously unseen objects (i.e. the UID has not been
