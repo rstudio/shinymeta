@@ -4,9 +4,9 @@ mr1 <- metaReactive({
   1
 })
 
-mr2 <- metaReactive({
-  !!mr1() + 2
-})
+mr2 <- metaReactive(
+  {!!mr1() + 2}
+)
 
 # Can't infer varname, but inlined
 metaReactive({
