@@ -13,13 +13,13 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  df <- metaReactive(
+  df <- metaReactive({
     get(!!input$dataset, "package:datasets")
-  )
+  })
 
-  filtered <- metaReactive(
+  filtered <- metaReactive({
     !!df() %>% head(!!input$n)
-  )
+  })
 
   filtered2 <- metaReactive({
     "# a comment inside metaReactive()"
@@ -37,15 +37,7 @@ server <- function(input, output, session) {
   })
 
   code <- reactive({
-    expandObjects(
-      "# Retrieve data",
-      df,
-      top = filtered,
-      bottom = filtered2,
-      obs,
-      output$plot,
-      .pkgs = "magrittr"
-    )
+    expandChain(output$plot(), obs())
   })
 
   output$code <- renderPrint(code())
