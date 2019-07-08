@@ -29,7 +29,7 @@
 #'   sample(5) %>% sum()
 #' })
 #'
-#' code <- expandCode(x <- !!x())
+#' code <- expandChain(x())
 #'
 #' deparseCode(code)
 #' formatCode(code)
