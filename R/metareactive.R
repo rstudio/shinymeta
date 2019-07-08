@@ -593,9 +593,9 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' @details
 #'
 #' There are two ways to extract code from meta objects (i.e. [metaReactive()],
-#' [metaObserve()], and [metaRender()]). The simplest is `withMetaMode(obj())`,
-#' which crawls the tree of meta-reactive dependencies and expands each `!!`
-#' in place.
+#' [metaObserve()], and [metaRender()]): `withMetaMode()` and `expandChain()`.
+#' The simplest is `withMetaMode(obj())`, which crawls the tree of meta-reactive
+#' dependencies and expands each `!!` in place.
 #'
 #' For example, consider these meta objects:
 #'
@@ -619,17 +619,20 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'     plot(runif(100))
 #' ```
 #'
-#' Notice the `runif` code is inlined into the code wherever `!!nums()`
-#' appeared, which is not desirable.
+#' Notice how `runif(100)` is inlined wherever `!!nums()`
+#' appears, which is not desirable if we wish to reuse the same
+#' random values for the `summary()` and `plot()`.
 #'
-#' The `expandChain` function is more complicated, but gives cleaner results:
+#' The `expandChain` function helps us workaround this issue
+#' by assigning return values of `metaReactive()` expressions to
+#' a name:
 #'
 #' ```
 #'     expandChain(obs())
 #' ```
 #'
-#' The resulting code gives a variable to the result of `runif`, using the
-#' variable name of the `nums` meta reactive.
+#' That is, the resulting code stores the result of the `nums()` reactives
+#' in a variable names `nums`, which is reused by `summary()` and `plot()`:
 #'
 #' ```
 #'     nums <- runif(100)
