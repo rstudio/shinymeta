@@ -52,8 +52,8 @@ appeared, which is not desirable.
 The \code{expandChain} function is more complicated, but gives cleaner results:\preformatted{    expandChain(obs())
 }
 
-The resulting code gives a variable to the result of \code{read.csv}, using the
-variable name of the \code{df} meta reactive.\preformatted{    nums <- runif(100)
+The resulting code gives a variable to the result of \code{runif}, using the
+variable name of the \code{nums} meta reactive.\preformatted{    nums <- runif(100)
     summary(nums)
     plot(nums)
 }
