@@ -15,7 +15,7 @@
 #' Create a meta-reactive expression
 #'
 #' Create a [reactive()] that, when invoked with meta-mode activated
-#' (i.e. called within [expandCode()] or [withMetaMode()]), returns a
+#' (i.e. called within [withMetaMode()] or [expandChain()]), returns a
 #' code expression (instead of evaluating that expression and returning the value).
 #'
 #' @details If you wish to capture specific code inside of `expr` (e.g. ignore code
@@ -24,12 +24,12 @@
 #'
 #' TODO: Document reasons why varname detection might fail.
 #'
+#' @param varname An R variable name that this object prefers to be named when
+#' its code is extracted into an R script. (See also: [expandChain()])
+#'
 #' @param inline If `TRUE`, during code expansion, do not declare a variable for
 #' this object; instead, inline the code into every call site. Use this to avoid
 #' introducing variables for very simple expressions. (See also: [expandChain()])
-#'
-#' @param varname An R variable name that this object prefers to be named when
-#' its code is extracted into an R script. (See also: [expandChain()])
 #'
 #' @inheritParams shiny::reactive
 #' @inheritParams metaExpr
@@ -49,7 +49,7 @@
 #' })
 #'
 #' withMetaMode(y())
-#' expandCode(y <- !!y())
+#' expandChain(y())
 #'
 #' y <- metaReactive2({
 #'   req(input$x)
@@ -58,10 +58,10 @@
 #'     a <- !!input$x + 1
 #'     b <- a + 1
 #'     c + 1
-#'   })
-#' }, bindToReturn = TRUE)
+#'   }, bindToReturn = TRUE)
+#' })
 #'
-#' expandCode(y <- !!y())
+#' expandChain(y())
 #'
 metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
   varname = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE,
@@ -638,7 +638,7 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'
 #' ```
 #'     expandChain(
-#'       "# Generate values
+#'       "# Generate values",
 #'       nums(),
 #'       "# Summarize and plot",
 #'       obs()

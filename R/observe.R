@@ -1,7 +1,7 @@
 #' Create a meta-reactive observer
 #'
 #' Create a [observe()]r that, when invoked with meta-mode activated
-#' (i.e. called within [withMetaMode()] or [expandCode()]), returns a
+#' (i.e. called within [withMetaMode()] or [expandChain()]), returns a
 #' partially evaluated code expression. Outside of meta-mode,
 #' `metaObserve()` is equivalent to `observe()`
 #' (it fully evaluates the given expression).
