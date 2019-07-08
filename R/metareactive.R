@@ -374,7 +374,6 @@ withDynamicScope <- function(expr, ..., .list = list(...)) {
 #' (e.g. `petal_width` in the example below). The quoted symbol(s) should
 #' match variable name(s) representing the return value of the meta-component(s).
 #'
-#' @export
 #' @seealso [withMetaMode()]
 #' @examples
 #'
@@ -450,7 +449,6 @@ make_assign_expr <- function(lhs = "", rhs) {
 #' @param ... A collection of meta-reactives.
 #' @param .env An environment.
 #' @param .pkgs A character vector of packages to load before the expanded code.
-#' @export
 #' @rdname expandCode
 expandObjects <- function(..., .env = parent.frame(), .pkgs) {
   exprs <- rlang::exprs(...)

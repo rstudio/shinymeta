@@ -36,9 +36,9 @@ only its own code to be written, but that of its dependencies as well.
 }
 \details{
 There are two ways to extract code from meta objects (i.e. \code{\link[=metaReactive]{metaReactive()}},
-\code{\link[=metaObserve]{metaObserve()}}, and \code{\link[=metaRender]{metaRender()}}). The simplest is \code{withMetaMode(obj())},
-which crawls the tree of meta-reactive dependencies and expands each \code{!!}
-in place.
+\code{\link[=metaObserve]{metaObserve()}}, and \code{\link[=metaRender]{metaRender()}}): \code{withMetaMode()} and \code{expandChain()}.
+The simplest is \code{withMetaMode(obj())}, which crawls the tree of meta-reactive
+dependencies and expands each \code{!!} in place.
 
 For example, consider these meta objects:\preformatted{    nums <- metaReactive({ runif(100) })
     obs <- metaObserve({
@@ -54,20 +54,23 @@ The result looks like this:\preformatted{    summary(runif(100))
     plot(runif(100))
 }
 
-Notice the \code{runif} code is inlined into the code wherever \code{!!nums()}
-appeared, which is not desirable.
+Notice how \code{runif(100)} is inlined wherever \code{!!nums()}
+appears, which is not desirable if we wish to reuse the same
+random values for the \code{summary()} and \code{plot()}.
 
-The \code{expandChain} function is more complicated, but gives cleaner results:\preformatted{    expandChain(obs())
+The \code{expandChain} function helps us workaround this issue
+by assigning return values of \code{metaReactive()} expressions to
+a name:\preformatted{    expandChain(obs())
 }
 
-The resulting code gives a variable to the result of \code{runif}, using the
-variable name of the \code{nums} meta reactive.\preformatted{    nums <- runif(100)
+That is, the resulting code stores the result of the \code{nums()} reactives
+in a variable names \code{nums}, which is reused by \code{summary()} and \code{plot()}:\preformatted{    nums <- runif(100)
     summary(nums)
     plot(nums)
 }
 
 You can pass multiple meta objects and/or comments to \code{expandChain}.\preformatted{    expandChain(
-      "# Generate values
+      "# Generate values",
       nums(),
       "# Summarize and plot",
       obs()

@@ -42,7 +42,7 @@ of a meta expression be applied to the \emph{last child} of the top-level \code{
 }
 \description{
 Create a \code{\link[=reactive]{reactive()}} that, when invoked with meta-mode activated
-(i.e. called within \code{\link[=expandCode]{expandCode()}} or \code{\link[=withMetaMode]{withMetaMode()}}), returns a
+(i.e. called within \code{\link[=withMetaMode]{withMetaMode()}} or \code{\link[=expandChain]{expandChain()}}), returns a
 code expression (instead of evaluating that expression and returning the value).
 }
 \details{
@@ -66,7 +66,7 @@ y <- metaReactive({
 })
 
 withMetaMode(y())
-expandCode(y <- !!y())
+expandChain(y())
 
 y <- metaReactive2({
   req(input$x)
@@ -75,10 +75,10 @@ y <- metaReactive2({
     a <- !!input$x + 1
     b <- a + 1
     c + 1
-  })
-}, bindToReturn = TRUE)
+  }, bindToReturn = TRUE)
+})
 
-expandCode(y <- !!y())
+expandChain(y())
 
 }
 \seealso{
