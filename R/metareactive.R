@@ -109,7 +109,11 @@ exprToVarname <- function(expr, varname = NULL, inline, objectType = "metaReacti
     srcref <- attr(expr, "srcref", exact = TRUE)
     if (is.null(srcref)) {
       if (!rlang::is_call(expr, "{")) {
-        stop("No srcref available. ", objectType, "'s expr must start with a {curly brace}.", call. = FALSE)
+        stop(
+          "Couldn't infer a `varname` for `", objectType,
+          "`. Either specify `varname` or have `expr` begin with `{`.",
+          call. = FALSE
+        )
       }
       stop("No srcref available. Please report this issue to https://github.com/rstudio/shinymeta/issues/new", call. = FALSE)
     }
