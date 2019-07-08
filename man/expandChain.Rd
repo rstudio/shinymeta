@@ -15,11 +15,19 @@ meta-reactive objects, 2) comment string (e.g. \code{"# A comment"}), 3)
 language object (e.g. \code{quote(print(1 + 1))}), or 4) \code{NULL} (which will be
 ignored). Calls to meta-reactive objects can optionally be \code{\link[=invisible]{invisible()}},
 see Details.}
+
+\item{.expansionContext}{Accept the default value if calling \code{expandChain} a
+single time to generate a corpus of code; or create an expansion context
+object using \code{newExpansionContext()} and pass it to multiple related calls
+of \code{expandChain}. See Details.}
 }
 \value{
-The return value is a code object that's suitable for printing or
-passing to \code{\link[=displayCodeModal]{displayCodeModal()}}, \code{\link[=buildScriptBundle]{buildScriptBundle()}}, or
+The return value of \code{expandCode} is a code object that's suitable for
+printing or passing to \code{\link[=displayCodeModal]{displayCodeModal()}}, \code{\link[=buildScriptBundle]{buildScriptBundle()}}, or
 \code{\link[=buildRmdBundle]{buildRmdBundle()}}.
+
+The return value of \code{newExpansionContext} is an object that should be
+passed to multiple \code{expandCode()} calls.
 }
 \description{
 Use \code{expandChain} to write code out of one or more metaReactive objects.

@@ -575,10 +575,17 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'   language object (e.g. `quote(print(1 + 1))`), or 4) `NULL` (which will be
 #'   ignored). Calls to meta-reactive objects can optionally be [invisible()],
 #'   see Details.
+#' @param .expansionContext Accept the default value if calling `expandChain` a
+#'   single time to generate a corpus of code; or create an expansion context
+#'   object using `newExpansionContext()` and pass it to multiple related calls
+#'   of `expandChain`. See Details.
 #'
-#' @return The return value is a code object that's suitable for printing or
-#' passing to [displayCodeModal()], [buildScriptBundle()], or
-#' [buildRmdBundle()].
+#' @return The return value of `expandCode` is a code object that's suitable for
+#'   printing or passing to [displayCodeModal()], [buildScriptBundle()], or
+#'   [buildRmdBundle()].
+#'
+#'   The return value of `newExpansionContext` is an object that should be
+#'   passed to multiple `expandCode()` calls.
 #'
 #' @details
 #'
