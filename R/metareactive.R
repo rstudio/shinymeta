@@ -618,8 +618,8 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'     expandChain(obs())
 #' ```
 #'
-#' The resulting code gives a variable to the result of `read.csv`, using the
-#' variable name of the `df` meta reactive.
+#' The resulting code gives a variable to the result of `runif`, using the
+#' variable name of the `nums` meta reactive.
 #'
 #' ```
 #'     nums <- runif(100)
