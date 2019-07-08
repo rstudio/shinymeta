@@ -108,7 +108,10 @@ exprToVarname <- function(expr, varname = NULL, inline, objectType = "metaReacti
     }
     srcref <- attr(expr, "srcref", exact = TRUE)
     if (is.null(srcref)) {
-      stop("No srcref available; is your ", objectType, " code missing {curly braces}?", call. = FALSE)
+      if (!rlang::is_call(expr, "{")) {
+        stop("No srcref available. ", objectType, "'s expr must start with a {curly brace}.", call. = FALSE)
+      }
+      stop("No srcref available. Please report this issue to https://github.com/rstudio/shinymeta/issues/new", call. = FALSE)
     }
     varname <- mrexprSrcrefToLabel(srcref[[1]],
       stop("Failed to infer variable name for ", objectType, "; see the Details section of ?metaReactive for suggestions", call. = FALSE)
@@ -912,7 +915,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
       } else if (is.null(x)) {
         x
       } else {
-        stop(call. = FALSE, "Invalid '", paste(class(x), collapse=","), "' argument to expandChain; please see ?expandChain for valid argument types.")
+        stop(call. = FALSE, "expandChain() understands language objects, comment-strings, and NULL; but not ", class(x)[1], " objects")
       }
       myDependencyCode <- dependencyCode
       dependencyCode <<- list()
