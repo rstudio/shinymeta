@@ -137,7 +137,7 @@ another user tries to run the generated code.
 
 You can use the expansion context object to swap out the implementation of
 \code{data}, or any other \code{metaReactive}:\preformatted{    ec <- newExpansionContext()
-    ec$substituteMetaReactive(data, read.csv("data.csv"))
+    ec$substituteMetaReactive(data, quote(read.csv("data.csv")))
 
     expandChain(.expansionContext = ec, obs())
 }
