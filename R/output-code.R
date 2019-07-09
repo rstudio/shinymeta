@@ -62,7 +62,7 @@ outputCodeButton <- function(outputObj, label = "Show code", icon = shiny::icon(
         style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
         type = "button",
         class = "btn btn-default action-button",
-        list(shiny:::validateIcon(icon), label),
+        list(getFromNamespace("validateIcon", "shiny")(icon), label),
         ...
       )
     ),
