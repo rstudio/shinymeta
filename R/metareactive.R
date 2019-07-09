@@ -544,7 +544,7 @@ newExpansionContext <- function() {
           stop(call. = FALSE, "Attempted to substitute an object that wasn't a metaReactive")
         }
         if (!is.function(callback) || length(formals(callback)) != 0) {
-          stop(call. = FALSE, "expr argument should be a quoted expression, or a function that takes 0 args")
+          stop(call. = FALSE, "Substitution callback should be a function that takes 0 args")
         }
 
         uid <- attr(mrobj, "shinymetaUID", exact = TRUE)
