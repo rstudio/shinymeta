@@ -83,12 +83,8 @@ describe("expansion context", {
 
   it("can substitute", {
     ec <- newExpansionContext()
-    ec$substituteMetaReactive(mr2, function() {
-      quote(100 + 200)
-    })
-    ec$substituteMetaReactive(mr3, function() {
-      quote(1000 + 2000)
-    })
+    ec$substituteMetaReactive(mr2, 100 + 200)
+    ec$substituteMetaReactive(mr3, 1000 + 2000)
 
     x <- capture.output(print(expandChain(.expansionContext = ec,
       o()
