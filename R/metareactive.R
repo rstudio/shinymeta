@@ -539,21 +539,26 @@ newExpansionContext <- function() {
           paste0("var_", nextVarId)
         }
       }),
-      substituteMetaReactive = function(mrobj, expr, quoted = FALSE) {
+      substituteMetaReactive = function(mrobj, expr) {
         if (!inherits(mrobj, "shinymeta_reactive")) {
           stop(call. = FALSE, "Attempted to substitute an object that wasn't a metaReactive")
         }
+        callback <- if (is.language(expr)) {
+          function() expr
+        } else {
+          expr
+        }
+        if (!is.function(callback) || length(formals(callback)) != 0) {
+          stop(call. = FALSE, "expr argument should be a quoted expression, or a function that takes 0 args")
+        }
 
         uid <- attr(mrobj, "shinymetaUID", exact = TRUE)
+
         if (!is.null(self$uidToVarname$get(uid))) {
           stop(call. = FALSE, "Attempt to substitute a metaReactive object that's already been rendered into code")
         }
 
-        if (!quoted) {
-          expr <- substitute(expr)
-        }
-
-        self$uidToSubstitute$set(uid, function() expr)
+        self$uidToSubstitute$set(uid, callback)
         invisible(self)
       }
     ),
@@ -721,7 +726,7 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'
 #' ```
 #'     ec <- newExpansionContext()
-#'     ec$substituteMetaReactive(data, read.csv("data.csv"))
+#'     ec$substituteMetaReactive(data, quote(read.csv("data.csv")))
 #'
 #'     expandChain(.expansionContext = ec, obs())
 #' ```
