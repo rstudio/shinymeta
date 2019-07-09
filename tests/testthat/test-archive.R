@@ -37,7 +37,7 @@ describe("zip building", {
   za <- zip_archive()
 
   # Copy file where dest doesn't have trailing slash
-  add_items(za, !!file1 := "baz")
+  add_items(za, baz = file1)
   expect_equal(list_items(za), c("baz"))
 
   # Copy file where dest has trailing slash
@@ -45,12 +45,12 @@ describe("zip building", {
   expect_equal(list_items(za), c("baz", "qux", "qux/bar"))
 
   # Copy dir where dest doesn't have trailing slash
-  lst <- setNames(list("quuz"), fs::path_dir(file1))
+  lst <- setNames(fs::path_dir(file1), list("quuz"))
   add_items(za, !!!lst)
   expect_equal(list_items(za), c("baz", "quuz", "quuz/bar", "qux", "qux/bar"))
 
   # Copy dir where dest does have trailing slash (no difference)
-  lst2 <- setNames(list("corge/"), fs::path_dir(file1))
+  lst2 <- setNames(fs::path_dir(file1), list("corge/"))
   add_items(za, !!!lst2)
   expect_equal(list_items(za), c("baz", "corge", "corge/bar", "quuz", "quuz/bar", "qux", "qux/bar"))
 })
