@@ -100,6 +100,3 @@ describe("expansion context", {
     ))
   })
 })
-
-# TODO: subsitute metaReactive
-# TODO: subsitute metaReactive that has inline = TRUE

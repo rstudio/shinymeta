@@ -1,6 +1,5 @@
 .globals <- new.env(parent = emptyenv())
 .globals$dynamicVars <- list()
-.globals$nextId = 0L
 
 # This is a global hook for intercepting meta-mode reads of metaReactive/2.
 # The first argument is the (delayed eval) code result, and rexpr is the
