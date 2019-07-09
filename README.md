@@ -41,41 +41,43 @@ We hope this example helps to illustrate several reasons why you might want to g
 
 ## Generating code with shinymeta
 
-In overly simplified terms, **shinymeta** provides variants of **shiny**'s reactive execution contexts (e.g., `reactive()` -> `metaReactive()`, `observe()` -> `metaObserve()`, `render()` -> `metaRender()`).  When called with **shinymeta**'s meta mode enabled, these variants return [quasi-quoted](https://adv-r.hadley.nz/quasiquotation.html) expressions, providing the **shiny** app author a flexible way to construct code expressions without duplication of the app's core logic. Here's a very basic example:
+In short, **shinymeta** provides variants of **shiny**'s reactive execution contexts (e.g., `reactive()` -> `metaReactive()`, `observe()` -> `metaObserve()`, `render()` -> `metaRender()`). When called with **shinymeta**'s meta mode enabled (i.e., with `withMetaMode()` or `expandChain()`), these variants return [quasi-quoted](https://adv-r.hadley.nz/quasiquotation.html) expressions. In this context, quasi-quoting is primarily useful for replacing *reactive* value(s) with their *static* value(s), so the resulting code can run outside of a Shiny session. Below is a basic Shiny app demonstrating how one can leverage **shinymeta** to generate code to reproduce an output (e.g., `output$Summary()`) by unquoting (i.e., `!!`) reactive values (e.g., `input$var`) and reactive expressions (e.g., `Summary()`).
 
 ```r
 library(shiny)
 library(shinymeta)
 
 ui <- fluidPage(
-  sliderInput("n", "Number of samples", min = 1, value = 30, max = 100),
-  plotOutput("p"),
+  selectInput("var", label = "Choose a variable", choices = names(cars)),
+  verbatimTextOutput("Summary"),
   verbatimTextOutput("code")
 )
 
 server <- function(input, output) {
-  output$p <- metaRender(renderPlot, {
-    hist(rnorm(!!input$n))
+  var <- metaReactive({
+    cars[[!!input$var]]
+  })
+  Summary <- metaReactive({
+    summary(!!var())
+  })
+  output$Summary <- metaRender(renderPrint, {
+    !!Summary()
   })
   output$code <- renderPrint({
-    withMetaMode(output$p())
+    expandChain(output$Summary())
   })
 }
 
 shinyApp(ui, server)
 ```
 
-Generating code with **shinymeta** that is correct and clean is not necessarily straight-forward. It requires a good grasp of **shiny** and metaprogramming. To learn more, read the article on [code generation](http://rstudio.github.io/shinymeta/articles/01-code-generation.html).
+This example illustrates the bare minimum of what you must do to get your Shiny app generating reproducible non-Shiny code:
 
-## Compared to alternatives
+* Each reactive building block (i.e., `reactive()` and `renderPrint()`) has been modified to use it's meta variant.
+* Each read of reactive value has been unquoted (i.e., prepended with `!!`).
+* Output(s) of interest are supplied to `expandChain()`.
 
-Combining interactivity and reproducibility is generally a very hard problem in computing. Shiny provides a great foundation for producing interactive artifacts, but reproducing those artifacts in another context is difficult. We do see **shinymeta** as a step forward for the reproducibility problem, but it is by no means *the solution*. As with most things, there are numerous ways to attack the problem, each with it's own set of tradeoffs and considerations:
-
-1. **Copy and paste**: The simplest approach is to simply duplicate your logic. You have an `app.R` file that contains your Shiny app, and a separate `script.R` or `report.Rmd` file that contains the same logic in linear form (i.e. minus any of the structure that Shiny imposes). The `script.R` or `report.Rmd` contains placeholders that will be replaced by input values selected by the user. This approach is easy to understand, but it means that you are stuck maintaining a parallel codebase that you must manually keep in sync. Over the long term, this can be a source of not only tedium but also bugs. On the plus side, because you're maintaining `script.R`/`report.Rmd` by hand, the level of code quality is limited only by your own skill.
-
-2. **Mechanical transformation**: This approach automatically transforms your reactives, outputs, and observers into linearized code, using predefined algorithms/heuristics. You as the app author are neither required nor able to influence the code generation process very much. The nice thing about this is how little effort it is -- you can add [scriptgloss](https://github.com/dgkf/scriptgloss) to your app in a couple of minutes! The price you pay for all this automation is that the generated code looks pretty unnatural, with some Shiny-related wires sticking out. Plus, there are several common situations that will lead to the script not working; then the onus is on either the app author to gain a deeper understanding of **scriptgloss** and restructure the app to suit, or on the user to take the slightly broken code and fix it.
-
-3. **Metaprogramming**: Of these three techniques, metaprogramming is by far the most conceptually challenging to get started with. In exchange for climbing the considerable learning curve, you get much more control over how the code output is generated. We also believe (but can't yet prove) that this approach can scale to larger, more complex apps, including ones that use Shiny modules.
+For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/01-code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/02-code-distribution.html)
 
 
 ## Acknowledgements
