@@ -41,7 +41,7 @@ We hope this example helps to illustrate several reasons why you might want to g
 
 ## Generating code with shinymeta
 
-In short, **shinymeta** provides variants of **shiny**'s reactive execution contexts (e.g., `reactive()` -> `metaReactive()`, `observe()` -> `metaObserve()`, `render()` -> `metaRender()`). When called with **shinymeta**'s meta mode enabled (i.e., with `withMetaMode()` or `expandChain()`), these variants return [quasi-quoted](https://adv-r.hadley.nz/quasiquotation.html) expressions. In this context, quasi-quoting is primarily useful for replacing *reactive* value(s) with their *static* value(s), so the resulting code can run outside of a Shiny session. Below is a basic Shiny app demonstrating how one can leverage **shinymeta** to generate code to reproduce an output (e.g., `output$Summary()`) by unquoting (i.e., `!!`) reactive values (e.g., `input$var`) and reactive expressions (e.g., `Summary()`).
+In short, **shinymeta** provides variants of **shiny**'s reactive execution contexts (e.g., `reactive()` -> `metaReactive()`, `observe()` -> `metaObserve()`, `render()` -> `metaRender()`). When invoked with **shinymeta**'s meta mode enabled (i.e., invoked via `withMetaMode()` or `expandChain()`), these variants return [quasi-quoted](https://adv-r.hadley.nz/quasiquotation.html) expressions. In this context, quasi-quoting is primarily useful for replacing *reactive* value(s) with their *static* value(s), so the resulting code can run outside of a Shiny session. Below is a basic Shiny app demonstrating how one can leverage **shinymeta** to generate code to reproduce an output (e.g., `output$Summary()`) by unquoting reactive values (e.g., `input$var`) and reactive expressions (e.g., `var()`).
 
 ```r
 library(shiny)
@@ -57,11 +57,8 @@ server <- function(input, output) {
   var <- metaReactive({
     cars[[!!input$var]]
   })
-  Summary <- metaReactive({
-    summary(!!var())
-  })
   output$Summary <- metaRender(renderPrint, {
-    !!Summary()
+    summary(!!var())
   })
   output$code <- renderPrint({
     expandChain(output$Summary())

@@ -14,8 +14,7 @@ reference:
   description: |
     Functions for generating code from meta-reactives.
   contents:
-     - expandObjects
-     - expandCode
+     - expandChain
      - formatCode
 
 - title: Code distribution

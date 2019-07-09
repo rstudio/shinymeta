@@ -49,10 +49,11 @@ server <- function(input, output) {
   output$p2 <- metaRender(renderPlot, {
     qplot(data = diamonds, x = price) + ylab("Number of diamonds")
   })
+  metaReactive()
   output$download_script <- downloadHandler(
     filename = "ggcode.zip", 
     content = function(file) {
-      ggcode <- expandCode({
+      ggcode <- expandChain(quote({
         "#' ---"
         "#' title: 'Some ggplot2 code'"
         "#' author: ''"
@@ -96,8 +97,8 @@ buildRmdBundle(
   "report.Rmd", 
   file, 
   vars = list(
-    plot1 = expandObjects(output$p1),
-    plot2 = expandObjects(output$p2)
+    plot1 = expandChain(output$p1()),
+    plot2 = expandChain(output$p2())
   ), 
   render_args = list(
     output_format = "all"
@@ -107,7 +108,7 @@ buildRmdBundle(
 
 ### Including other files
 
-If your report needs access to other files (e.g., data files or images), you'll want to use the `include_files` argument. This copies local file(s) over to the (temporary) directory where the report generation occurs and includes them in the final zip bundle. More than likely, you'll want to use this to include a dataset that your Shiny app has access to, but your users probably don't. Below is a Shiny app where a user can upload their own dataset, then download that dataset along with some transformation of that dataset.
+If your report needs access to other files (e.g., data files or images), you'll want to use the `include_files` argument. This copies local file(s) over to a (temporary) directory where the report generation and zip bundling occurs. More than likely, you'll want to use this to include a dataset that your Shiny app has access to, but your users probably don't. Below is a Shiny app where a user can upload their own dataset, then download that dataset along with some transformation of that dataset.
 
 ```{r, eval = FALSE}
 library(shiny)
@@ -126,16 +127,9 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
-  data <- metaReactive2({
+  data <- metaReactive({
     req(input$file1)
-    path <- input$file1$datapath
-    filename <- basename(path)
-    # Export code that uses relative paths! 🔥
-    withr::with_dir(dirname(path), {
-      metaExpr({
-        read.csv(!!filename, header = !!input$header)
-      })
-    })
+    read.csv(input$file1$datapath, header = input$header)  
   })
   
   output$download_button <- renderUI({
@@ -150,14 +144,14 @@ server <- function(input, output) {
   output$download <- downloadHandler(
     filename = "report.zip", 
     content = function(out) {
-      filename <- input$file1$datapath
+      ec <- newExpansionContext()
+      ec$substituteMetaReactive(data, read.csv("data.csv"))
       buildScriptBundle(
-        expandObjects(data, output$summary), out, 
-        include_files = setNames(basename(filename), filename)
+        expandChain(output$summary(), .expansionContext = ec), out, 
+        include_files = setNames(input$file1$datapath, "data.csv")
       )
     }
   )
-  
 }
 
 shinyApp(ui, server)
@@ -191,11 +185,11 @@ server <- function(input, output) {
     qplot(data = diamonds, x = price) + ylab("Number of diamonds")
   })
   observeEvent(input$p1_output_code, {
-    code <- expandObjects(output$p1, .pkgs = "ggplot2")
+    code <- expandChain(quote(library(ggplot2)), output$p1())
     displayCodeModal(code)
   })
   observeEvent(input$p2_output_code, {
-    code <- expandObjects(output$p2, .pkgs = "ggplot2")
+    code <- expandChain(quote(library(ggplot2)), output$p2())
     displayCodeModal(code)
   })
 }
