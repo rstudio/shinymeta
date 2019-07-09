@@ -6,11 +6,12 @@
 \title{Create a meta-reactive expression}
 \usage{
 metaReactive(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain(),
-  localize = "auto", bindToReturn = FALSE)
+  varname = NULL, domain = shiny::getDefaultReactiveDomain(),
+  inline = FALSE, localize = "auto", bindToReturn = FALSE)
 
 metaReactive2(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain())
+  varname = NULL, domain = shiny::getDefaultReactiveDomain(),
+  inline = FALSE)
 }
 \arguments{
 \item{expr}{An expression (quoted or unquoted).}
@@ -23,9 +24,14 @@ non-reactive expression.}
 This is useful when you want to use an expression that is stored in a
 variable; to do so, it must be quoted with \code{quote()}.}
 
-\item{label}{A label for the reactive expression, useful for debugging.}
+\item{varname}{An R variable name that this object prefers to be named when
+its code is extracted into an R script. (See also: \code{\link[=expandChain]{expandChain()}})}
 
 \item{domain}{See \link{domains}.}
+
+\item{inline}{If \code{TRUE}, during code expansion, do not declare a variable for
+this object; instead, inline the code into every call site. Use this to avoid
+introducing variables for very simple expressions. (See also: \code{\link[=expandChain]{expandChain()}})}
 
 \item{localize}{Whether or not to wrap the returned expression in \code{\link[=local]{local()}}.
 The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[=return]{return()}}
@@ -36,13 +42,15 @@ of a meta expression be applied to the \emph{last child} of the top-level \code{
 }
 \description{
 Create a \code{\link[=reactive]{reactive()}} that, when invoked with meta-mode activated
-(i.e. called within \code{\link[=expandCode]{expandCode()}} or \code{\link[=withMetaMode]{withMetaMode()}}), returns a
+(i.e. called within \code{\link[=withMetaMode]{withMetaMode()}} or \code{\link[=expandChain]{expandChain()}}), returns a
 code expression (instead of evaluating that expression and returning the value).
 }
 \details{
 If you wish to capture specific code inside of \code{expr} (e.g. ignore code
 that has no meaning outside shiny, like \code{\link[=req]{req()}}), use \code{metaReactive2()} in combination
 with \code{metaExpr()}. When using \code{metaReactive2()}, \code{expr} must return a \code{metaExpr()}.
+
+TODO: Document reasons why varname detection might fail.
 }
 \examples{
 
@@ -58,7 +66,7 @@ y <- metaReactive({
 })
 
 withMetaMode(y())
-expandCode(y <- !!y())
+expandChain(y())
 
 y <- metaReactive2({
   req(input$x)
@@ -67,10 +75,10 @@ y <- metaReactive2({
     a <- !!input$x + 1
     b <- a + 1
     c + 1
-  })
-}, bindToReturn = TRUE)
+  }, bindToReturn = TRUE)
+})
 
-expandCode(y <- !!y())
+expandChain(y())
 
 }
 \seealso{

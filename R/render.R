@@ -57,23 +57,30 @@ metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FA
     quoted <- TRUE
   }
 
+  domain <- getDefaultReactiveDomain()
+
   normal <- renderFunc(expr = expr, ..., env = env, quoted = quoted)
   meta <- function() {
-    rlang::eval_tidy(expr, env = env)
+    shiny::withReactiveDomain(domain, {
+      rlang::eval_tidy(expr, env = env)
+    })
   }
 
-  function(...) {
-    metaDispatch(
-      normal = {
-        if (is.null(formals(normal)))
-          normal()
-        else
-          normal(...)
-      },
-      meta = {
-        # TODO: Verify that length(list(...)) == 0?
-        meta()
-      }
-    )
-  }
+  structure(
+    function(...) {
+      metaDispatch(
+        normal = {
+          if (is.null(formals(normal)))
+            normal()
+          else
+            normal(...)
+        },
+        meta = {
+          # TODO: Verify that length(list(...)) == 0?
+          meta()
+        }
+      )
+    },
+    class = c("shinymeta_render", "shinymeta_object", "function")
+  )
 }
