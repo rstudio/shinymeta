@@ -36,7 +36,7 @@ Suggests:
     cranlogs,
     zoo
 Remotes:
-    rstudio/shiny@joe/feature/readable-outputs,
+    rstudio/shiny,
     r-lib/fastmap
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
