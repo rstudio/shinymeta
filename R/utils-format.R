@@ -147,7 +147,7 @@ walk_ast <- function(x, fun, ...) {
 }
 
 is_assign <- function(x) {
-  rlang::is_call(x, "<-") || rlang::is_call(x, "=")
+  inherits(x, c("<-", "="))
 }
 
 is_comment <- function(x) {
