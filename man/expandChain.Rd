@@ -138,7 +138,7 @@ another user tries to run the generated code.
 You can use the expansion context object to swap out the implementation of
 \code{data}, or any other \code{metaReactive}:\preformatted{    ec <- newExpansionContext()
     ec$substituteMetaReactive(data, function() {
-      quote(read.csv("data.csv"))
+      metaExpr(read.csv("data.csv"))
     })
 
     expandChain(.expansionContext = ec, obs())
@@ -154,9 +154,10 @@ analysis.
 
 The \code{substituteMetaReactive} method takes two arguments: the \code{metaReactive}
 object to substitute, and a function that takes zero arguments and returns a
-quoted expression. This function will be invoked the first time the
-\code{metaReactive} object is encountered (nit: or if the \code{metaReactive} is
-defined with \code{inline = TRUE}, then every time it is encountered).
+quoted expression (for the nicest looking results, use \code{metaExpr} to create
+the expression). This function will be invoked the first time the
+\code{metaReactive} object is encountered (or if the \code{metaReactive} is defined
+with \code{inline = TRUE}, then every time it is encountered).
 }
 
 \examples{

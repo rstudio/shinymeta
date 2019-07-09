@@ -722,7 +722,7 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' ```
 #'     ec <- newExpansionContext()
 #'     ec$substituteMetaReactive(data, function() {
-#'       quote(read.csv("data.csv"))
+#'       metaExpr(read.csv("data.csv"))
 #'     })
 #'
 #'     expandChain(.expansionContext = ec, obs())
@@ -741,9 +741,10 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'
 #' The `substituteMetaReactive` method takes two arguments: the `metaReactive`
 #' object to substitute, and a function that takes zero arguments and returns a
-#' quoted expression. This function will be invoked the first time the
-#' `metaReactive` object is encountered (nit: or if the `metaReactive` is
-#' defined with `inline = TRUE`, then every time it is encountered).
+#' quoted expression (for the nicest looking results, use `metaExpr` to create
+#' the expression). This function will be invoked the first time the
+#' `metaReactive` object is encountered (or if the `metaReactive` is defined
+#' with `inline = TRUE`, then every time it is encountered).
 #'
 #' @examples
 #' input <- list(dataset = "cars")
@@ -834,7 +835,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     exec <- function() {
       subfunc <- .expansionContext$uidToSubstitute$get(uid)
       result <- if (!is.null(subfunc)) {
-        subfunc()
+        withMetaMode(subfunc())
       } else {
         x
       }

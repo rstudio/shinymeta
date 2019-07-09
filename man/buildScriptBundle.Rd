@@ -19,7 +19,11 @@ buildRmdBundle(report_template, output_zip_path, vars = list(),
 
 \item{script_name}{A name for the R script in the zip bundle.}
 
-\item{include_files}{Other files to include with the zip bundle.}
+\item{include_files}{A named list consisting of additional files that should
+be included in the zip bundle. The element names indicate the destination
+path within the bundle, specified as a relative path; the element values
+indicate the path to the actual file currently on disk, specified as either
+a relative or absolute path.}
 
 \item{render}{Whether or not to call \code{\link[rmarkdown:render]{rmarkdown::render()}} on the R script.}
 

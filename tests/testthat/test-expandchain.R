@@ -84,16 +84,20 @@ describe("expansion context", {
   it("can substitute", {
     ec <- newExpansionContext()
     ec$substituteMetaReactive(mr2, function() {
-      quote(100 + 200)
+      metaExpr({
+        "# Add one hundred and two hundred"
+        100 + 200
+      })
     })
     ec$substituteMetaReactive(mr3, function() {
-      quote(1000 + 2000)
+      metaExpr({1000 + 2000})
     })
 
     x <- capture.output(print(expandChain(.expansionContext = ec,
       o()
     )))
     expect_identical(x, c(
+      "# Add one hundred and two hundred",
       "mr2 <- 100 + 200",
       "mrFour <- 4",
       "mr2 + (1000 + 2000) + mrFour"

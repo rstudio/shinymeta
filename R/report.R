@@ -5,7 +5,11 @@
 #' @param code A language object.
 #' @param output_zip_path A filename for the resulting zip bundle.
 #' @param script_name A name for the R script in the zip bundle.
-#' @param include_files Other files to include with the zip bundle.
+#' @param include_files A named list consisting of additional files that should
+#'   be included in the zip bundle. The element names indicate the destination
+#'   path within the bundle, specified as a relative path; the element values
+#'   indicate the path to the actual file currently on disk, specified as either
+#'   a relative or absolute path.
 #' @param render Whether or not to call [rmarkdown::render()] on the R script.
 #' @param render_args Arguments to provide to [rmarkdown::render()].
 #'
