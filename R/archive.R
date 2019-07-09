@@ -63,7 +63,7 @@ add_items <- function(x, ...) {
     names(include_files) <- as.character(include_files)
   }
 
-  mapply(names(include_files), include_files, FUN = function(from, to) {
+  mapply(names(include_files), include_files, FUN = function(to, from) {
     if (nchar(from) == 0) {
       from <- to
     }
