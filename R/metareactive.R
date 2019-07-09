@@ -539,12 +539,17 @@ newExpansionContext <- function() {
           paste0("var_", nextVarId)
         }
       }),
-      substituteMetaReactive = function(mrobj, callback) {
+      substituteMetaReactive = function(mrobj, expr) {
         if (!inherits(mrobj, "shinymeta_reactive")) {
           stop(call. = FALSE, "Attempted to substitute an object that wasn't a metaReactive")
         }
+        callback <- if (is.language(expr)) {
+          function() expr
+        } else {
+          expr
+        }
         if (!is.function(callback) || length(formals(callback)) != 0) {
-          stop(call. = FALSE, "Substitution callback should be a function that takes 0 args")
+          stop(call. = FALSE, "expr argument should be a quoted expression, or a function that takes 0 args")
         }
 
         uid <- attr(mrobj, "shinymetaUID", exact = TRUE)
@@ -721,9 +726,7 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'
 #' ```
 #'     ec <- newExpansionContext()
-#'     ec$substituteMetaReactive(data, function() {
-#'       quote(read.csv("data.csv"))
-#'     })
+#'     ec$substituteMetaReactive(data, quote(read.csv("data.csv")))
 #'
 #'     expandChain(.expansionContext = ec, obs())
 #' ```
@@ -740,10 +743,11 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' analysis.
 #'
 #' The `substituteMetaReactive` method takes two arguments: the `metaReactive`
-#' object to substitute, and a function that takes zero arguments and returns a
-#' quoted expression. This function will be invoked the first time the
-#' `metaReactive` object is encountered (nit: or if the `metaReactive` is
-#' defined with `inline = TRUE`, then every time it is encountered).
+#' object to substitute, and either a quoted expression or a function that
+#' takes zero arguments and returns a quoted expression. This function will
+#' be invoked the first time the `metaReactive` object is encountered (nit:
+#' or if the `metaReactive` is defined with `inline = TRUE`, then every time
+#' it is encountered).
 #'
 #' @examples
 #' input <- list(dataset = "cars")
