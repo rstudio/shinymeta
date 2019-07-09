@@ -30,7 +30,11 @@ Suggests:
     rmarkdown,
     testthat,
     shinyAce,
-    clipr
+    clipr,
+    dplyr,
+    ggplot2,
+    cranlogs,
+    zoo
 Remotes:
     rstudio/shiny@joe/feature/readable-outputs,
     r-lib/fastmap
