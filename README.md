@@ -68,6 +68,8 @@ server <- function(input, output) {
 shinyApp(ui, server)
 ```
 
+<img src="https://rstudio.github.io/shinymeta/reference/figures/cars.gif" />
+
 This example illustrates the bare minimum of what you must do to get your Shiny app generating reproducible non-Shiny code:
 
 * Each reactive building block (i.e., `reactive()` and `renderPrint()`) has been modified to use it's meta variant.
