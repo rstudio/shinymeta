@@ -1,7 +1,7 @@
 #' Create a meta-reactive observer
 #'
 #' Create a [observe()]r that, when invoked with meta-mode activated
-#' (i.e. called within [withMetaMode()] or [expandCode()]), returns a
+#' (i.e. called within [withMetaMode()] or [expandChain()]), returns a
 #' partially evaluated code expression. Outside of meta-mode,
 #' `metaObserve()` is equivalent to `observe()`
 #' (it fully evaluates the given expression).
@@ -54,9 +54,11 @@ metaObserveImpl <- function(expr, env, label, domain) {
   force(label)
   force(domain)
 
-  r_meta <- reactiveWithInputs({
-    rlang::eval_tidy(expr, NULL, env)
-  }, domain = domain)
+  r_meta <- function() {
+    shiny::withReactiveDomain(domain, {
+      rlang::eval_tidy(expr, NULL, env)
+    })
+  }
 
   o_normal <- shiny::observe(expr, env = env, quoted = TRUE, label = label, domain = domain)
 
@@ -67,13 +69,12 @@ metaObserveImpl <- function(expr, env, label, domain) {
           stop("Meta mode must be activated when calling the function returned by `metaObserve()`: did you mean to call this function inside of `shinymeta::withMetaMode()`?")
         },
         meta = {
-          # r_meta cache varies by dynamicVars
-          r_meta(metaCacheKey())
+          r_meta()
         }
       )
     },
     observer_impl = o_normal,
-    class = c("shinymeta_observer", "function")
+    class = c("shinymeta_observer", "shinymeta_object", "function")
   )
 }
 

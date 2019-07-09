@@ -5,3 +5,4 @@ examples
 ^docs$
 ^pkgdown$
 ^\.travis\.yml$
+^tools$

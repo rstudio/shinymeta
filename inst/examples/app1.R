@@ -28,7 +28,7 @@ server <- function(input, output, session) {
   })
 
   output$code <- renderPrint({
-    withMetaMode(filtered())
+    expandChain(filtered())
   })
 }
 

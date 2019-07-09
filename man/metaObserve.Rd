@@ -36,7 +36,7 @@ of a meta expression be applied to the \emph{last child} of the top-level \code{
 }
 \description{
 Create a \code{\link[=observe]{observe()}}r that, when invoked with meta-mode activated
-(i.e. called within \code{\link[=withMetaMode]{withMetaMode()}} or \code{\link[=expandCode]{expandCode()}}), returns a
+(i.e. called within \code{\link[=withMetaMode]{withMetaMode()}} or \code{\link[=expandChain]{expandChain()}}), returns a
 partially evaluated code expression. Outside of meta-mode,
 \code{metaObserve()} is equivalent to \code{observe()}
 (it fully evaluates the given expression).

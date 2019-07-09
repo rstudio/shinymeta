@@ -175,15 +175,16 @@ server <- function(input, output, session) {
     "plot.zip",
     content = function(out) {
       saveRDS(getData(), "data.rds")
-      code <- expandCode({
-        library(plotly)
-        library(dplyr)
-        library(ggmosaic)
-        d <- readRDS("data.rds")
-        !!output$plot()
-      }, patchCalls = list(
-        getData = quote(d)
-      ))
+      on.exit(unlink("data.rds"), add = TRUE)
+      code <- expandChain(
+        quote({
+          library(plotly)
+          library(dplyr)
+          library(ggmosaic)
+          d <- readRDS("data.rds")
+        }),
+        output$plot()
+      )
 
       buildRmdBundle(
         "plot.Rmd", out,
@@ -198,23 +199,16 @@ server <- function(input, output, session) {
     "model.zip",
     content = function(out) {
       saveRDS(getData(), "data.rds")
-      code <- expandCode(
-        {
+      on.exit(unlink("data.rds"), add = TRUE)
+      code <- expandChain(
+        quote({
           library(plotly)
           library(dplyr)
           library(ggmosaic)
           d <- readRDS("data.rds")
-          counts_long <- !!counts_long()
-          counts_wide <- !!counts_wide()
-          counts_raw <- !!counts_raw()
-          !!output$model()
-        },
-        patchCalls = list(
-          counts_long = quote(counts_long),
-          counts_wide = quote(counts_wide),
-          counts_raw = quote(counts_raw),
-          getData = quote(d)
-        ))
+        }),
+        output$model()
+      )
 
       buildRmdBundle(
         "model.Rmd", out,
@@ -233,24 +227,17 @@ server <- function(input, output, session) {
     content = function(out) {
 
       saveRDS(getData(), "data.rds")
-      code <- expandCode(
-        {
+      on.exit(unlink("data.rds"), add = TRUE)
+      code <- expandChain(
+        quote({
           library(plotly)
           library(dplyr)
           library(ggmosaic)
           d <- readRDS("data.rds")
-          counts_long <- !!counts_long()
-          counts_wide <- !!counts_wide()
-          counts_raw <- !!counts_raw()
-          !!output$plot()
-          !!output$model()
-        },
-        patchCalls = list(
-          counts_long = quote(counts_long),
-          counts_wide = quote(counts_wide),
-          counts_raw = quote(counts_raw),
-          getData = quote(d)
-        ))
+        }),
+        output$plot(),
+        output$model()
+      )
 
       buildRmdBundle(
         "full.Rmd", out,

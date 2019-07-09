@@ -1,15 +1,34 @@
 .globals <- new.env(parent = emptyenv())
 .globals$dynamicVars <- list()
 
+# This is a global hook for intercepting meta-mode reads of metaReactive/2.
+# The first argument is the (delayed eval) code result, and rexpr is the
+# metaReactive/2 object itself. If evaluation of x is not triggered by the
+# hook function, then the metaReactive/2 code will not execute/be expanded.
+#
+# The return value should be a code object.
+.globals$rexprMetaReadFilter <- function(x, rexpr) {
+  x
+}
+
 #' Create a meta-reactive expression
 #'
 #' Create a [reactive()] that, when invoked with meta-mode activated
-#' (i.e. called within [expandCode()] or [withMetaMode()]), returns a
+#' (i.e. called within [withMetaMode()] or [expandChain()]), returns a
 #' code expression (instead of evaluating that expression and returning the value).
 #'
 #' @details If you wish to capture specific code inside of `expr` (e.g. ignore code
 #' that has no meaning outside shiny, like [req()]), use `metaReactive2()` in combination
 #' with `metaExpr()`. When using `metaReactive2()`, `expr` must return a `metaExpr()`.
+#'
+#' TODO: Document reasons why varname detection might fail.
+#'
+#' @param varname An R variable name that this object prefers to be named when
+#' its code is extracted into an R script. (See also: [expandChain()])
+#'
+#' @param inline If `TRUE`, during code expansion, do not declare a variable for
+#' this object; instead, inline the code into every call site. Use this to avoid
+#' introducing variables for very simple expressions. (See also: [expandChain()])
 #'
 #' @inheritParams shiny::reactive
 #' @inheritParams metaExpr
@@ -29,7 +48,7 @@
 #' })
 #'
 #' withMetaMode(y())
-#' expandCode(y <- !!y())
+#' expandChain(y())
 #'
 #' y <- metaReactive2({
 #'   req(input$x)
@@ -38,19 +57,21 @@
 #'     a <- !!input$x + 1
 #'     b <- a + 1
 #'     c + 1
-#'   })
-#' }, bindToReturn = TRUE)
+#'   }, bindToReturn = TRUE)
+#' })
 #'
-#' expandCode(y <- !!y())
+#' expandChain(y())
 #'
 metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
-                         label = NULL, domain = shiny::getDefaultReactiveDomain(),
-                         localize = "auto", bindToReturn = FALSE) {
+  varname = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE,
+  localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
   }
+
+  varname <- exprToVarname(expr, varname, inline, "metaReactive")
 
   # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
   # so, because we want to keep any `!!` contained in expr intact (i.e. too
@@ -60,49 +81,89 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
   expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
 
-  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
+  metaReactiveImpl(expr = expr, env = env, varname = varname, domain = domain, inline = inline)
 }
 
 
 #' @export
 #' @rdname metaReactive
 metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = shiny::getDefaultReactiveDomain()) {
+  varname = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
   }
 
-  metaReactiveImpl(expr = expr, env = env, label = label, domain = domain)
+  varname <- exprToVarname(expr, varname, inline, "metaReactive2")
+
+  metaReactiveImpl(expr = expr, env = env, varname = varname, domain = domain, inline = inline)
 }
 
-metaReactiveImpl <- function(expr, env, label, domain) {
+exprToVarname <- function(expr, varname = NULL, inline, objectType = "metaReactive") {
+  if (is.null(varname)) {
+    if (inline) {
+      return("anonymous")
+    }
+    srcref <- attr(expr, "srcref", exact = TRUE)
+    if (is.null(srcref)) {
+      if (!rlang::is_call(expr, "{")) {
+        stop(
+          "Couldn't infer a `varname` for `", objectType,
+          "`. Either specify `varname` or have `expr` begin with `{`.",
+          call. = FALSE
+        )
+      }
+      stop("No srcref available. Please report this issue to https://github.com/rstudio/shinymeta/issues/new", call. = FALSE)
+    }
+    varname <- mrexprSrcrefToLabel(srcref[[1]],
+      stop("Failed to infer variable name for ", objectType, "; see the Details section of ?metaReactive for suggestions", call. = FALSE)
+    )
+  } else {
+    if (!is.character(varname) || length(varname) != 1 || is.na(varname) || nchar(varname) == 0) {
+      stop("varname must be a non-empty string", call. = FALSE)
+    }
+  }
+  varname
+}
+
+metaReactiveImpl <- function(expr, env, varname, domain, inline) {
   force(expr)
   force(env)
-  force(label)
+  force(varname)
   force(domain)
+  force(inline)
 
-  r_meta <- reactiveWithInputs({
-    rlang::eval_tidy(expr, NULL, env)
-  }, domain = domain)
+  r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = varname, domain = domain)
+  r_meta <- function() {
+    shiny::withReactiveDomain(domain, {
+      rlang::eval_tidy(expr, NULL, env)
+    })
+  }
 
-  r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = label, domain = domain)
-
-  structure(
+  self <- structure(
     function() {
       metaDispatch(
         normal = {
           r_normal()
         },
         meta = {
-          # r_meta cache varies by dynamicVars
-          r_meta(metaCacheKey())
+          .globals$rexprMetaReadFilter(r_meta(), self)
         }
       )
     },
-    class = c("shinymeta_reactive", "function")
+    class = c("shinymeta_reactive", "shinymeta_object", "function"),
+    shinymetaVarname = varname,
+    shinymetaUID = shiny:::createUniqueId(8),
+    shinymetaDomain = domain,
+    shinymetaInline = inline
   )
+  self
+}
+
+#' @export
+print.shinymeta_reactive <- function(x, ...) {
+  cat("metaReactive:", attr(x, "shinymetaVarname"), "\n", sep = "")
 }
 
 # A global variable that can be one of three values:
@@ -202,11 +263,6 @@ withMetaMode <- function(expr, mode = TRUE) {
   if (!identical(origVal, mode)) {
     metaMode(mode)
     on.exit(metaMode(origVal), add = TRUE)
-  }
-
-  if (!getOption("shiny.allowoutputreads", FALSE)) {
-    op <- options(shiny.allowoutputreads = TRUE)
-    on.exit(options(op), add = TRUE)
   }
 
   if (switchMetaMode(normal = FALSE, meta = TRUE, mixed = FALSE)) {
@@ -317,7 +373,6 @@ withDynamicScope <- function(expr, ..., .list = list(...)) {
 #' (e.g. `petal_width` in the example below). The quoted symbol(s) should
 #' match variable name(s) representing the return value of the meta-component(s).
 #'
-#' @export
 #' @seealso [withMetaMode()]
 #' @examples
 #'
@@ -393,7 +448,6 @@ make_assign_expr <- function(lhs = "", rhs) {
 #' @param ... A collection of meta-reactives.
 #' @param .env An environment.
 #' @param .pkgs A character vector of packages to load before the expanded code.
-#' @export
 #' @rdname expandCode
 expandObjects <- function(..., .env = parent.frame(), .pkgs) {
   exprs <- rlang::exprs(...)
@@ -466,6 +520,421 @@ expandObjects <- function(..., .env = parent.frame(), .pkgs) {
 
   expr <- do.call(call, c(list("{"), objs), quote = TRUE)
   expandCode(!!expandExpr(expr, NULL, .env), patchCalls = patchCalls)
+}
+
+#' @rdname expandChain
+#' @name expandChain
+#' @export
+newExpansionContext <- function() {
+  self <- structure(
+    list(
+      uidToVarname = fastmap::fastmap(missing_default = NULL),
+      seenVarname = fastmap::fastmap(missing_default = FALSE),
+      uidToSubstitute = fastmap::fastmap(missing_default = NULL),
+      # Function to make a (hopefully but not guaranteed to be new) varname
+      makeVarname = local({
+        nextVarId <- 0L
+        function() {
+          nextVarId <<- nextVarId + 1L
+          paste0("var_", nextVarId)
+        }
+      }),
+      substituteMetaReactive = function(mrobj, callback) {
+        if (!inherits(mrobj, "shinymeta_reactive")) {
+          stop(call. = FALSE, "Attempted to substitute an object that wasn't a metaReactive")
+        }
+        if (!is.function(callback) || length(formals(callback)) != 0) {
+          stop(call. = FALSE, "Substitution callback should be a function that takes 0 args")
+        }
+
+        uid <- attr(mrobj, "shinymetaUID", exact = TRUE)
+
+        if (!is.null(self$uidToVarname$get(uid))) {
+          stop(call. = FALSE, "Attempt to substitute a metaReactive object that's already been rendered into code")
+        }
+
+        self$uidToSubstitute$set(uid, callback)
+        invisible(self)
+      }
+    ),
+    class = "shinymetaExpansionContext"
+  )
+  self
+}
+
+#' @export
+print.shinymetaExpansionContext <- function(x, ...) {
+  map <- x$uidToVarname
+  cat(sprintf("%s [id: %s]", map$mget(map$keys()), map$keys()), sep = "\n")
+}
+
+#' Expand code objects
+#'
+#' Use `expandChain` to write code out of one or more metaReactive objects.
+#' Each meta-reactive object (expression, observer, or renderer) will cause not
+#' only its own code to be written, but that of its dependencies as well.
+#'
+#' @param ... All arguments must be unnamed, and must be one of: 1) calls to
+#'   meta-reactive objects, 2) comment string (e.g. `"# A comment"`), 3)
+#'   language object (e.g. `quote(print(1 + 1))`), or 4) `NULL` (which will be
+#'   ignored). Calls to meta-reactive objects can optionally be [invisible()],
+#'   see Details.
+#' @param .expansionContext Accept the default value if calling `expandChain` a
+#'   single time to generate a corpus of code; or create an expansion context
+#'   object using `newExpansionContext()` and pass it to multiple related calls
+#'   of `expandChain`. See Details.
+#'
+#' @return The return value of `expandCode` is a code object that's suitable for
+#'   printing or passing to [displayCodeModal()], [buildScriptBundle()], or
+#'   [buildRmdBundle()].
+#'
+#'   The return value of `newExpansionContext` is an object that should be
+#'   passed to multiple `expandCode()` calls.
+#'
+#' @details
+#'
+#' There are two ways to extract code from meta objects (i.e. [metaReactive()],
+#' [metaObserve()], and [metaRender()]): `withMetaMode()` and `expandChain()`.
+#' The simplest is `withMetaMode(obj())`, which crawls the tree of meta-reactive
+#' dependencies and expands each `!!` in place.
+#'
+#' For example, consider these meta objects:
+#'
+#' ```
+#'     nums <- metaReactive({ runif(100) })
+#'     obs <- metaObserve({
+#'       summary(!!nums())
+#'       hist(!!nums())
+#'     })
+#' ```
+#'
+#' When code is extracted using `withMetaMode`:
+#' ```
+#'     withMetaMode(obs())
+#' ```
+#'
+#' The result looks like this:
+#'
+#' ```
+#'     summary(runif(100))
+#'     plot(runif(100))
+#' ```
+#'
+#' Notice how `runif(100)` is inlined wherever `!!nums()`
+#' appears, which is not desirable if we wish to reuse the same
+#' random values for the `summary()` and `plot()`.
+#'
+#' The `expandChain` function helps us workaround this issue
+#' by assigning return values of `metaReactive()` expressions to
+#' a name:
+#'
+#' ```
+#'     expandChain(obs())
+#' ```
+#'
+#' That is, the resulting code stores the result of the `nums()` reactives
+#' in a variable names `nums`, which is reused by `summary()` and `plot()`:
+#'
+#' ```
+#'     nums <- runif(100)
+#'     summary(nums)
+#'     plot(nums)
+#' ```
+#'
+#' You can pass multiple meta objects and/or comments to `expandChain`.
+#'
+#' ```
+#'     expandChain(
+#'       "# Generate values",
+#'       nums(),
+#'       "# Summarize and plot",
+#'       obs()
+#'     )
+#' ```
+#'
+#' Output:
+#'
+#' ```
+#'     # Load data
+#'     nums <- runif(100)
+#'     nums
+#'     # Inspect data
+#'     summary(nums)
+#'     plot(nums)
+#' ```
+#'
+#' You can suppress the printing of the `nums` vector in the previous example by
+#' wrapping the `nums()` argument to `expandChain()` with `invisible(nums())`.
+#'
+#' @section Preserving dependencies between `expandChain()` calls:
+#'
+#' Sometimes we may have related meta objects that we want to generate code for,
+#' but we want the code for some objects in one code chunk, and the code for
+#' other objects in another code chunk; for example, you might be constructing
+#' an R Markdown report that has a specific place for each code chunk.
+#'
+#' Within a single `expandChain()` call, all `metaReactive` objects are
+#' guaranteed to only be declared once, even if they're declared on by multiple
+#' meta objects; but since we're making two `expandChain()` calls, we will end
+#' up with duplicated code. To remove this duplication, we need the second
+#' `expandChain` call to know what code was emitted in the first `expandChain`
+#' call.
+#'
+#' We can achieve this by creating an "expansion context" and sharing it between
+#' the two calls.
+#'
+#' ```
+#'     exp_ctx <- newExpansionContext()
+#'     chunk1 <- expandChain(.expansionContext = exp_ctx,
+#'       invisible(nums())
+#'     )
+#'     chunk2 <- expandChain(.expansionContext = exp_ctx,
+#'       obs()
+#'     )
+#' ```
+#'
+#' After this code is run, `chunk1` contains only the definition of `nums` and
+#' `chunk2` contains only the code for `obs`.
+#'
+#' @section Substituting `metaReactive` objects:
+#'
+#' Sometimes, when generating code, we want to completely replace the
+#' implementation of a `metaReactive`. For example, our Shiny app might contain
+#' this logic, using [shiny::fileInput()]:
+#'
+#' ```
+#'     data <- metaReactive2({
+#'       req(input$file_upload)
+#'       metaExpr(read.csv(!!input$file_upload$datapath))
+#'     })
+#'     obs <- metaObserve({
+#'       summary(!!data())
+#'     })
+#' ```
+#'
+#' Shiny's file input works by saving uploading files to a temp directory. The
+#' file referred to by `input$file_upload$datapath` won't be available when
+#' another user tries to run the generated code.
+#'
+#' You can use the expansion context object to swap out the implementation of
+#' `data`, or any other `metaReactive`:
+#'
+#' ```
+#'     ec <- newExpansionContext()
+#'     ec$substituteMetaReactive(data, function() {
+#'       quote(read.csv("data.csv"))
+#'     })
+#'
+#'     expandChain(.expansionContext = ec, obs())
+#' ```
+#'
+#' Result:
+#'
+#' ```
+#'     data <- read.csv("data.csv")
+#'     summary(data)
+#' ```
+#'
+#' Just make sure this code ends up in a script or Rmd bundle that includes the
+#' uploaded file as `data.csv`, and the user will be able to reproduce your
+#' analysis.
+#'
+#' The `substituteMetaReactive` method takes two arguments: the `metaReactive`
+#' object to substitute, and a function that takes zero arguments and returns a
+#' quoted expression. This function will be invoked the first time the
+#' `metaReactive` object is encountered (nit: or if the `metaReactive` is
+#' defined with `inline = TRUE`, then every time it is encountered).
+#'
+#' @examples
+#' input <- list(dataset = "cars")
+#'
+#' # Declare some meta objects
+#'
+#' mr <- metaReactive({
+#'   get(!!input$dataset, "package:datasets")
+#' })
+#'
+#' top <- metaReactive({
+#'   head(!!mr())
+#' })
+#'
+#' bottom <- metaReactive({
+#'   tail(!!mr())
+#' })
+#'
+#' obs <- metaObserve({
+#'   message("Top:")
+#'   summary(!!top())
+#'   message("Bottom:")
+#'   summary(!!bottom())
+#' })
+#'
+#' # Simple case
+#' expandChain(obs())
+#'
+#' # Explicitly print top
+#' expandChain(top(), obs())
+#'
+#' # Separate into two code chunks
+#' exp_ctx <- newExpansionContext()
+#' expandChain(.expansionContext = exp_ctx,
+#'   invisible(top()),
+#'   invisible(bottom()))
+#' expandChain(.expansionContext = exp_ctx,
+#'   obs())
+#'
+#' @export
+expandChain <- function(..., .expansionContext = newExpansionContext()) {
+  # As we come across previously unseen objects (i.e. the UID has not been
+  # encountered before) we have to make some decisions about what variable name
+  # (i.e. varname) to use to represent that object. This varname is either
+  # auto-detected based on the metaReactive's variable name, or provided
+  # explicitly by the user when the metaReactive is created. (If the object
+  # belongs to a module, then we use the module ID to prefix the varname.)
+  #
+  # But, the desired variable name might already have been used by a different
+  # metaReactive (i.e. two objects have the same label). In this case, we can
+  # also use a var_1, var_2, etc. (and this is what the code currently does)
+  # but it'd be even better to try to disambiguate by using the desired name
+  # plus _1, _2, etc. (keep going til you find one that hasn't been used yet).
+  #
+  # IDEA:
+  # A different strategy we could use is to generate a gensym as the label at
+  # first, keeping track of the metadata for every gensym (label, module id).
+  # Then after the code generation is done, we can go back and see what the
+  # best overall set of variable names is. For example, if the same variable
+  # name "df" is used within module IDs "one" and "two", we can use "one_df"
+  # and "two_df"; but if only module ID "one" is used, we can just leave it
+  # as "df". (As opposed to the current strategy, where if "one" and "two"
+  # are both used, we end up with "df" and "df_two".)
+
+  # Keep track of what label we have used for each UID we have previously
+  # encountered. If a UID isn't found in this map, then we haven't yet
+  # encountered it.
+  uidToVarname <- .expansionContext$uidToVarname
+  # Keep track of what labels we have used, so we can be sure we don't
+  # reuse them.
+  seenVarname <- .expansionContext$seenVarname
+
+  # As we encounter metaReactives that we depend on (directly or indirectly),
+  # we'll append their code to this list (including assigning them to a label).
+  dependencyCode <- list()
+
+  # Override the rexprMetaReadFilter while we generate code. This is a filter
+  # function that metaReactive/metaReactive2 will call when someone asks them
+  # for their meta value. The `x` is the (lazily evaluated) logic for actually
+  # generating their code (or retrieving it from cache).
+  oldFilter <- .globals$rexprMetaReadFilter
+  .globals$rexprMetaReadFilter <- function(x, rexpr) {
+    # Read this object's UID.
+    uid <- attr(rexpr, "shinymetaUID", exact = TRUE)
+    domain <- attr(rexpr, "shinymetaDomain", exact = TRUE)
+    inline <- attr(rexpr, "shinymetaInline", exact = TRUE)
+
+    exec <- function() {
+      subfunc <- .expansionContext$uidToSubstitute$get(uid)
+      result <- if (!is.null(subfunc)) {
+        subfunc()
+      } else {
+        x
+      }
+    }
+
+    if (isTRUE(inline)) {
+      # The metaReactive doesn't want to have its own variable
+      return(exec())
+    }
+
+    # Check if we've seen this UID before, and if so, just return the same
+    # varname as we used last time.
+    varname <- uidToVarname$get(uid)
+    if (!is.null(varname)) {
+      return(as.symbol(varname))
+    }
+
+    # OK, we haven't seen this UID before. We need to figure out what variable
+    # name to use.
+
+    # Our first choice would be whatever varname the object itself has (the true
+    # var name of this metaReactive, or a name the user explicitly provided).
+    varname <- attr(rexpr, "shinymetaVarname", exact = TRUE)
+
+    # If there wasn't either a varname or explicitly provided name, just make
+    # a totally generic one up.
+    if (is.null(varname) || varname == "" || length(varname) != 1) {
+      varname <- .expansionContext$makeVarname()
+    } else {
+      if (!is.null(domain)) {
+        varname <- gsub("-", "_", domain$ns(varname))
+      }
+    }
+
+    # Make sure we don't use a variable name that has already been used.
+    while (seenVarname$get(varname)) {
+      varname <- .expansionContext$makeVarname()
+    }
+
+    # Remember this UID/varname combination for the future.
+    uidToVarname$set(uid, varname)
+    # Make sure this varname doesn't get used again.
+    seenVarname$set(varname, TRUE)
+
+    # Since this is the first time we're seeing this object, now we need to
+    # generate its code and store it in our running list of dependencies.
+    expr <- rlang::expr(`<-`(!!as.symbol(varname), !!exec()))
+    dependencyCode <<- c(dependencyCode, list(expr))
+
+    # This is what we're returning to the caller; whomever wanted the code for
+    # this metaReactive is going to get this variable name instead.
+    as.symbol(varname)
+  }
+  on.exit(.globals$rexprMetaReadFilter <- oldFilter, add = TRUE, after = FALSE)
+
+  withMetaMode({
+    # Trigger evaluation of the ..., which will also cause dependencyCode to be
+    # populated. The value of list(...) should all be code expressions, unless
+    # the user passed in something wrong.
+    dot_args <- eval(substitute(alist(...)))
+    if (!is.null(names(dot_args))) {
+      stop(call. = FALSE, "Named ... arguments to expandChain are not supported")
+    }
+    res <- lapply(seq_along(dot_args), function(i) {
+      # Grab the nth element. We do it with this gross `..n` business because
+      # we want to make sure we trigger evaluation of the arguments one at a
+      # time. We can't use rlang's dots-related functions, because it eagerly
+      # expands the `!!` in arguments, which we want to leave alone.
+      #
+      # Use `withVisible` because invisible() arguments should have their
+      # deps inserted, but not their actual code. Note that metaReactives
+      # consider *themselves* their own dependencies, so for metaReactive
+      # this means the code that assigns it is created (`mr <- ...`),
+      # but the additional line for printing it (`mr`) will be suppressed.
+      x_vis <- withVisible(eval(as.symbol(paste0("..", i)), envir = environment()))
+      x <- x_vis$value
+
+      val <- if (is_comment(x)) {
+        do.call(metaExpr, list(rlang::expr({!!x; {}})))
+      } else if (is.language(x)) {
+        x
+      } else if (is.null(x)) {
+        x
+      } else {
+        stop(call. = FALSE, "expandChain() understands language objects, comment-strings, and NULL; but not ", class(x)[1], " objects")
+      }
+      myDependencyCode <- dependencyCode
+      dependencyCode <<- list()
+      if (x_vis$visible) {
+        c(myDependencyCode, list(val))
+      } else {
+        myDependencyCode
+      }
+    })
+    res <- unlist(res, recursive = FALSE)
+    res <- res[!vapply(res, is.null, logical(1))]
+
+    # Expand into a block of code
+    metaExpr({!!!res})
+  })
 }
 
 prefix_class <- function (x, y) {

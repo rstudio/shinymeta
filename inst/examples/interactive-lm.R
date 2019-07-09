@@ -44,13 +44,13 @@ server <- function(input, output) {
     }
   })
 
-  data_discard <- metaReactive(
+  data_discard <- metaReactive({
     filter(data, .row_ids %in% !!outliers())
-  )
+  })
 
-  data_kept <- metaReactive(
+  data_kept <- metaReactive({
     filter(data, !.row_ids %in% !!outliers())
-  )
+  })
 
   model_fit <- metaReactive2({
     req(input$degree)
@@ -73,32 +73,15 @@ server <- function(input, output) {
   })
 
   observeEvent(input$plot_output_code, {
-    code <- expandCode(
-      {
+    code <- expandChain(
+      quote({
         library(ggplot2)
         library(dplyr)
         library(modelr)
-        # TODO: make it easier to capture 'setup' code
-        # https://github.com/rstudio/shinymeta/issues/16
         data <- mtcars
         data <- tibble::rownames_to_column(data, var = ".row_ids")
-        "# Row ids of the points removed"
-        outliers <- !!outliers()
-        "# Data for the points removed"
-        dataDiscard <- !!data_discard()
-        "# Data for the points remaining"
-        dataKept <- !!data_kept()
-        "# Fit the model"
-        modelFit <- !!model_fit()
-        "# Plot it!"
-        !!output$plot()
-      },
-      patchCalls = list(
-        outliers = quote(outliers),
-        data_discard = quote(dataDiscard),
-        data_kept = quote(dataKept),
-        model_fit = quote(modelFit)
-      )
+      }),
+      output$plot()
     )
 
     displayCodeModal(

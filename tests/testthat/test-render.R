@@ -71,7 +71,7 @@ describe("metaRender", isolate({
   })
 
   it("varies by dynvars", {
-    mr <- metaReactive(cars)
+    mr <- metaReactive({cars})
 
     out <- metaRender(shiny::renderPrint, { str(!!mr()) })
 
