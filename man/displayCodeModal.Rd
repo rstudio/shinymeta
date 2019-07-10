@@ -5,7 +5,7 @@
 \title{Display a shinyAce code editor via shiny modal}
 \usage{
 displayCodeModal(code, title = NULL, clip = "clipboard",
-  footer = modalButton("Dismiss"), size = c("m", "s", "l"),
+  footer = shiny::modalButton("Dismiss"), size = c("m", "s", "l"),
   easyClose = TRUE, fade = TRUE,
   session = shiny::getDefaultReactiveDomain(), ...)
 }

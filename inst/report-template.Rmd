@@ -7,9 +7,9 @@ output:
     code_folding: "hide"
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
-  out.width="100%", 
+  out.width = "100%", 
   tidy = TRUE
 )
 ```

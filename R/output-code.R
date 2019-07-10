@@ -9,7 +9,6 @@
 #'
 #' @param outputObj A shiny output container (e.g., [shiny::plotOutput], [shiny::textOutput], etc)
 #' @inheritParams shiny::actionButton
-#'
 #' @export
 #' @seealso [displayCodeModal]
 #' @examples
@@ -59,7 +58,7 @@ outputCodeButton <- function(outputObj, label = "Show code", icon = shiny::icon(
       # be a foolproof way to get the outputId given the outputObj, so
       # we won't know the id of this button ahead of time
       tags$button(
-        style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+        style = if (!is.null(width)) paste0("width: ", shiny::validateCssUnit(width), ";"),
         type = "button",
         class = "btn btn-default action-button",
         list(getFromNamespace("validateIcon", "shiny")(icon), label),

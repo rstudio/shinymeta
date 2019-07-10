@@ -48,6 +48,7 @@ Collate:
     'utils.R'
     'metareactive.R'
     'observe.R'
+    'globals.R'
     'output-code.R'
     'print.R'
     'render.R'

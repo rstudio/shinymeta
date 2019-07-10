@@ -33,7 +33,7 @@
 #' }
 #'
 displayCodeModal <- function(code, title = NULL, clip = "clipboard",
-                          footer = modalButton("Dismiss"), size = c("m", "s", "l"),
+                          footer = shiny::modalButton("Dismiss"), size = c("m", "s", "l"),
                           easyClose = TRUE, fade = TRUE,
                           session = shiny::getDefaultReactiveDomain(), ...) {
 
@@ -55,7 +55,7 @@ displayCodeModal <- function(code, title = NULL, clip = "clipboard",
 
   id <- getFromNamespace("createUniqueId", "shiny")(10)
 
-  observeEvent(session$rootScope()$input[[paste0(id, "-copy")]], {
+  shiny::observeEvent(session$rootScope()$input[[paste0(id, "-copy")]], {
     clipr::write_clip(code)
   })
 
@@ -73,7 +73,7 @@ displayCodeModal <- function(code, title = NULL, clip = "clipboard",
         ...
       ),
       footer = shiny::tagList(
-        if (length(clip)) shiny::actionButton(paste0(id, "-copy"), icon(clip)),
+        if (length(clip)) shiny::actionButton(paste0(id, "-copy"), shiny::icon(clip)),
         footer
       )
     )

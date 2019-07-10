@@ -6,3 +6,5 @@ examples
 ^pkgdown$
 ^\.travis\.yml$
 ^tools$
+^doc$
+^Meta$

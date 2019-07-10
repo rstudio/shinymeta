@@ -85,7 +85,7 @@ If you need code spread across multiple chunks in a report, you'll have to use `
 
 <pre>
 ```{r, results='asis', echo = FALSE}
-cat(readLines("_report.Rmd"), sep = "\n")
+cat(readLines(system.file(package = "shinymeta", "report-template.Rmd")), sep = "\n")
 ```
 </pre>
 
