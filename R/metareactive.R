@@ -291,7 +291,7 @@ withMetaMode <- function(expr, mode = TRUE) {
 #'
 #' @param expr An expression (quoted or unquoted).
 #' @param env An environment.
-#' @param quote Is the expression quoted? This is useful when you want to use an expression
+#' @param quoted Is the expression quoted? This is useful when you want to use an expression
 #' that is stored in a variable; to do so, it must be quoted with [`quote()`].
 #' @param localize Whether or not to wrap the returned expression in [`local()`].
 #' The default, \code{"auto"}, only wraps expressions with a top-level [`return()`]

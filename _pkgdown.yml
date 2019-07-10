@@ -1,5 +1,19 @@
 destination: docs
 
+navbar:
+  type: default
+  left:
+  - text: Code generation
+    href: articles/code-generation.html
+  - text: Code distribution
+    href: articles/code-distribution.html
+  - text: Reference
+    href: reference/index.html
+# Eventually, when we have news.md
+#  - text: News
+#    href: news/index.html
+
+
 reference:
 - title: Meta-reactives
   description: |

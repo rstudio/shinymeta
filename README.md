@@ -45,7 +45,9 @@ server <- function(input, output) {
 shinyApp(ui, server)
 ```
 
-<img src="https://rstudio.github.io/shinymeta/reference/figures/cars.gif" />
+<div align="center">
+  <img src="https://i.imgur.com/5gNquPE.gif" width="67%" />
+</div>
 
 This example illustrates the bare minimum of what you must do to get your Shiny app generating reproducible non-Shiny code:
 
@@ -53,13 +55,13 @@ This example illustrates the bare minimum of what you must do to get your Shiny 
 * Each read of reactive value has been unquoted (i.e., prepended with `!!`).
 * Output(s) of interest are supplied to `expandChain()`.
 
-For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/01-code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/02-code-distribution.html)
+For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/code-distribution.html)
 
 ## A motivating example
 
 Below is a screen-recording of a Shiny app which allows you to obtain CRAN download statistics for any combination of CRAN packages, look at those downloads using different aggregations, and produce a Rmd-based report _with code to reproduce the visualization_. This Shiny app is different from most in that it generates R code to reproduce what the user sees in the Shiny app (i.e., notice how the generated report reflects the user's input).
 
-<img src="https://rstudio.github.io/shinymeta/reference/figures/cranview-intro.gif" />
+<img src="https://i.imgur.com/DJCCRiP.gif" />
 
 We hope this example helps illustrate and inspire several reasons why you might want to generate standalone R code that mimics logic in your Shiny app:
 

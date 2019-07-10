@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-Once you're able to [generate code](01-code-generation.html) that replicates desired logic in your Shiny app, you'll need some way to distribute the code (and the results!) to users. **shinymeta** provides a few utilties to make all these things a bit easier to implement, including [downloading code and results](#bundles) as well as [showing code](#show-code) in the Shiny app itself.
+Once you're able to [generate code](code-generation.html) that replicates desired logic in your Shiny app, you'll need some way to distribute the code (and the results!) to users. **shinymeta** provides a few utilties to make all these things a bit easier to implement, including [downloading code and results](#bundles) as well as [showing code](#show-code) in the Shiny app itself.
 
 <!--
 One of the downsides to just showing code is that it doesn't guarantee the result will be reproduced, because the user may not have easy access to a suitable computational environment for running the code. One way to combat this is to provide both the code and the results as one deliverable. Moreover, by leveraging the power of **rmarkdown**, you can insert your code into a larger template that produces a high-quality HTML/pdf/word report of your user's Shiny experience. 
@@ -77,7 +77,7 @@ shinyApp(ui, server)
 ```
 
 ```{r, echo = FALSE, out.width="100%"}
-knitr::include_graphics("download-script.gif")
+knitr::include_graphics("https://i.imgur.com/mQ1kBAe.gif")
 ```
 
 ### From an Rmd template
@@ -159,7 +159,7 @@ shinyApp(ui, server)
 
 
 ```{r, echo = FALSE, out.width="100%"}
-knitr::include_graphics("upload-download.gif")
+knitr::include_graphics("https://i.imgur.com/IV0gfZJ.gif")
 ```
 
 
@@ -197,7 +197,7 @@ shinyApp(ui, server)
 ```
 
 ```{r, echo = FALSE, out.width="80%"}
-knitr::include_graphics("output-code.gif")
+knitr::include_graphics("https://i.imgur.com/ZiHKfXY.gif")
 ```
 
 <!--
@@ -248,5 +248,5 @@ shinyApp(ui, server)
 ```
 
 ```{r, echo = FALSE, out.width="80%"}
-knitr::include_graphics("show-code.gif")
+knitr::include_graphics("https://i.imgur.com/h14d7QG.gif")
 ```

@@ -12,15 +12,15 @@ metaExpr(expr, env = parent.frame(), quoted = FALSE,
 
 \item{env}{An environment.}
 
+\item{quoted}{Is the expression quoted? This is useful when you want to use an expression
+that is stored in a variable; to do so, it must be quoted with \code{\link[=quote]{quote()}}.}
+
 \item{localize}{Whether or not to wrap the returned expression in \code{\link[=local]{local()}}.
 The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[=return]{return()}}
 statement (i.e., return statements in anonymized functions are ignored).}
 
 \item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
 of a meta expression be applied to the \emph{last child} of the top-level \code{\{} call?}
-
-\item{quote}{Is the expression quoted? This is useful when you want to use an expression
-that is stored in a variable; to do so, it must be quoted with \code{\link[=quote]{quote()}}.}
 }
 \description{
 Mark an expression as a meta-expression

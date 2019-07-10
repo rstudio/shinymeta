@@ -38,31 +38,13 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
-     
-  </a>
+  <a href="../articles/code-generation.html">Code generation</a>
+</li>
+<li>
+  <a href="../articles/code-distribution.html">Code distribution</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="../articles/01-code-generation.html">Code generation</a>
-    </li>
-    <li>
-      <a href="../articles/02-code-distribution.html">Code distribution</a>
-    </li>
-    <li>
-      <a href="../articles/03-case-studies.html">Case studies</a>
-    </li>
-  </ul>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -87,16 +69,16 @@
       <h1>Code distribution</h1>
                         <h4 class="author">Carson Sievert &amp; Joe Cheng</h4>
             
-            <h4 class="date">2019-07-09</h4>
+            <h4 class="date">2019-07-10</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/master/vignettes/02-code-distribution.Rmd"><code>vignettes/02-code-distribution.Rmd</code></a></small>
-      <div class="hidden name"><code>02-code-distribution.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/master/vignettes/code-distribution.Rmd"><code>vignettes/code-distribution.Rmd</code></a></small>
+      <div class="hidden name"><code>code-distribution.Rmd</code></div>
 
     </div>
 
     
     
-<p>Once you’re able to <a href="01-code-generation.html">generate code</a> that replicates desired logic in your Shiny app, you’ll need some way to distribute the code (and the results!) to users. <strong>shinymeta</strong> provides a few utilties to make all these things a bit easier to implement, including <a href="#bundles">downloading code and results</a> as well as <a href="#show-code">showing code</a> in the Shiny app itself.</p>
+<p>Once you’re able to <a href="code-generation.html">generate code</a> that replicates desired logic in your Shiny app, you’ll need some way to distribute the code (and the results!) to users. <strong>shinymeta</strong> provides a few utilties to make all these things a bit easier to implement, including <a href="#bundles">downloading code and results</a> as well as <a href="#show-code">showing code</a> in the Shiny app itself.</p>
 <!--
 One of the downsides to just showing code is that it doesn't guarantee the result will be reproduced, because the user may not have easy access to a suitable computational environment for running the code. One way to combat this is to provide both the code and the results as one deliverable. Moreover, by leveraging the power of **rmarkdown**, you can insert your code into a larger template that produces a high-quality HTML/pdf/word report of your user's Shiny experience. 
 -->
@@ -148,7 +130,7 @@ One of the downsides to just showing code is that it doesn't guarantee the resul
 <span id="cb1-38"><a href="#cb1-38"></a>  )</span>
 <span id="cb1-39"><a href="#cb1-39"></a>}</span>
 <span id="cb1-40"><a href="#cb1-40"></a><span class="kw">shinyApp</span>(ui, server)</span></code></pre></div>
-<p><img src="download-script.gif" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="https://i.imgur.com/mQ1kBAe.gif" width="100%" style="display: block; margin: auto;"></p>
 </div>
 <div id="from-an-rmd-template" class="section level3">
 <h3 class="hasAnchor">
@@ -244,7 +226,7 @@ And the second one:
 <span id="cb3-42"><a href="#cb3-42"></a>}</span>
 <span id="cb3-43"><a href="#cb3-43"></a></span>
 <span id="cb3-44"><a href="#cb3-44"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
-<p><img src="upload-download.gif" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="https://i.imgur.com/IV0gfZJ.gif" width="100%" style="display: block; margin: auto;"></p>
 </div>
 </div>
 <div id="showicode" class="section level2">
@@ -278,7 +260,7 @@ And the second one:
 <span id="cb4-22"><a href="#cb4-22"></a>  })</span>
 <span id="cb4-23"><a href="#cb4-23"></a>}</span>
 <span id="cb4-24"><a href="#cb4-24"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
-<p><img src="output-code.gif" width="80%" style="display: block; margin: auto;"></p>
+<p><img src="https://i.imgur.com/ZiHKfXY.gif" width="80%" style="display: block; margin: auto;"></p>
 <!--
 TODO: 
 1. styling the icon?
@@ -305,7 +287,7 @@ TODO:
 <span id="cb5-14"><a href="#cb5-14"></a>    <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/qplot.html">qplot</a></span>(<span class="dt">data =</span> diamonds, <span class="dt">x =</span> price) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span>(<span class="st">"Number of diamonds"</span>)</span>
 <span id="cb5-15"><a href="#cb5-15"></a>  })</span>
 <span id="cb5-16"><a href="#cb5-16"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/observeEvent">observeEvent</a></span>(input<span class="op">$</span>code, {</span>
-<span id="cb5-17"><a href="#cb5-17"></a>    code &lt;-<span class="st"> </span><span class="kw"><a href="../reference/expandCode.html">expandCode</a></span>({</span>
+<span id="cb5-17"><a href="#cb5-17"></a>    code &lt;-<span class="st"> </span><span class="kw">expandCode</span>({</span>
 <span id="cb5-18"><a href="#cb5-18"></a>      <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)</span>
 <span id="cb5-19"><a href="#cb5-19"></a>      gridExtra<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/gridExtra/topics/arrangeGrob">grid.arrange</a></span>(</span>
 <span id="cb5-20"><a href="#cb5-20"></a>        <span class="op">!!</span>output<span class="op">$</span><span class="kw">p1</span>(),</span>
@@ -323,7 +305,7 @@ TODO:
 <span id="cb5-32"><a href="#cb5-32"></a>  })</span>
 <span id="cb5-33"><a href="#cb5-33"></a>}</span>
 <span id="cb5-34"><a href="#cb5-34"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
-<p><img src="show-code.gif" width="80%" style="display: block; margin: auto;"></p>
+<p><img src="https://i.imgur.com/h14d7QG.gif" width="80%" style="display: block; margin: auto;"></p>
 </div>
 </div>
 <div class="footnotes">

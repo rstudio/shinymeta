@@ -97,7 +97,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-Below is one way the app above could be modified to generate code that reproduces `output$plot` outside of the shiny session. Notice how both the `output$plot` and `output$code` update dynamically in response to new package names without having to repeat any logic of the original app. To keep the focus on code generation, we've presented the `output$code` as simple as possible here (by using `verbatimTextOutput()` and `renderPrint()`), but the [next article](02-code-distribution.html) outlines the various options distributing code to users.
+Below is one way the app above could be modified to generate code that reproduces `output$plot` outside of the shiny session. Notice how both the `output$plot` and `output$code` update dynamically in response to new package names without having to repeat any logic of the original app. To keep the focus on code generation, we've presented the `output$code` as simple as possible here (by using `verbatimTextOutput()` and `renderPrint()`), but the [next article](code-distribution.html) outlines the various options distributing code to users.
 
 ```{r, eval = FALSE}
 library(shiny)
@@ -142,7 +142,7 @@ shinyApp(ui, server)
 ```
 
 ```{r, echo = FALSE}
-knitr::include_graphics("cranview-basic.gif")
+knitr::include_graphics("https://i.imgur.com/T9a60Fm.gif")
 ```
 
 So, what has changed in the implementation between the original Shiny app and the one that generates code? There a few high-level observations we can make here that should hold true for most apps that leverage **shinymeta** to generate code:
@@ -382,7 +382,7 @@ expandChain(output$summary(), .expansionContext = ec)
 
 Expansion contexts are also useful for cases where you need to redefine a meta-reactive. This is useful in at least two scenarios:
 
-1. For efficiency or privacy reasons, you may not want to provide the "rawest" form of the data in your app to users. Instead, you might want to only provide a transformed and/or summarized version of the data. For example, instead of providing the user with `downloads`, we could provide `downloads_rolling` as file to be [included as part of a download bundle](02-code-distribution.html#including-other-files).
+1. For efficiency or privacy reasons, you may not want to provide the "rawest" form of the data in your app to users. Instead, you might want to only provide a transformed and/or summarized version of the data. For example, instead of providing the user with `downloads`, we could provide `downloads_rolling` as file to be [included as part of a download bundle](code-distribution.html#including-other-files).
 
 ```{r}
 saveRDS(downloads_rolling(), "d.rds")
@@ -402,7 +402,7 @@ expandChain(
 unlink("d.rds")
 ```
 
-2. Apps that allow users to upload a file: the location of the file on the server won't be available to users, so it may be easier just to substitute the reactive that reads the uploaded file. For an example, see [this example](02-code-distribution.html#including-other-files) in the next vignette.
+2. Apps that allow users to upload a file: the location of the file on the server won't be available to users, so it may be easier just to substitute the reactive that reads the uploaded file. For an example, see [this example](code-distribution.html#including-other-files) in the next vignette.
 
 
 <!--
@@ -502,7 +502,7 @@ expandCode(
 )
 ```
 
-You might be thinking, `expandCode()` seems weird and complicated (it is!), why should I even bother learning how to use it? For one, you might want to generate code that combines multiple outputs in some custom way, like [this example in the next article](02-code-distribution.html#numerous-outputs). Also, `expandCode()` gives you the abilty to 'short-cut' reactive logic, which is probably most useful for generating code for [reports](02-code-distribution.html#bundling) where it's not ideal to expose all your code, just some portion of it (whether it's for proprietary and/or efficiency reasons). For example, when a user downloads the report, you might want to save an R object to disk (e.g., `saveRDS()`), then have the generated code read in that object.
+You might be thinking, `expandCode()` seems weird and complicated (it is!), why should I even bother learning how to use it? For one, you might want to generate code that combines multiple outputs in some custom way, like [this example in the next article](code-distribution.html#numerous-outputs). Also, `expandCode()` gives you the abilty to 'short-cut' reactive logic, which is probably most useful for generating code for [reports](code-distribution.html#bundling) where it's not ideal to expose all your code, just some portion of it (whether it's for proprietary and/or efficiency reasons). For example, when a user downloads the report, you might want to save an R object to disk (e.g., `saveRDS()`), then have the generated code read in that object.
 
 ```{r, eval = FALSE}
 expandCode(
