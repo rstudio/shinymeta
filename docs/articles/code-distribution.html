@@ -284,24 +284,22 @@ TODO:
 <span id="cb5-14"><a href="#cb5-14"></a>    <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/qplot.html">qplot</a></span>(<span class="dt">data =</span> diamonds, <span class="dt">x =</span> price) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span>(<span class="st">"Number of diamonds"</span>)</span>
 <span id="cb5-15"><a href="#cb5-15"></a>  })</span>
 <span id="cb5-16"><a href="#cb5-16"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/observeEvent">observeEvent</a></span>(input<span class="op">$</span>code, {</span>
-<span id="cb5-17"><a href="#cb5-17"></a>    code &lt;-<span class="st"> </span><span class="kw">expandCode</span>({</span>
-<span id="cb5-18"><a href="#cb5-18"></a>      <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)</span>
-<span id="cb5-19"><a href="#cb5-19"></a>      gridExtra<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/gridExtra/topics/arrangeGrob">grid.arrange</a></span>(</span>
-<span id="cb5-20"><a href="#cb5-20"></a>        <span class="op">!!</span>output<span class="op">$</span><span class="kw">p1</span>(),</span>
-<span id="cb5-21"><a href="#cb5-21"></a>        <span class="op">!!</span>output<span class="op">$</span><span class="kw">p2</span>()</span>
-<span id="cb5-22"><a href="#cb5-22"></a>      )</span>
-<span id="cb5-23"><a href="#cb5-23"></a>    })</span>
-<span id="cb5-24"><a href="#cb5-24"></a>    <span class="kw"><a href="../reference/displayCodeModal.html">displayCodeModal</a></span>(</span>
-<span id="cb5-25"><a href="#cb5-25"></a>      code, </span>
-<span id="cb5-26"><a href="#cb5-26"></a>      <span class="dt">title =</span> <span class="st">"ggplot2 code"</span>,</span>
-<span id="cb5-27"><a href="#cb5-27"></a>      <span class="dt">size =</span> <span class="st">"s"</span>, </span>
-<span id="cb5-28"><a href="#cb5-28"></a>      <span class="dt">fontSize =</span> <span class="dv">16</span>, </span>
-<span id="cb5-29"><a href="#cb5-29"></a>      <span class="dt">height =</span> <span class="st">"200px"</span>,</span>
-<span id="cb5-30"><a href="#cb5-30"></a>      <span class="dt">theme =</span> <span class="st">"solarized_dark"</span></span>
-<span id="cb5-31"><a href="#cb5-31"></a>    )</span>
-<span id="cb5-32"><a href="#cb5-32"></a>  })</span>
-<span id="cb5-33"><a href="#cb5-33"></a>}</span>
-<span id="cb5-34"><a href="#cb5-34"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
+<span id="cb5-17"><a href="#cb5-17"></a>    code &lt;-<span class="st"> </span><span class="kw"><a href="../reference/expandChain.html">expandChain</a></span>(</span>
+<span id="cb5-18"><a href="#cb5-18"></a>      <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/substitute">quote</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)),</span>
+<span id="cb5-19"><a href="#cb5-19"></a>      output<span class="op">$</span><span class="kw">p1</span>(),</span>
+<span id="cb5-20"><a href="#cb5-20"></a>      output<span class="op">$</span><span class="kw">p2</span>()</span>
+<span id="cb5-21"><a href="#cb5-21"></a>    )</span>
+<span id="cb5-22"><a href="#cb5-22"></a>    <span class="kw"><a href="../reference/displayCodeModal.html">displayCodeModal</a></span>(</span>
+<span id="cb5-23"><a href="#cb5-23"></a>      code, </span>
+<span id="cb5-24"><a href="#cb5-24"></a>      <span class="dt">title =</span> <span class="st">"ggplot2 code"</span>,</span>
+<span id="cb5-25"><a href="#cb5-25"></a>      <span class="dt">size =</span> <span class="st">"s"</span>, </span>
+<span id="cb5-26"><a href="#cb5-26"></a>      <span class="dt">fontSize =</span> <span class="dv">16</span>, </span>
+<span id="cb5-27"><a href="#cb5-27"></a>      <span class="dt">height =</span> <span class="st">"200px"</span>,</span>
+<span id="cb5-28"><a href="#cb5-28"></a>      <span class="dt">theme =</span> <span class="st">"solarized_dark"</span></span>
+<span id="cb5-29"><a href="#cb5-29"></a>    )</span>
+<span id="cb5-30"><a href="#cb5-30"></a>  })</span>
+<span id="cb5-31"><a href="#cb5-31"></a>}</span>
+<span id="cb5-32"><a href="#cb5-32"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
 <p><img src="https://i.imgur.com/h14d7QG.gif" width="80%" style="display: block; margin: auto;"></p>
 </div>
 </div>

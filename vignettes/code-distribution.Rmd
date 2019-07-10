@@ -224,13 +224,11 @@ server <- function(input, output) {
     qplot(data = diamonds, x = price) + ylab("Number of diamonds")
   })
   observeEvent(input$code, {
-    code <- expandCode({
-      library(ggplot2)
-      gridExtra::grid.arrange(
-        !!output$p1(),
-        !!output$p2()
-      )
-    })
+    code <- expandChain(
+      quote(library(ggplot2)),
+      output$p1(),
+      output$p2()
+    )
     displayCodeModal(
       code, 
       title = "ggplot2 code",
