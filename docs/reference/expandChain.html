@@ -256,7 +256,7 @@ another user tries to run the generated code.</p>
 <p>You can use the expansion context object to swap out the implementation of
 <code>data</code>, or any other <code>metaReactive</code>:</p><pre>    ec &lt;- newExpansionContext()
     ec$substituteMetaReactive(data, function() {
-      quote(read.csv("data.csv"))
+      metaExpr(read.csv("data.csv"))
     })
     expandChain(.expansionContext = ec, obs())
 </pre>
@@ -268,9 +268,10 @@ uploaded file as <code>data.csv</code>, and the user will be able to reproduce y
 analysis.</p>
 <p>The <code>substituteMetaReactive</code> method takes two arguments: the <code>metaReactive</code>
 object to substitute, and a function that takes zero arguments and returns a
-quoted expression. This function will be invoked the first time the
-<code>metaReactive</code> object is encountered (nit: or if the <code>metaReactive</code> is
-defined with <code>inline = TRUE</code>, then every time it is encountered).</p>
+quoted expression (for the nicest looking results, use <code>metaExpr</code> to create
+the expression). This function will be invoked the first time the
+<code>metaReactive</code> object is encountered (or if the <code>metaReactive</code> is defined
+with <code>inline = TRUE</code>, then every time it is encountered).</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
