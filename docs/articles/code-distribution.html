@@ -162,18 +162,17 @@ And the second one:
 {{plot2}}
 ```
 </pre>
-<p>Then, to use this <code>report.Rmd</code> template, we could replace <code><a href="../reference/buildScriptBundle.html">buildScriptBundle()</a></code> with this instead:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw"><a href="../reference/buildScriptBundle.html">buildRmdBundle</a></span>(</span>
-<span id="cb2-2"><a href="#cb2-2"></a>  <span class="st">"report.Rmd"</span>, </span>
-<span id="cb2-3"><a href="#cb2-3"></a>  file, </span>
-<span id="cb2-4"><a href="#cb2-4"></a>  <span class="dt">vars =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(</span>
-<span id="cb2-5"><a href="#cb2-5"></a>    <span class="dt">plot1 =</span> <span class="kw"><a href="../reference/expandChain.html">expandChain</a></span>(output<span class="op">$</span><span class="kw">p1</span>()),</span>
-<span id="cb2-6"><a href="#cb2-6"></a>    <span class="dt">plot2 =</span> <span class="kw"><a href="../reference/expandChain.html">expandChain</a></span>(output<span class="op">$</span><span class="kw">p2</span>())</span>
-<span id="cb2-7"><a href="#cb2-7"></a>  ), </span>
-<span id="cb2-8"><a href="#cb2-8"></a>  <span class="dt">render_args =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(</span>
-<span id="cb2-9"><a href="#cb2-9"></a>    <span class="dt">output_format =</span> <span class="st">"all"</span></span>
-<span id="cb2-10"><a href="#cb2-10"></a>  )</span>
-<span id="cb2-11"><a href="#cb2-11"></a>)</span></code></pre></div>
+<p>Then, to use this <code>report.Rmd</code> template, the <code><a href="https://www.rdocumentation.org/packages/shiny/topics/downloadHandler">downloadHandler()</a></code> in the Shiny app could use the code below (instead of <code><a href="../reference/buildScriptBundle.html">buildScriptBundle()</a></code>). Since our template places output code into separate <strong>knitr</strong> code chunks, it’s a good idea to share the expansion context so that any dependency code isn’t duplicated (as discussed in <a href="#code-expansion">code generation</a>).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>ec &lt;-<span class="st"> </span><span class="kw"><a href="../reference/expandChain.html">newExpansionContext</a></span>()</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw"><a href="../reference/buildScriptBundle.html">buildRmdBundle</a></span>(</span>
+<span id="cb2-3"><a href="#cb2-3"></a>  <span class="st">"report.Rmd"</span>, </span>
+<span id="cb2-4"><a href="#cb2-4"></a>  file, </span>
+<span id="cb2-5"><a href="#cb2-5"></a>  <span class="dt">vars =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(</span>
+<span id="cb2-6"><a href="#cb2-6"></a>    <span class="dt">plot1 =</span> <span class="kw"><a href="../reference/expandChain.html">expandChain</a></span>(output<span class="op">$</span><span class="kw">p1</span>(), <span class="dt">.expansionContext =</span> ec),</span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="dt">plot2 =</span> <span class="kw"><a href="../reference/expandChain.html">expandChain</a></span>(output<span class="op">$</span><span class="kw">p2</span>(), <span class="dt">.expansionContext =</span> ec)</span>
+<span id="cb2-8"><a href="#cb2-8"></a>  ), </span>
+<span id="cb2-9"><a href="#cb2-9"></a>  <span class="dt">render_args =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">output_format =</span> <span class="st">"all"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10"></a>)</span></code></pre></div>
 </div>
 <div id="including-other-files" class="section level3">
 <h3 class="hasAnchor">
@@ -213,16 +212,18 @@ And the second one:
 <span id="cb3-32"><a href="#cb3-32"></a>    <span class="dt">filename =</span> <span class="st">"report.zip"</span>, </span>
 <span id="cb3-33"><a href="#cb3-33"></a>    <span class="dt">content =</span> <span class="cf">function</span>(out) {</span>
 <span id="cb3-34"><a href="#cb3-34"></a>      ec &lt;-<span class="st"> </span><span class="kw"><a href="../reference/expandChain.html">newExpansionContext</a></span>()</span>
-<span id="cb3-35"><a href="#cb3-35"></a>      ec<span class="op">$</span><span class="kw">substituteMetaReactive</span>(data, <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/read.table">read.csv</a></span>(<span class="st">"data.csv"</span>))</span>
-<span id="cb3-36"><a href="#cb3-36"></a>      <span class="kw"><a href="../reference/buildScriptBundle.html">buildScriptBundle</a></span>(</span>
-<span id="cb3-37"><a href="#cb3-37"></a>        <span class="kw"><a href="../reference/expandChain.html">expandChain</a></span>(output<span class="op">$</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(), <span class="dt">.expansionContext =</span> ec), out, </span>
-<span id="cb3-38"><a href="#cb3-38"></a>        <span class="dt">include_files =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/setNames">setNames</a></span>(input<span class="op">$</span>file1<span class="op">$</span>datapath, <span class="st">"data.csv"</span>)</span>
-<span id="cb3-39"><a href="#cb3-39"></a>      )</span>
-<span id="cb3-40"><a href="#cb3-40"></a>    }</span>
-<span id="cb3-41"><a href="#cb3-41"></a>  )</span>
-<span id="cb3-42"><a href="#cb3-42"></a>}</span>
-<span id="cb3-43"><a href="#cb3-43"></a></span>
-<span id="cb3-44"><a href="#cb3-44"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
+<span id="cb3-35"><a href="#cb3-35"></a>      ec<span class="op">$</span><span class="kw">substituteMetaReactive</span>(data, <span class="cf">function</span>() {</span>
+<span id="cb3-36"><a href="#cb3-36"></a>        <span class="kw"><a href="../reference/metaExpr.html">metaExpr</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/read.table">read.csv</a></span>(<span class="st">"data.csv"</span>))</span>
+<span id="cb3-37"><a href="#cb3-37"></a>      })</span>
+<span id="cb3-38"><a href="#cb3-38"></a>      <span class="kw"><a href="../reference/buildScriptBundle.html">buildScriptBundle</a></span>(</span>
+<span id="cb3-39"><a href="#cb3-39"></a>        <span class="kw"><a href="../reference/expandChain.html">expandChain</a></span>(output<span class="op">$</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(), <span class="dt">.expansionContext =</span> ec), out, </span>
+<span id="cb3-40"><a href="#cb3-40"></a>        <span class="dt">include_files =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/setNames">setNames</a></span>(input<span class="op">$</span>file1<span class="op">$</span>datapath, <span class="st">"data.csv"</span>)</span>
+<span id="cb3-41"><a href="#cb3-41"></a>      )</span>
+<span id="cb3-42"><a href="#cb3-42"></a>    }</span>
+<span id="cb3-43"><a href="#cb3-43"></a>  )</span>
+<span id="cb3-44"><a href="#cb3-44"></a>}</span>
+<span id="cb3-45"><a href="#cb3-45"></a></span>
+<span id="cb3-46"><a href="#cb3-46"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
 <p><img src="https://i.imgur.com/IV0gfZJ.gif" width="100%" style="display: block; margin: auto;"></p>
 </div>
 </div>

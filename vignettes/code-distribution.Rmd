@@ -87,19 +87,18 @@ cat(readLines("_report.Rmd"), sep = "\n")
 ```
 </pre>
 
-Then, to use this `report.Rmd` template, we could replace `buildScriptBundle()` with this instead:
+Then, to use this `report.Rmd` template, the `downloadHandler()` in the Shiny app could use the code below (instead of `buildScriptBundle()`). Since our template places output code into separate **knitr** code chunks, it's a good idea to share the expansion context so that any dependency code isn't duplicated (as discussed in [code generation](#code-expansion)).
 
 ```{r, eval = FALSE}
+ec <- newExpansionContext()
 buildRmdBundle(
   "report.Rmd", 
   file, 
   vars = list(
-    plot1 = expandChain(output$p1()),
-    plot2 = expandChain(output$p2())
+    plot1 = expandChain(output$p1(), .expansionContext = ec),
+    plot2 = expandChain(output$p2(), .expansionContext = ec)
   ), 
-  render_args = list(
-    output_format = "all"
-  )
+  render_args = list(output_format = "all")
 )
 ```
 
@@ -142,7 +141,9 @@ server <- function(input, output) {
     filename = "report.zip", 
     content = function(out) {
       ec <- newExpansionContext()
-      ec$substituteMetaReactive(data, read.csv("data.csv"))
+      ec$substituteMetaReactive(data, function() {
+        metaExpr(read.csv("data.csv"))
+      })
       buildScriptBundle(
         expandChain(output$summary(), .expansionContext = ec), out, 
         include_files = setNames(input$file1$datapath, "data.csv")
