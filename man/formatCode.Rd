@@ -48,7 +48,7 @@ options(shiny.suppressMissingContextError = TRUE)
 x <- metaReactive({
   "# Here's a comment"
   sample(5) \%>\% sum()
-})
+}, varname = "x")
 
 code <- expandChain(x())
 

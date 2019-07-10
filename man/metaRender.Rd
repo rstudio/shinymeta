@@ -35,7 +35,7 @@ of a meta expression be applied to the \emph{last child} of the top-level \code{
 }
 \description{
 Create a meta-reactive output that, when invoked with meta-mode activated
-(i.e. called within \code{\link[=expandCode]{expandCode()}} or \code{\link[=withMetaMode]{withMetaMode()}}), returns a
+(i.e. called within \code{\link[=expandChain]{expandChain()}} or \code{\link[=withMetaMode]{withMetaMode()}}), returns a
 code expression (instead of evaluating that expression and returning the value).
 }
 \details{

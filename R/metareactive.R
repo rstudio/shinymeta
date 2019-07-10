@@ -36,6 +36,7 @@
 #' @seealso [metaExpr()]
 #' @examples
 #'
+#' library(shiny)
 #' options(shiny.suppressMissingContextError = TRUE)
 #'
 #' input <- list(x = 1)
@@ -45,7 +46,7 @@
 #'   a <- !!input$x + 1
 #'   b <- a + 1
 #'   c + 1
-#' })
+#' }, varname = "y")
 #'
 #' withMetaMode(y())
 #' expandChain(y())
@@ -58,7 +59,7 @@
 #'     b <- a + 1
 #'     c + 1
 #'   }, bindToReturn = TRUE)
-#' })
+#' }, varname = "y")
 #'
 #' expandChain(y())
 #'
@@ -114,7 +115,7 @@ exprToVarname <- function(expr, varname = NULL, inline, objectType = "metaReacti
           call. = FALSE
         )
       }
-      stop("No srcref available. Please report this issue to https://github.com/rstudio/shinymeta/issues/new", call. = FALSE)
+      warning("No srcref available. Please report this issue to https://github.com/rstudio/shinymeta/issues/new", call. = FALSE)
     }
     varname <- mrexprSrcrefToLabel(srcref[[1]],
       stop("Failed to infer variable name for ", objectType, "; see the Details section of ?metaReactive for suggestions", call. = FALSE)
@@ -256,7 +257,7 @@ metaCacheKey <- function() {
 #' @param expr an expression.
 #' @param mode whether or not to evaluate expression in meta mode.
 #'
-#' @seealso [expandCode()]
+#' @seealso [expandChain()]
 #' @export
 withMetaMode <- function(expr, mode = TRUE) {
   origVal <- metaMode()
@@ -374,28 +375,7 @@ withDynamicScope <- function(expr, ..., .list = list(...)) {
 #' match variable name(s) representing the return value of the meta-component(s).
 #'
 #' @seealso [withMetaMode()]
-#' @examples
-#'
-#' options(shiny.suppressMissingContextError = TRUE)
-#'
-#' petal_width <- metaReactive({
-#'   iris$Petal.Width
-#' })
-#'
-#' mean_pw <- metaReactive({
-#'   mean(!!petal_width())
-#' })
-#'
-#' expandCode(
-#'   {
-#'     pw <- !!petal_width()
-#'     !!mean_pw()
-#'   },
-#'   patchCalls = list(
-#'     petal_width = quote(pw)
-#'   )
-#' )
-#'
+#' @noRd
 expandCode <- function(expr, env = parent.frame(), quoted = FALSE, patchCalls = list()) {
   if (!quoted) {
     expr <- substitute(expr)
@@ -448,7 +428,7 @@ make_assign_expr <- function(lhs = "", rhs) {
 #' @param ... A collection of meta-reactives.
 #' @param .env An environment.
 #' @param .pkgs A character vector of packages to load before the expanded code.
-#' @rdname expandCode
+#' @noRd
 expandObjects <- function(..., .env = parent.frame(), .pkgs) {
   exprs <- rlang::exprs(...)
 
@@ -749,19 +729,19 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' @examples
 #' input <- list(dataset = "cars")
 #'
-#' # Declare some meta objects
-#'
+#' # varname is only required if srcref aren't supported
+#' # (R CMD check disables them for some reason?)
 #' mr <- metaReactive({
 #'   get(!!input$dataset, "package:datasets")
-#' })
+#' }, varname = "mr")
 #'
 #' top <- metaReactive({
 #'   head(!!mr())
-#' })
+#' }, varname = "top")
 #'
 #' bottom <- metaReactive({
 #'   tail(!!mr())
-#' })
+#' }, varname = "bottom")
 #'
 #' obs <- metaObserve({
 #'   message("Top:")

@@ -163,19 +163,19 @@ with \code{inline = TRUE}, then every time it is encountered).
 \examples{
 input <- list(dataset = "cars")
 
-# Declare some meta objects
-
+# varname is only required if srcref aren't supported
+# (R CMD check disables them for some reason?)
 mr <- metaReactive({
   get(!!input$dataset, "package:datasets")
-})
+}, varname = "mr")
 
 top <- metaReactive({
   head(!!mr())
-})
+}, varname = "top")
 
 bottom <- metaReactive({
   tail(!!mr())
-})
+}, varname = "bottom")
 
 obs <- metaObserve({
   message("Top:")

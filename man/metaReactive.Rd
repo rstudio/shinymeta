@@ -54,6 +54,7 @@ TODO: Document reasons why varname detection might fail.
 }
 \examples{
 
+library(shiny)
 options(shiny.suppressMissingContextError = TRUE)
 
 input <- list(x = 1)
@@ -63,7 +64,7 @@ y <- metaReactive({
   a <- !!input$x + 1
   b <- a + 1
   c + 1
-})
+}, varname = "y")
 
 withMetaMode(y())
 expandChain(y())
@@ -76,7 +77,7 @@ y <- metaReactive2({
     b <- a + 1
     c + 1
   }, bindToReturn = TRUE)
-})
+}, varname = "y")
 
 expandChain(y())
 

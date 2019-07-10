@@ -10,7 +10,7 @@
 #' @param ... arguments passed along to `shinyAce::aceEditor()`
 #'
 #' @export
-#' @seealso [outputCode]
+#' @seealso [outputCodeButton]
 #' @examples
 #'
 #' if (interactive()) {

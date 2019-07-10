@@ -1,7 +1,7 @@
 #' Create a meta-reactive output
 #'
 #' Create a meta-reactive output that, when invoked with meta-mode activated
-#' (i.e. called within [expandCode()] or [withMetaMode()]), returns a
+#' (i.e. called within [expandChain()] or [withMetaMode()]), returns a
 #' code expression (instead of evaluating that expression and returning the value).
 #'
 #' @details If you wish to capture specific code inside of `expr` (e.g. ignore code

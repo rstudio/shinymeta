@@ -61,5 +61,5 @@ if (interactive()) {
 
 }
 \seealso{
-\link{outputCode}
+\link{outputCodeButton}
 }

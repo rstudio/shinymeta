@@ -15,5 +15,5 @@ withMetaMode(expr, mode = TRUE)
 Evaluate an expression with meta mode activated
 }
 \seealso{
-\code{\link[=expandCode]{expandCode()}}
+\code{\link[=expandChain]{expandChain()}}
 }
