@@ -2,7 +2,9 @@
 title: "Code distribution"
 author: "Carson Sievert & Joe Cheng"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{2. Code distribution}
   %\VignetteEngine{knitr::rmarkdown}

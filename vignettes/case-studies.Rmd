@@ -2,7 +2,9 @@
 title: "Case studies"
 author: "Carson Sievert & Joe Cheng"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{3. Case studies}
   %\VignetteEngine{knitr::rmarkdown}
