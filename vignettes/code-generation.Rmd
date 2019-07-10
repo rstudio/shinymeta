@@ -361,7 +361,7 @@ expandChain(
 )
 ```
 
-Note, however, that if we expand these outputs separately, we end up duplicating code, because the expansion of `output$summary()` doesn't know that we've already expanded `output$plot()`:
+Note, however, that if we expand these outputs separately, `expandChain()` won't know to avoid duplicating code for dependencies that they share. In our case, both of these outputs depend on `downloads`, so if we expand them in subsequent calls to `expandChain()`, we'll be producing code that calls `cranlogs::cran_downloads()` twice:
 
 ```{r}
 expandChain(output$plot())
@@ -371,7 +371,7 @@ expandChain(output$plot())
 expandChain(output$summary())
 ```
 
-Fortunately, there is a way to share the 'expansion context' between subsequent calls to `expandChain()`, effectively eliminating the redundant caused by shared dependencies (e.g., `downloads`), which is especially useful for [generating reports](#generating-reports):
+Fortunately, there is a way to avoid this redundant code caused by shared dependencies by sharing an 'expansion context' between subsequent calls to `expandChain()`. This is especially useful for [generating reports](#generating-reports):
 
 ```{r}
 ec <- newExpansionContext()
@@ -382,7 +382,7 @@ expandChain(output$plot(), .expansionContext = ec)
 expandChain(output$summary(), .expansionContext = ec)
 ```
 
-Expansion contexts are also useful for cases where you need to redefine a meta-reactive. This is useful in at least two scenarios:
+Expansion contexts are also useful for cases where you need to redefine a meta-reactive's logic. This is useful in at least two scenarios:
 
 1. For efficiency or privacy reasons, you may not want to provide the "rawest" form of the data in your app to users. Instead, you might want to only provide a transformed and/or summarized version of the data. For example, instead of providing the user with `downloads`, we could provide `downloads_rolling` as file to be [included as part of a download bundle](code-distribution.html#including-other-files).
 

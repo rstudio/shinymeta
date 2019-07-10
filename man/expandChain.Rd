@@ -56,15 +56,15 @@ The result looks like this:\preformatted{    summary(runif(100))
 
 Notice how \code{runif(100)} is inlined wherever \code{!!nums()}
 appears, which is not desirable if we wish to reuse the same
-random values for the \code{summary()} and \code{plot()}.
+values for \code{summary()} and \code{plot()}.
 
 The \code{expandChain} function helps us workaround this issue
 by assigning return values of \code{metaReactive()} expressions to
-a name:\preformatted{    expandChain(obs())
+a name, then replaces relevant expansion (e.g., \code{!!nums()})
+with the appropriate name (e.g. \code{nums}).\preformatted{    expandChain(obs())
 }
 
-That is, the resulting code stores the result of the \code{nums()} reactives
-in a variable names \code{nums}, which is reused by \code{summary()} and \code{plot()}:\preformatted{    nums <- runif(100)
+The result looks like this:\preformatted{    nums <- runif(100)
     summary(nums)
     plot(nums)
 }
@@ -198,4 +198,7 @@ expandChain(.expansionContext = exp_ctx,
 expandChain(.expansionContext = exp_ctx,
   obs())
 
+}
+\references{
+\url{https://rstudio.github.io/shinymeta/articles/code-generation.html}
 }

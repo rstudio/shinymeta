@@ -167,13 +167,13 @@ dependencies and expands each <code>!!</code> in place.</p>
 </pre>
     <p>Notice how <code><a href='https://www.rdocumentation.org/packages/stats/topics/Uniform'>runif(100)</a></code> is inlined wherever <code>!!nums()</code>
 appears, which is not desirable if we wish to reuse the same
-random values for the <code><a href='https://www.rdocumentation.org/packages/base/topics/summary'>summary()</a></code> and <code><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot()</a></code>.</p>
+values for <code><a href='https://www.rdocumentation.org/packages/base/topics/summary'>summary()</a></code> and <code><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot()</a></code>.</p>
 <p>The <code>expandChain</code> function helps us workaround this issue
 by assigning return values of <code><a href='metaReactive.html'>metaReactive()</a></code> expressions to
-a name:</p><pre>    expandChain(obs())
+a name, then replaces relevant expansion (e.g., <code>!!nums()</code>)
+with the appropriate name (e.g. <code>nums</code>).</p><pre>    expandChain(obs())
 </pre>
-    <p>That is, the resulting code stores the result of the <code>nums()</code> reactives
-in a variable names <code>nums</code>, which is reused by <code><a href='https://www.rdocumentation.org/packages/base/topics/summary'>summary()</a></code> and <code><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot()</a></code>:</p><pre>    nums &lt;- runif(100)
+    <p>The result looks like this:</p><pre>    nums &lt;- runif(100)
     summary(nums)
     plot(nums)
 </pre>
@@ -255,6 +255,10 @@ the expression). This function will be invoked the first time the
 <code>metaReactive</code> object is encountered (or if the <code>metaReactive</code> is defined
 with <code>inline = TRUE</code>, then every time it is encountered).</p>
     
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+
+    <p><a href='https://rstudio.github.io/shinymeta/articles/code-generation.html'>https://rstudio.github.io/shinymeta/articles/code-generation.html</a></p>
+    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='no'>input</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>dataset</span> <span class='kw'>=</span> <span class='st'>"cars"</span>)
@@ -322,6 +326,8 @@ with <code>inline = TRUE</code>, then every time it is encountered).</p>
       <li><a href="#preserving-dependencies-between-expandchain-calls">Preserving dependencies between <code>expandChain()</code> calls</a></li>
 
       <li><a href="#substituting-metareactive-objects">Substituting <code>metaReactive</code> objects</a></li>
+
+      <li><a href="#references">References</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>

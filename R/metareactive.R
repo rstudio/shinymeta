@@ -585,6 +585,8 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'   The return value of `newExpansionContext` is an object that should be
 #'   passed to multiple `expandCode()` calls.
 #'
+#' @references <https://rstudio.github.io/shinymeta/articles/code-generation.html>
+#'
 #' @details
 #'
 #' There are two ways to extract code from meta objects (i.e. [metaReactive()],
@@ -616,18 +618,18 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'
 #' Notice how `runif(100)` is inlined wherever `!!nums()`
 #' appears, which is not desirable if we wish to reuse the same
-#' random values for the `summary()` and `plot()`.
+#' values for `summary()` and `plot()`.
 #'
 #' The `expandChain` function helps us workaround this issue
 #' by assigning return values of `metaReactive()` expressions to
-#' a name:
+#' a name, then replaces relevant expansion (e.g., `!!nums()`)
+#' with the appropriate name (e.g. `nums`).
 #'
 #' ```
 #'     expandChain(obs())
 #' ```
 #'
-#' That is, the resulting code stores the result of the `nums()` reactives
-#' in a variable names `nums`, which is reused by `summary()` and `plot()`:
+#' The result looks like this:
 #'
 #' ```
 #'     nums <- runif(100)
