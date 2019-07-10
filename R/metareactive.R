@@ -23,7 +23,7 @@
 #'
 #' If `varname` is unspecified, [srcref]s are used in attempt to infer the name
 #' bound to the meta-reactive object. In order for this inference to work, the
-#' `keep.source` [option] must be `TRUE` and `expr` must begin with [`\{`].
+#' `keep.source` [option] must be `TRUE` and `expr` must begin with `\{`.
 #'
 #' @param varname An R variable name that this object prefers to be named when
 #' its code is extracted into an R script. (See also: [expandChain()])
@@ -296,7 +296,7 @@ withMetaMode <- function(expr, mode = TRUE) {
 #' @param quoted Is the expression quoted? This is useful when you want to use an expression
 #' that is stored in a variable; to do so, it must be quoted with [`quote()`].
 #' @param localize Whether or not to wrap the returned expression in [`local()`].
-#' The default, \code{"auto"}, only wraps expressions with a top-level [`return()`]
+#' The default, `"auto"`, only wraps expressions with a top-level [`return()`]
 #' statement (i.e., return statements in anonymized functions are ignored).
 #' @param bindToReturn For non-`localize`d expressions, should an assignment
 #' of a meta expression be applied to the _last child_ of the top-level `\{` call?

@@ -52,7 +52,7 @@ with \code{metaExpr()}. When using \code{metaReactive2()}, \code{expr} must retu
 
 If \code{varname} is unspecified, \link{srcref}s are used in attempt to infer the name
 bound to the meta-reactive object. In order for this inference to work, the
-\code{keep.source} \link{option} must be \code{TRUE} and \code{expr} must begin with \code{\link{\{}}.
+\code{keep.source} \link{option} must be \code{TRUE} and \code{expr} must begin with \code{\{}.
 }
 \examples{
 
