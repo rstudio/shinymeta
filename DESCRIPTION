@@ -18,7 +18,7 @@ Imports:
   fs,
   magrittr,
   rlang,
-  shiny,
+  shiny (>= 1.3.2.9001),
   sourcetools,
   styler,
   utils
