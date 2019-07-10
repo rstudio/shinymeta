@@ -42,12 +42,16 @@ formatCode <- function(code, width = 500L, formatter = styleText, ...) {
 }
 
 #' @export
+#' @param formatR whether to run `formatR::tidy_source()` on `code`.
 #' @rdname formatCode
-styleText <- function(code, ...) {
+styleText <- function(code, formatR = TRUE, ...) {
   # TODO: break up functionality in rebreak and allow user to opt-out?
   # Also, perhaps someday we let styler handle the %>% line-breaking?
   # https://github.com/r-lib/styler/issues/523
   code <- rebreak(code)
+  if (formatR) {
+    capture.output(code <- formatR::tidy_source(text = code)$text.tidy)
+  }
   styler::style_text(code, ...)
 }
 

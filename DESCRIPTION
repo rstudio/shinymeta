@@ -15,6 +15,7 @@ Imports:
   callr,
   digest,
   fastmap,
+  formatR,
   fs,
   magrittr,
   rlang,
