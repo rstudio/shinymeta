@@ -64,7 +64,7 @@ y <- metaReactive({
   a <- !!input$x + 1
   b <- a + 1
   c + 1
-}, varname = "y")
+})
 
 withMetaMode(y())
 expandChain(y())
@@ -77,7 +77,7 @@ y <- metaReactive2({
     b <- a + 1
     c + 1
   }, bindToReturn = TRUE)
-}, varname = "y")
+})
 
 expandChain(y())
 

@@ -46,7 +46,7 @@
 #'   a <- !!input$x + 1
 #'   b <- a + 1
 #'   c + 1
-#' }, varname = "y")
+#' })
 #'
 #' withMetaMode(y())
 #' expandChain(y())
@@ -59,7 +59,7 @@
 #'     b <- a + 1
 #'     c + 1
 #'   }, bindToReturn = TRUE)
-#' }, varname = "y")
+#' })
 #'
 #' expandChain(y())
 #'
@@ -102,24 +102,36 @@ metaReactive2 <- function(expr, env = parent.frame(), quoted = FALSE,
 }
 
 exprToVarname <- function(expr, varname = NULL, inline, objectType = "metaReactive") {
+
   if (is.null(varname)) {
-    if (inline) {
-      return("anonymous")
-    }
+    if (inline) return("anonymous")
+
     srcref <- attr(expr, "srcref", exact = TRUE)
     if (is.null(srcref)) {
-      if (!rlang::is_call(expr, "{")) {
-        stop(
-          "Couldn't infer a `varname` for `", objectType,
-          "`. Either specify `varname` or have `expr` begin with `{`.",
+      if (identical(getOption("keep.source"), FALSE)) {
+        warning(
+          "Unable to infer variable name for ", objectType, " when the option ",
+          "keep.source is FALSE. Either set `options(keep.source = TRUE)` ",
+          "or specify `varname` in ", objectType,
+          call. = FALSE
+        )
+      } else if (!rlang::is_call(expr, "{")) {
+        warning(
+          "Unable to infer variable name for ", objectType, " when `expr` does not ",
+          "begin with `{`. Either start `expr` with `{` or specify `varname` in ",
+          objectType,
+          call. = FALSE
+        )
+      } else {
+        warning(
+          "Unable to infer variable name for ", objectType, " because no srcref ",
+          "is available. Please report an issue to https://github.com/rstudio/shinymeta/issues/new",
           call. = FALSE
         )
       }
-      warning("No srcref available. Please report this issue to https://github.com/rstudio/shinymeta/issues/new", call. = FALSE)
     }
-    varname <- mrexprSrcrefToLabel(srcref[[1]],
-      stop("Failed to infer variable name for ", objectType, "; see the Details section of ?metaReactive for suggestions", call. = FALSE)
-    )
+
+    varname <- mrexprSrcrefToLabel(srcref[[1]], defaultLabel = NULL)
   } else {
     if (!is.character(varname) || length(varname) != 1 || is.na(varname) || nchar(varname) == 0) {
       stop("varname must be a non-empty string", call. = FALSE)
@@ -733,15 +745,15 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' # (R CMD check disables them for some reason?)
 #' mr <- metaReactive({
 #'   get(!!input$dataset, "package:datasets")
-#' }, varname = "mr")
+#' })
 #'
 #' top <- metaReactive({
 #'   head(!!mr())
-#' }, varname = "top")
+#' })
 #'
 #' bottom <- metaReactive({
 #'   tail(!!mr())
-#' }, varname = "bottom")
+#' })
 #'
 #' obs <- metaObserve({
 #'   message("Top:")
