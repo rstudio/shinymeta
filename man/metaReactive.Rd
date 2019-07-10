@@ -50,7 +50,9 @@ If you wish to capture specific code inside of \code{expr} (e.g. ignore code
 that has no meaning outside shiny, like \code{\link[=req]{req()}}), use \code{metaReactive2()} in combination
 with \code{metaExpr()}. When using \code{metaReactive2()}, \code{expr} must return a \code{metaExpr()}.
 
-TODO: Document reasons why varname detection might fail.
+If \code{varname} is unspecified, \link{srcref}s are used in attempt to infer the name
+bound to the meta-reactive object. In order for this inference to work, the
+\code{keep.source} \link{option} must be \code{TRUE} and \code{expr} must begin with \code{\link{\{}}.
 }
 \examples{
 

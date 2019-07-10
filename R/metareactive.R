@@ -21,7 +21,9 @@
 #' that has no meaning outside shiny, like [req()]), use `metaReactive2()` in combination
 #' with `metaExpr()`. When using `metaReactive2()`, `expr` must return a `metaExpr()`.
 #'
-#' TODO: Document reasons why varname detection might fail.
+#' If `varname` is unspecified, [srcref]s are used in attempt to infer the name
+#' bound to the meta-reactive object. In order for this inference to work, the
+#' `keep.source` [option] must be `TRUE` and `expr` must begin with [`\{`].
 #'
 #' @param varname An R variable name that this object prefers to be named when
 #' its code is extracted into an R script. (See also: [expandChain()])

@@ -198,11 +198,6 @@ shinyApp(ui, server)
 knitr::include_graphics("https://i.imgur.com/ZiHKfXY.gif")
 ```
 
-<!--
-TODO: 
-1. styling the icon?
-2. Downloading via icon?
--->
 
 ### For numerous outputs {#numerous-outputs}
 
