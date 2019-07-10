@@ -49,23 +49,20 @@ server <- function(input, output) {
   output$p2 <- metaRender(renderPlot, {
     qplot(data = diamonds, x = price) + ylab("Number of diamonds")
   })
-  metaReactive()
   output$download_script <- downloadHandler(
     filename = "ggcode.zip", 
     content = function(file) {
-      ggcode <- expandChain(quote({
-        "#' ---"
-        "#' title: 'Some ggplot2 code'"
-        "#' author: ''"
-        "#' ---"
-        "#' Some text that appears above the plot"
-        "#+ plot, message=FALSE, tidy=TRUE"
-        library(ggplot2)
-        gridExtra::grid.arrange(
-          !!output$p1(),
-          !!output$p2()
-        )
-      })
+      ggcode <- expandChain(
+        "#' ---",
+        "#' title: 'Some ggplot2 code'",
+        "#' author: ''",
+        "#' ---",
+        "#' Some text that appears above the plot",
+        "#+ plot, message=FALSE, tidy=TRUE, fig.show='hold', fig.height=2",
+        quote(library(ggplot2)),
+        output$p1(),
+        output$p2()
+      )
       buildScriptBundle(
         ggcode, file, 
         render_args = list(output_format = "pdf_document")
