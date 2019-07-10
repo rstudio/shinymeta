@@ -1,6 +1,6 @@
 Package: shinymeta
 Type: Package
-Title: Record and expose Shiny app logic using metaprogramming
+Title: Record and Expose Shiny App Logic using Metaprogramming
 Version: 0.1.0
 Authors@R: c(
     person("Joe", "Cheng", email = "joe@rstudio.com", role = "cre"),
