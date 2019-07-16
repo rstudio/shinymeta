@@ -22,12 +22,12 @@ object using \code{newExpansionContext()} and pass it to multiple related calls
 of \code{expandChain}. See Details.}
 }
 \value{
-The return value of \code{expandCode} is a code object that's suitable for
+The return value of \code{expandChain()} is a code object that's suitable for
 printing or passing to \code{\link[=displayCodeModal]{displayCodeModal()}}, \code{\link[=buildScriptBundle]{buildScriptBundle()}}, or
 \code{\link[=buildRmdBundle]{buildRmdBundle()}}.
 
 The return value of \code{newExpansionContext} is an object that should be
-passed to multiple \code{expandCode()} calls.
+passed to multiple \code{expandChain()} calls.
 }
 \description{
 Use \code{expandChain} to write code out of one or more metaReactive objects.

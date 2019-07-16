@@ -401,12 +401,12 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'   object using `newExpansionContext()` and pass it to multiple related calls
 #'   of `expandChain`. See Details.
 #'
-#' @return The return value of `expandCode` is a code object that's suitable for
+#' @return The return value of `expandChain()` is a code object that's suitable for
 #'   printing or passing to [displayCodeModal()], [buildScriptBundle()], or
 #'   [buildRmdBundle()].
 #'
 #'   The return value of `newExpansionContext` is an object that should be
-#'   passed to multiple `expandCode()` calls.
+#'   passed to multiple `expandChain()` calls.
 #'
 #' @references <https://rstudio.github.io/shinymeta/articles/code-generation.html>
 #'
