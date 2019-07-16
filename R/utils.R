@@ -1,11 +1,3 @@
-# Creates a nullary function that returns the given value
-constf <- function(value) {
-  force(value)
-  function() {
-    value
-  }
-}
-
 #' Wrap expressions with a function call
 #'
 #' Creates a function call with the given function, using the quoted expressions
@@ -45,27 +37,6 @@ strip_outer_brace <- function(expr) {
     expr <- expr[[2]]
   }
   expr
-}
-
-reactiveWithInputs <- function(expr, env = parent.frame(), quoted = FALSE, domain = getDefaultReactiveDomain()) {
-  map <- fastmap::fastmap()
-
-  if (!quoted) {
-    expr <- substitute(expr)
-    quoted <- TRUE
-  }
-
-  force(env)
-  force(quoted)
-  force(domain)
-
-  function(...) {
-    hash <- isolate(digest::digest(list(...), algo = "sha1"))
-    if (!map$has(hash)) {
-      map$set(hash, shiny::reactive(expr, env = env, quoted = quoted, domain = domain))
-    }
-    map$get(hash)()
-  }
 }
 
 # Given the srcref to a metaReactive expression, attempts to figure out what the

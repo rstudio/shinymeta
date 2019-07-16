@@ -303,15 +303,6 @@ metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "aut
     quoted <- TRUE
   }
 
-  metaExpr_(expr, env = env, quoted = quoted, localize = localize, bindToReturn = bindToReturn)
-}
-
-metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE) {
-  if (!quoted) {
-    expr <- substitute(expr)
-    quoted <- TRUE
-  }
-
   if (switchMetaMode(normal = TRUE, meta = FALSE, mixed = FALSE)) {
     expr <- expandExpr(expr, list(), env)
     return(rlang::eval_tidy(expr, env = env))
@@ -345,17 +336,6 @@ metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "au
 
     expr
   })
-}
-
-
-is_output_read <- function(expr) {
-  is_dollar <- rlang::is_call(expr, name = "$", n = 2) &&
-    rlang::is_symbol(expr[[2]], "output") &&
-    rlang::is_symbol(expr[[3]])
-  is_bracket <- rlang::is_call(expr, name = "[[", n = 2) &&
-    rlang::is_symbol(expr[[2]], "output") &&
-    is.character(expr[[3]])
-  is_dollar || is_bracket
 }
 
 
