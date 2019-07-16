@@ -718,6 +718,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     if (!is.null(names(dot_args))) {
       stop(call. = FALSE, "Named ... arguments to expandChain are not supported")
     }
+
     res <- lapply(seq_along(dot_args), function(i) {
       # Grab the nth element. We do it with this gross `..n` business because
       # we want to make sure we trigger evaluation of the arguments one at a
@@ -729,9 +730,17 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
       # consider *themselves* their own dependencies, so for metaReactive
       # this means the code that assigns it is created (`mr <- ...`),
       # but the additional line for printing it (`mr`) will be suppressed.
-      x_vis <- withVisible(eval(as.symbol(paste0("..", i)), envir = environment()))
-      x <- x_vis$value
+      x_vis <- tryCatch({
+        withVisible(eval(as.symbol(paste0("..", i)), envir = environment()))
+      }, error = function(e) {
+        if (is_output_read(dot_args[[i]])) {
+          stop("Could not find: ", format(dot_args[[i]]), call. = FALSE)
+        } else {
+          stop(e$message, call. = FALSE)
+        }
+      })
 
+      x <- x_vis$value
       val <- if (is_comment(x)) {
         do.call(metaExpr, list(rlang::expr({!!x; {}})))
       } else if (is.language(x)) {
@@ -755,6 +764,19 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     # Expand into a block of code
     metaExpr({!!!res})
   })
+}
+
+
+is_output_read <- function(expr) {
+  if (!rlang::is_call(expr)) return(FALSE)
+  if (length(expr) == 1) expr <- expr[[1]]
+  is_dollar <- rlang::is_call(expr, name = "$", n = 2) &&
+    rlang::is_symbol(expr[[2]], "output") &&
+    rlang::is_symbol(expr[[3]])
+  is_bracket <- rlang::is_call(expr, name = "[[", n = 2) &&
+    rlang::is_symbol(expr[[2]], "output") &&
+    is.character(expr[[3]])
+  is_dollar || is_bracket
 }
 
 prefix_class <- function (x, y) {

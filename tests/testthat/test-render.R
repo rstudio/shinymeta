@@ -77,25 +77,24 @@ describe("metaRender", isolate({
     output$plot <- metaRender(renderPlot, {
       ggplot(!!data(), aes(carat, price)) + geom_point()
     })
+    x1 <- expandChain(
+      "# top-level comment",
+      output$plot()
+    )
+    x2 <- expandChain(
+      "# top-level comment",
+      output[["plot"]]()
+    )
+    expected <- c(
+      "# top-level comment",
+      "data <- dplyr::sample_n(diamonds, 1000)",
+      "ggplot(data, aes(carat, price)) + geom_point()"
+    )
 
-    it("works with bare names", {
-      x1 <- expandChain(
-        "# top-level comment",
-        output$plot()
-      )
-      x2 <- expandChain(
-        "# top-level comment",
-        output[["plot"]]()
-      )
-      expected <- c(
-        "# top-level comment",
-        "data <- dplyr::sample_n(diamonds, 1000)",
-        "ggplot(data, aes(carat, price)) + geom_point()"
-      )
+    expect_true(all(formatCode(x1) == expected))
+    expect_true(all(formatCode(x2) == expected))
 
-      expect_true(all(formatCode(x1) == expected))
-      expect_true(all(formatCode(x2) == expected))
-    })
+    expect_error(expandChain(output$foo()), regexp = "output\\$foo")
   })
 
 
