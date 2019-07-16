@@ -158,7 +158,14 @@ walk_ast <- function(x, fun, ...) {
   switch(
     expr_type(x),
     ...,
-    call = as.call(lapply(x, fun)),
+    call = {
+      res <- as.call(lapply(x, fun))
+      if (inherits(x, "bindToReturn")) {
+        prefix_class(res, "bindToReturn")
+      } else {
+        res
+      }
+    },
     pairlist = as.pairlist(lapply(x, fun)),
     x
   )
