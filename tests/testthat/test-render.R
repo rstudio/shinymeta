@@ -70,6 +70,34 @@ describe("metaRender", isolate({
 
   })
 
+  it("works with a render pipeline", {
+    output <- list()
+
+    data <- metaReactive({ dplyr::sample_n(diamonds, 1000) })
+    output$plot <- metaRender(renderPlot, {
+      ggplot(!!data(), aes(carat, price)) + geom_point()
+    })
+
+    it("works with bare names", {
+      x1 <- expandChain(
+        "# top-level comment",
+        output$plot()
+      )
+      x2 <- expandChain(
+        "# top-level comment",
+        output[["plot"]]()
+      )
+      expected <- c(
+        "# top-level comment",
+        "data <- dplyr::sample_n(diamonds, 1000)",
+        "ggplot(data, aes(carat, price)) + geom_point()"
+      )
+
+      expect_true(all(formatCode(x1) == expected))
+      expect_true(all(formatCode(x2) == expected))
+    })
+  })
+
 
   it("removes curly brackets when appropriate", {
     mr1 <- metaReactive({1 + 1})
