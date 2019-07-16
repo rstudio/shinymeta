@@ -191,3 +191,31 @@ describe(
   })
 
 )
+
+
+
+
+describe(
+  "stripping trivial assignment", isolate({
+
+    it("basically works", {
+
+      data <- metaReactive({iris})
+      my_lm <- metaReactive({
+        data <- !!data()
+        lm(Sepal.Length ~ Sepal.Width, data = data)
+      })
+
+      expect_code_string(
+        expandChain(my_lm()),
+        c(
+          'data <- iris',
+          'my_lm <- lm(Sepal.Length ~ Sepal.Width, data = data)',
+          'my_lm'
+        )
+      )
+
+    })
+  })
+
+)

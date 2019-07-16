@@ -2,6 +2,24 @@
 # Code formatting utilities
 # --------------------------------------------------------
 
+strip_trivial_assign <- function(x) {
+  if (rlang::is_call(x, "{")) {
+    isTrivial <- vapply(x, is_trivial_assign, logical(1))
+    if (any(isTrivial)) {
+      x[which(isTrivial)] <- NULL
+    }
+  }
+  walk_ast(x, strip_trivial_assign)
+}
+
+is_trivial_assign <- function(expr) {
+  is_assign(expr) &&
+    length(expr) == 3 &&
+    is.symbol(expr[[2]]) &&
+    identical(expr[[2]], expr[[3]])
+}
+
+
 # wrap a call in local
 add_local_scope <- function(x, localize) {
   if (!is.call(x)) return(x)

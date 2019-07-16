@@ -328,6 +328,7 @@ metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "au
   withMetaMode(mode = TRUE, {
     expr <- comment_flags(expr)
     expr <- expandExpr(expr, if (topLevelDynVars) .globals$dynamicVars, env)
+    expr <- strip_trivial_assign(expr)
     expr <- strip_outer_brace(expr)
 
     # Note that bindToReturn won't make sense for a localized call,
