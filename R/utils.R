@@ -35,8 +35,18 @@ wrapExpr <- function(func, ...) {
 #   expandExpr(quote(!!a + !!b), list(a = quote(two)), env)
 # })
 expandExpr <- function(expr, data, env) {
-  wrappedExpr <- wrapExpr(rlang::quo, expr)
-  rlang::quo_get_expr(eval(wrappedExpr, data, env))
+  do.call(bquote, list(expr = expr, where = env))
+}
+
+cleanExpr <- function(expr) {
+  walk_ast(expr, function(x) {
+    if (rlang::is_call(x, ".")) {
+      # TODO: stop if this call doesn't have a single, unnamed argument
+      cleanExpr(x[[2]])
+    } else {
+      cleanExpr(x)
+    }
+  })
 }
 
 

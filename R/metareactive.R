@@ -320,7 +320,7 @@ metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "au
   }
 
   if (switchMetaMode(normal = TRUE, meta = FALSE, mixed = FALSE)) {
-    expr <- expandExpr(expr, list(), env)
+    expr <- cleanExpr(expr)
     return(rlang::eval_tidy(expr, env = env))
   }
 
@@ -930,7 +930,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     res <- res[!vapply(res, is.null, logical(1))]
 
     # Expand into a block of code
-    metaExpr({!!!res})
+    metaExpr(as.call(c(list(quote(`{`)), res)), quoted = TRUE)
   })
 }
 
