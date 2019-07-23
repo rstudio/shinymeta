@@ -730,17 +730,9 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
       # consider *themselves* their own dependencies, so for metaReactive
       # this means the code that assigns it is created (`mr <- ...`),
       # but the additional line for printing it (`mr`) will be suppressed.
-      x_vis <- tryCatch({
-        withVisible(eval(as.symbol(paste0("..", i)), envir = environment()))
-      }, error = function(e) {
-        if (is_output_read(dot_args[[i]])) {
-          stop("Could not find: ", format(dot_args[[i]]), call. = FALSE)
-        } else {
-          stop(e)
-        }
-      })
-
+      x_vis <- withVisible(eval(as.symbol(paste0("..", i)), envir = environment()))
       x <- x_vis$value
+
       val <- if (is_comment(x)) {
         do.call(metaExpr, list(rlang::expr({!!x; {}})))
       } else if (is.language(x)) {
