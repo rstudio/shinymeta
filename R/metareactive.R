@@ -736,7 +736,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
         if (is_output_read(dot_args[[i]])) {
           stop("Could not find: ", format(dot_args[[i]]), call. = FALSE)
         } else {
-          stop(e$message, call. = FALSE)
+          stop(e)
         }
       })
 
