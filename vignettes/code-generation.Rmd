@@ -269,27 +269,7 @@ downloads_rolling <- metaReactive({
 expandChain(downloads_rolling())
 ```
 
-> #### Takeaway: unquote meta-reactive reads (i.e., `!!downloads()`) that appear within other meta-reactives
-
-As a side-note, when unquoting a read of a reactive expression, you should make sure the `!!` operator applies to the read, and nothing else. A common scenario where this subtlety becomes relevant is when using `$` or `[[` operators to subset the return value:
-
-```{r, error = TRUE}
-downloads_count <- metaReactive({
-  !!downloads()$count
-})
-expandChain(downloads_count())
-```
-
-In this case, you can surround the unquoting operator in parentheses to ensure the unquoting applies only to `downloads()` (instead of `downloads()$count`): 
-
-```{r}
-downloads_count <- metaReactive({
-  (!!downloads())$count
-})
-expandChain(downloads_count())
-```
-
-There are a few other scenarios where landing upon the proper quasiquotation strategy isn't very straightforward. For example, what if you want to generate code that contains the unquote operator (`!!`) for other [tidyeval](https://tidyeval.tidyverse.org/) purposes (e.g. [programming with dplyr](https://dplyr.tidyverse.org/articles/programming.html))? to learn more about these scenarios, and how to manage them, see the [special topics](special-topics.html) article.
+> #### Takeaway: unquote meta-reactive reads (i.e., `.(downloads())`) that appear within other meta-reactives
 
 ## Ignoring Shiny logic {#ignore-code}
 
