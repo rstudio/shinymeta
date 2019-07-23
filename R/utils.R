@@ -24,11 +24,11 @@ wrapExpr <- function(func, ...) {
 #   a <- quote(one)
 #   b <- quote(three)
 #   env <- environment()
-#   expandExpr(quote(!!a + !!b), list(a = quote(two)), env)
+#   expandExpr(quote(!!a + !!b), env)
 # })
-expandExpr <- function(expr, data, env) {
+expandExpr <- function(expr, env) {
   wrappedExpr <- wrapExpr(rlang::quo, expr)
-  rlang::quo_get_expr(eval(wrappedExpr, data, env))
+  rlang::quo_get_expr(eval(wrappedExpr, list(), env))
 }
 
 

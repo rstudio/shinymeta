@@ -304,14 +304,14 @@ metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "aut
   }
 
   if (switchMetaMode(normal = TRUE, meta = FALSE, mixed = FALSE)) {
-    expr <- expandExpr(expr, list(), env)
+    expr <- expandExpr(expr, env)
     return(rlang::eval_tidy(expr, env = env))
   }
 
   # metaExpr() moves us from mixed to meta state
   withMetaMode(mode = TRUE, {
     expr <- comment_flags(expr)
-    expr <- expandExpr(expr, list(), env)
+    expr <- expandExpr(expr, env)
     expr <- strip_outer_brace(expr)
 
     # Note that bindToReturn won't make sense for a localized call,
