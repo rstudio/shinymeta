@@ -18,7 +18,7 @@ remotes::install_github("rstudio/shinymeta")
 
 ## Generating code with shinymeta
 
-In short, **shinymeta** provides variants of **shiny**'s reactive building blocks (e.g., `reactive()` -> `metaReactive()`, `observe()` -> `metaObserve()`, `render()` -> `metaRender()`). When invoked with **shinymeta**'s meta mode enabled (i.e., invoked via `withMetaMode()` or `expandChain()`), these variants return [quasi-quoted](https://adv-r.hadley.nz/quasiquotation.html) expressions. In this context, quasiquotation is primarily useful for replacing *reactive* value(s) with their *static* value(s), so the resulting code can run outside of a Shiny session. Below is a basic Shiny app demonstrating how one can leverage **shinymeta** to generate code to reproduce an output (e.g., `output$Summary()`) by unquoting reactive values (e.g., `input$var`) and reactive expressions (e.g., `var()`).
+In short, **shinymeta** provides variants of **shiny**'s reactive building blocks (e.g., `reactive()` -> `metaReactive()`, `observe()` -> `metaObserve()`, `render()` -> `metaRender()`). When invoked with **shinymeta**'s meta mode enabled (i.e., invoked via `withMetaMode()` or `expandChain()`), these variants return [quasi-quoted](https://adv-r.hadley.nz/quasiquotation.html) expressions. In this context, quasiquotation is primarily useful for replacing *reactive* value(s) with their *static* value(s), so the resulting code can run outside of a Shiny session. Below is a basic Shiny app demonstrating how one can leverage **shinymeta** to generate code to reproduce an output (e.g., `output$Summary()`) by unquoting reactive values (e.g., `input$var`) and reactive expressions (e.g., `var()`) with `.()`.
 
 ```r
 library(shiny)
@@ -32,10 +32,10 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   var <- metaReactive({
-    cars[[!!input$var]]
+    cars[[.(input$var)]]
   })
   output$Summary <- metaRender(renderPrint, {
-    summary(!!var())
+    summary(.(var()))
   })
   output$code <- renderPrint({
     expandChain(output$Summary())
@@ -52,7 +52,7 @@ shinyApp(ui, server)
 This example illustrates the bare minimum of what you must do to get your Shiny app generating reproducible non-Shiny code:
 
 * Each reactive building block (i.e., `reactive()` and `renderPrint()`) has been modified to use it's meta variant.
-* Each read of reactive value has been unquoted (i.e., prepended with `!!`).
+* Each read of reactive value has been unquoted (i.e., wrapped in `.()`).
 * Output(s) of interest are supplied to `expandChain()`.
 
 For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/code-distribution.html)
@@ -75,7 +75,7 @@ We hope this example helps illustrate and inspire several reasons why you might 
     
     * **Enabling**: Shiny is great for enabling others to interface with an R script you've written, but what if your users wish to explore things that your interface doesn't allow for? By exposing the core logic of your app, you make it easier for motivated users to modify and build upon your work in ways you never thought about.
     
-    * **Documentation**: This one is especially relevant for exploratory analysis apps that allow you to derive insight from a dataset. A great example is the ANOVA example app in the [case studies vignette](04-case-studies.html#ANOVA), where you can upload a dataset, run an ANOVA analysis, then download a report with all ANOVA results as well as the code to reproduce it.
+    * **Documentation**: This one is especially relevant for exploratory analysis apps that allow you to derive insight from a dataset. A great example is the ANOVA example app in the [case studies vignette](case-studies.html#ANOVA), where you can upload a dataset, run an ANOVA analysis, then download a report with all ANOVA results as well as the code to reproduce it.
 
 * **Permanence**: Using a Shiny app can have an ephemeral feeling to it; what happens in the future if the server goes down, or the app's features change? With a reproducible report, your users can download a more permanent artifact that can be saved locally.
     
