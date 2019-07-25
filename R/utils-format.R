@@ -136,9 +136,11 @@ expr_type <- function(x) {
 }
 
 # Apply a function to each node of an AST
-walk_ast <- function(x, fun, ...) {
+walk_ast <- function(x, fun, ..., constant = x, symbol = x) {
   switch(
     expr_type(x),
+    constant = constant,
+    symbol = symbol,
     call = as.call(lapply(x, fun, ...)),
     pairlist = as.pairlist(lapply(x, fun, ...)),
     x
