@@ -15,44 +15,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Unquoting in depth {#unquoting}
-
-In the code generation article, we [introduced unquoting](#unquoting), as well as when and why you'll need to use it in **shinymeta**. Generally speaking, the two use cases are:
-
-1. Replacing reactive values with static values
-2. Replacing reactive expressions with static code
-
-The first case is relatively easy to not mess up: you just might have to be careful about 
-
-
-
-<!--
-### Targeted unquoting of reactive expressions
-
-TODO: also mention targetted unquoting of reactive values? There's already an example in codegen.Rmd
-
-When unquoting a read of a reactive expression, make sure that the `!!` operator applies to the reactive read, and nothing more. A common pattern where this becomes relevant 
-
-It's easy to run into problems if you unquote a reactive expression, then as a part of that same call, do something else to the return value, as done in `cyl()` below:
-
-```{r, error=TRUE}
-m <- metaReactive({mtcars})
-cyl <- metaReactive({!!m()$cyl})
-expandChain(cyl())
-```
-
-This unfortunate error is due to the fact that when `m()$cyl` is unquoted, the `$` call is evaluated although it shouldn't be. To workaround the problem, you can make sure the unquoting operator applies strictly to the read of the reactive expression.
-
-```{r}
-cyl <- metaReactive({
-  (!!m())$cyl
-})
-expandChain(cyl())
-```
--->
-
-
-### Shiny, tidyeval, and shinymeta
+## tidyeval and shinymeta
 
 Many **tidyverse** function arguments quote their input and evaluate those code expression in some special context (e.g., within a data frame). That's how **dplyr** knows, for example, to evaluate symbols (e.g. `cyl`) and calls (e.g., `mean(mpg)`) within a context defined by `mtcars`:
 
@@ -66,7 +29,7 @@ mtcars %>%
 
 This design is great for interactive use, but it also complicates things if we wish to pass variables into these quoted arguments. For example, if we were to program a Shiny app that allowed us to compute the average of diffferent variables, you might use something like `rlang::sym()` (or `as.symbol()`) to turn a string into a symbol this way:
 
-```{r, error = TRUE}
+```{r}
 input <- list(var = "mpg")
 mean_by_cyl <- reactive({
   var_sym <- sym(input$var)
@@ -77,142 +40,33 @@ mean_by_cyl <- reactive({
 mean_by_cyl()
 ```
 
-This code works because the unquoting happens at run time (i.e., when the reactive expression is invoked). However, for sound technical reasons, **shinymeta** meta-variants unquotes (i.e., expands `!!`) before the reactive expression is actually invoked. This means, if you were to make `mean_by_cyl` a `metaReactive` and `expandChain()`, you'd get an `Error: object 'var_sym' not found`. You can workaround this problem by extracting the `sym()` conversion into it's own `metaReactive()`:
+Making the **shinymeta** variant that works 
 
 ```{r}
-var_sym <- metaReactive({
-  sym(!!input$var)
-})
-
+input <- list(var = "mpg")
 mean_by_cyl <- metaReactive({
+  var_sym <- sym(..(input$var))
   mtcars %>%
     group_by(cyl) %>% 
-    summarise(mean_mpg = mean(!!var_sym()))
-})
+    summarise(mean_mpg = mean(!!var_sym))
+}, bindToReturn = TRUE)
 expandChain(mean_by_cyl())
 ```
 
-> Takeaway, don't unquote 
-
-
-It's worth noting that, although it's technically possible to 
-
-
-
-The [programming with dplyr]() vignette is written primarily for the intention of writing your own functions around **dplyr** pipelines, where you may or m
-
-
-
-In some sense, **shinymeta** overloads the `!!` operator, so if you're Shiny app already uses `!!` for other **tidyeval** reasons, it might take some more thinking to get your app generating code in a sensible way.
-
-1. When in normal execution, `!!` is expanded 
-
-
-
-
-
-### Unquoting in NSE function arguments
-
-Many functions in R have arguments that quote their input so they can provide sensible output based on user input. The `lm()` function is one such example that quotes the `data` argument, so it can display the function call that created the model object:
-
-```{r}
-lm(mpg ~ wt, data = mtcars)
-```
-
-Note that, if you wind up unquoting `mtcars` in the `data` argument, the argument will contain the *value* that `iris` represents instead of the name bound to that value.
-
-```r
-library(rlang)
-expr(lm(mpg ~ wt, data = !!mtcars))
-```
-
-For exactly the same reason, when you unquote a reactive expression read inside a function argument like `lm()`'s `data` argument, you wind up getting the same undesirable output (i.e., the entire deparsed value of `mtcars` is inserted in lm's print method):
-
-```r
-data <- metaReactive({mtcars})
-my_lm <- metaReactive({
-  lm(mpg ~ wt, data = !!data())
-})
-my_lm()
-```
-
-When you run into this problem, make sure to unquote outside of the function argument of interest. Moreover, if you assign the result to a name that matches the meta-reactive, `expandChain()` will strip the trivial assignment for you:
-
-```{r}
-my_lm <- metaReactive({
-  data <- !!data()
-  lm(mpg ~ wt, data = data)
-})
-my_lm()
-```
-
-```{r}
-expandChain(my_lm())
-```
-
-
-
-
-### Unquoting and side effects
-
-<!--
-TODO: are there other examples beside control flow?
--->
-
-It's important to know that unquoting occurs *before* meta-variants (e.g., `metaReactive()`, `metaObserve()`, `metaExpr()`, etc) are actually invoked. 
-
-It's important to know that any `!!` that appears in the code body of any  is expanded before they are actually invoked  
-
-```r
-library(shiny)
-library(shinymeta)
-
-ui <- ""
-
-server <- function(input, output, session) {
-  
-  mr <- metaObserve({
-    if (TRUE) {
-      !!always_run()
-    } else {
-      !!never_run()
-    }
-  })
-  
-  always_run <- metaReactive({
-    message("always_run")
-  })
-  
-  never_run <- metaReactive({
-    message("never_run")
-  })
-  
-  #observe(print(expandChain(mr())))
-}
-
-shinyApp(ui, server)
-```
-
-```r
-Listening on http://127.0.0.1:4598
-always_run
-never_run
-```
-
+TODO: 
+ 1. Do an example where `input$var` represent a symbol 
+ 2. Are there any **tidyeval** patterns that totally conflict with **shinymeta**?  
 
 
 ## Capturing setup code
+
+## Meta variants of `observeEvent()`/`eventReactive()`
 
 ## Debugging meta-reactives
 
 To debug code that contains `..()`, use `metaExpr()`
 
-## `reactiveValues()`
-
-## Meta variants of `observeEvent()`/`eventReactive()`
 
 ## Shiny modules
 
-
-
-
+See example app
