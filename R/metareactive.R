@@ -523,7 +523,7 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' ```
 #'     data <- metaReactive2({
 #'       req(input$file_upload)
-#'       metaExpr(read.csv(.(input$file_upload$datapath)))
+#'       metaExpr(read.csv(..(input$file_upload$datapath)))
 #'     })
 #'     obs <- metaObserve({
 #'       summary(..(data()))

@@ -124,7 +124,7 @@ Sometimes, when generating code, we want to completely replace the
 implementation of a \code{metaReactive}. For example, our Shiny app might contain
 this logic, using \code{\link[shiny:fileInput]{shiny::fileInput()}}:\preformatted{    data <- metaReactive2({
       req(input$file_upload)
-      metaExpr(read.csv(.(input$file_upload$datapath)))
+      metaExpr(read.csv(..(input$file_upload$datapath)))
     })
     obs <- metaObserve({
       summary(..(data()))
