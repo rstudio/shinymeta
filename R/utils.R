@@ -36,31 +36,23 @@ wrapExpr <- function(func, ...) {
 # })
 expandExpr <- function(expr, data, env) {
 
-  expr <- walk_ast(expr, function(x) {
-    expandExpr(x, data, env)
-  })
-
   if (rlang::is_call(expr, "..", n = 1) && is.null(names(expr))) {
-    res <- eval(expr[[2]], data, env)
-    if (inherits(res, "shinymeta_symbol")) {
-      as.symbol(res)
-    } else if (is.symbol(res)) {
-      call("as.symbol", as.character(res))
-    } else {
-      res
+    expr <- eval(expr[[2]], data, env)
+    expr <- if (inherits(expr, "shinymeta_symbol")) {
+      as.symbol(expr)
+    } else if (is.symbol(expr)) {
+      call("as.symbol", as.character(expr))
     }
-  } else {
-    expr
   }
+
+  walk_ast(expr, expandExpr, data, env)
 }
 
 cleanExpr <- function(expr) {
-  expr <- walk_ast(expr, cleanExpr)
   if (rlang::is_call(expr, "..", n = 1) && is.null(names(expr))) {
-    expr[[2]]
-  } else {
-    expr
+    expr <- expr[[2]]
   }
+  walk_ast(expr, cleanExpr)
 }
 
 

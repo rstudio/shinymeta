@@ -139,9 +139,8 @@ expr_type <- function(x) {
 walk_ast <- function(x, fun, ...) {
   switch(
     expr_type(x),
-    ...,
-    call = as.call(lapply(x, fun)),
-    pairlist = as.pairlist(lapply(x, fun)),
+    call = as.call(lapply(x, fun, ...)),
+    pairlist = as.pairlist(lapply(x, fun, ...)),
     x
   )
 }
