@@ -41,7 +41,7 @@ if (interactive()) {
       plot(sample(!!input$n))
     })
     observeEvent(input$p_output_code, {
-      code <- expandObjects(output$p)
+      code <- expandChain(output$p())
       displayCodeModal(code)
     })
   }

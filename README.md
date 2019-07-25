@@ -55,7 +55,7 @@ This example illustrates the bare minimum of what you must do to get your Shiny 
 * Each read of reactive value has been unquoted (i.e., wrapped in `..()`).
 * Output(s) of interest are supplied to `expandChain()`.
 
-For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/code-distribution.html)
+For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/code-distribution.html). You can also watch Joe Cheng's useR keynote on **shinymeta** [here](https://youtu.be/5KByRC6eqC8?t=727).
 
 ## A motivating example
 

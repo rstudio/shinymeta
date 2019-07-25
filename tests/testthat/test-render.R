@@ -70,53 +70,48 @@ describe("metaRender", isolate({
 
   })
 
-  it("varies by dynvars", {
-    mr <- metaReactive({cars})
+  it("works with a render pipeline", {
+    output <- list()
 
-    out <- metaRender(shiny::renderPrint, { str(!!mr()) })
+    data <- metaReactive({ dplyr::sample_n(diamonds, 1000) })
+    output$plot <- metaRender(renderPlot, {
+      ggplot(!!data(), aes(carat, price)) + geom_point()
+    })
+    x1 <- expandChain(
+      "# top-level comment",
+      output$plot()
+    )
+    x2 <- expandChain(
+      "# top-level comment",
+      output[["plot"]]()
+    )
+    expected <- c(
+      "# top-level comment",
+      "data <- dplyr::sample_n(diamonds, 1000)",
+      "ggplot(data, aes(carat, price)) + geom_point()"
+    )
 
-    # Have to call expandCode outside of expect_equal because expect_equal will
-    # expand the !!
-    x <- expandCode( !!out() )
-    q1 <- quote( str(cars) )
-    expect_equal(x, q1)
-    expect_true(formatCode(x) == "str(cars)")
+    expect_true(all(formatCode(x1) == expected))
+    expect_true(all(formatCode(x2) == expected))
 
-    x <- expandCode({ !!out() }, patchCalls = list(mr = quote(boats)))
-
-    q2 <- quote( str(boats) )
-    expect_equal(x, q2)
-    expect_true(formatCode(x) == "str(boats)")
+    # TODO: it would be nice to have an informative error here
+    # https://github.com/rstudio/shinymeta/issues/49
+    #expect_error(expandChain(output$foo()), regexp = "output\\$foo")
   })
 
 
   it("removes curly brackets when appropriate", {
-    mr1 <- metaReactive({
-      1 + 1
-    })
-
-    code <- expandCode({
-      mr1 <- !!mr1()
-    })
-
+    mr1 <- metaReactive({1 + 1})
+    code <- expandChain(invisible(mr1()))
     expect_true(formatCode(code) == "mr1 <- 1 + 1")
 
     mr2 <- metaReactive({
       !!quote({1 + 1})
     })
 
-    code <- expandCode({
-      mr2 <- !!mr2()
-    })
+    code <- expandChain(invisible(mr2()))
 
     expect_true(formatCode(code) == "mr2 <- 1 + 1")
-
-    code <- expandCode({
-      mr1 <- !!mr1()
-      mr2 <- !!mr2()
-    })
-
-    expect_true(all(formatCode(code) == c("mr1 <- 1 + 1", "mr2 <- 1 + 1")))
   })
 
 }))

@@ -1,5 +1,4 @@
 .globals <- new.env(parent = emptyenv())
-.globals$dynamicVars <- list()
 
 # This is a global hook for intercepting meta-mode reads of metaReactive/2.
 # The first argument is the (delayed eval) code result, and rexpr is the
@@ -261,11 +260,6 @@ metaDispatch <- function(normal, meta) {
   )
 }
 
-metaCacheKey <- function() {
-  list(.globals$dynamicVars, metaMode())
-}
-
-
 #' Evaluate an expression with meta mode activated
 #'
 #' @param expr an expression.
@@ -309,16 +303,6 @@ metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "aut
     quoted <- TRUE
   }
 
-  metaExpr_(expr, env = env, quoted = quoted, localize = localize, bindToReturn = bindToReturn)
-}
-
-metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE,
-  topLevelDynVars = TRUE) {
-  if (!quoted) {
-    expr <- substitute(expr)
-    quoted <- TRUE
-  }
-
   if (switchMetaMode(normal = TRUE, meta = FALSE, mixed = FALSE)) {
     expr <- cleanExpr(expr)
     return(rlang::eval_tidy(expr, env = env))
@@ -327,7 +311,7 @@ metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "au
   # metaExpr() moves us from mixed to meta state
   withMetaMode(mode = TRUE, {
     expr <- comment_flags(expr)
-    expr <- expandExpr(expr, if (topLevelDynVars) .globals$dynamicVars, env)
+    expr <- expandExpr(expr, env)
     expr <- strip_outer_brace(expr)
 
     # Note that bindToReturn won't make sense for a localized call,
@@ -354,167 +338,6 @@ metaExpr_ <- function(expr, env = parent.frame(), quoted = FALSE, localize = "au
   })
 }
 
-withDynamicScope <- function(expr, ..., .list = list(...)) {
-  if (length(.list) > 0) {
-    if (is.null(names(.list)) || !all(nzchar(names(.list)))) {
-      stop("withDynamicScope invoked with unnamed vars; all vars must be named")
-    }
-
-    oldVars <- .globals$dynamicVars
-    .globals$dynamicVars <- c(oldVars[setdiff(names(oldVars), names(.list))], .list)
-    on.exit(.globals$dynamicVars <- oldVars)
-  }
-
-  expr
-  # TODO use promise domain
-}
-
-#' Expand meta primitives into user code
-#'
-#' This function provides the main entry point for generating user code
-#' via meta-components (e.g., [metaReactive()], [metaObserve()], [metaRender()], etc).
-#' It's similar to [withMetaMode()], but instead, quotes the `expr`, which allows you
-#' to generate code from multiple meta-components via quasiquotation (e.g. [rlang::!!]).
-#' When producing code from multiple meta-components, you may find that code produced from one
-#' meta-component overlaps (i.e., repeats redundant computation) with another meta-component.
-#' In that case, it's desirable to assign the return value of a meta-component to a variable, and
-#' use that variable (i.e., symbol) in downstream code generated from other meta-components. This
-#' can be done via the `patchCalls` argument which can replace the return value of
-#' a meta-component with a relevant variable name.
-#'
-#' @inheritParams metaExpr
-#' @param patchCalls a named list of quoted symbols. The names of the list
-#' should match name(s) bound to relevant meta-component(s) found in `expr`
-#' (e.g. `petal_width` in the example below). The quoted symbol(s) should
-#' match variable name(s) representing the return value of the meta-component(s).
-#'
-#' @seealso [withMetaMode()]
-#' @noRd
-expandCode <- function(expr, env = parent.frame(), quoted = FALSE, patchCalls = list()) {
-  if (!quoted) {
-    expr <- substitute(expr)
-    quoted <- TRUE
-  }
-
-  withMetaMode(
-    withDynamicScope(
-      metaExpr_(expr, env = env, quoted = quoted, localize = FALSE,
-        bindToReturn = FALSE, topLevelDynVars = FALSE),
-      .list = lapply(patchCalls, constf)
-    )
-  )
-}
-
-is_output_read <- function(expr) {
-  is_dollar <- rlang::is_call(expr, name = "$", n = 2) &&
-    rlang::is_symbol(expr[[2]], "output") &&
-    rlang::is_symbol(expr[[3]])
-  is_bracket <- rlang::is_call(expr, name = "[[", n = 2) &&
-    rlang::is_symbol(expr[[2]], "output") &&
-    is.character(expr[[3]])
-  is_dollar || is_bracket
-}
-
-# Create an `lhs <- rhs` expression, unless lhs == "", in which case
-# just return rhs.
-#
-# lhs should be either "", some other string (to be converted using as.name),
-# or a language object (e.g. quote(foo) or quote(foo$bar)).
-#
-# rhs can be anything; either a simple value, or a language object.
-#
-# Return value will probably be a language object, but possibly not (e.g.
-# make_assign_expr("", 10) would just return 10).
-make_assign_expr <- function(lhs = "", rhs) {
-  stopifnot(is.character(lhs) || is.language(lhs))
-
-  if (is.character(lhs)) {
-    if (lhs == "") {
-      return(rhs)
-    } else {
-      lhs <- as.name(lhs)
-    }
-  }
-
-  call("<-", lhs, rhs)
-}
-
-#' @param ... A collection of meta-reactives.
-#' @param .env An environment.
-#' @param .pkgs A character vector of packages to load before the expanded code.
-#' @noRd
-expandObjects <- function(..., .env = parent.frame(), .pkgs) {
-  exprs <- rlang::exprs(...)
-
-  patchCalls <- list()
-
-  objs <- mapply(names(exprs), exprs, FUN = function(nm, x) {
-
-    if (is_comment(x)) {
-      if (nzchar(nm)) {
-        stop("expandObjects called with a named comment; only unnamed comments are supported")
-      }
-      attr(x, "shinymeta_comment") <- TRUE
-      return(x)
-    }
-
-    # Do a sensible thing if someone has done `expandObjects(mr())` instead of `expandObjects(mr)`
-    if (rlang::is_call(x) && length(x) == 1 && (is.symbol(x[[1]]) || is_output_read(x[[1]]))) {
-      x <- x[[1]]
-    }
-
-
-    if (is.symbol(x)) {
-      # Get the value pointed to by `x`. We'll need this to decide what rules we
-      # apply to its expansion. Throws error if not found.
-      val <- get(as.character(x), pos = .env, inherits = TRUE)
-
-      # Observers and reactive expressions get different rules.
-      is_observe <- inherits(val, "shinymeta_observer")
-      is_reactive_expr <- inherits(val, "shinymeta_reactive")
-
-      # Only metaObserve and metaReactive objects are supported
-      if (!is_observe && !is_reactive_expr) {
-        stop("expandObjects called with ", as.character(x), ", which has unrecognized object type ", deparse(class(val)))
-      }
-
-      # If metaReactive objects are passed without an explicit name, use the
-      # name of the object itself as the name--this is the common case.
-      if (is_reactive_expr && nm == "") {
-        nm <- as.character(x)
-      }
-
-      # Reactive expressions always go into patchCalls; observers never do, even
-      # if they're passed to us as named arguments, because there's no way they
-      # can be validly referred to from other meta-reactive objects.
-      if (is_reactive_expr) {
-        patchCalls[[as.character(x)]] <<- as.name(nm)
-      }
-
-      rhs <- wrapExpr(`!!`, as.call(list(x)))
-      return(make_assign_expr(nm, rhs))
-    }
-
-    if (is_output_read(x)) {
-      output_obj <- withMetaMode(eval(x, envir = .env))
-      if (is.null(output_obj)) {
-        stop("Could not find ", format(x))
-      }
-      rhs <- wrapExpr(`!!`, as.call(list(x)))
-      return(make_assign_expr(nm, rhs))
-    }
-
-    stop("expandObjects requires all arguments to be comment-strings and/or variable names of meta-reactive objects")
-  })
-
-  if (!missing(.pkgs)) {
-    libs <- lapply(.pkgs, function(x) call("library", x))
-    objs <- c(libs, objs)
-  }
-
-  expr <- do.call(call, c(list("{"), objs), quote = TRUE)
-  expandCode(!!expandExpr(expr, NULL, .env), patchCalls = patchCalls)
-}
 
 #' @rdname expandChain
 #' @name expandChain
@@ -578,12 +401,12 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'   object using `newExpansionContext()` and pass it to multiple related calls
 #'   of `expandChain`. See Details.
 #'
-#' @return The return value of `expandCode` is a code object that's suitable for
+#' @return The return value of `expandChain()` is a code object that's suitable for
 #'   printing or passing to [displayCodeModal()], [buildScriptBundle()], or
 #'   [buildRmdBundle()].
 #'
 #'   The return value of `newExpansionContext` is an object that should be
-#'   passed to multiple `expandCode()` calls.
+#'   passed to multiple `expandChain()` calls.
 #'
 #' @references <https://rstudio.github.io/shinymeta/articles/code-generation.html>
 #'
@@ -895,6 +718,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     if (!is.null(names(dot_args))) {
       stop(call. = FALSE, "Named ... arguments to expandChain are not supported")
     }
+
     res <- lapply(seq_along(dot_args), function(i) {
       # Grab the nth element. We do it with this gross `..n` business because
       # we want to make sure we trigger evaluation of the arguments one at a
@@ -936,6 +760,19 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
   })
 }
 
+
+is_output_read <- function(expr) {
+  if (!rlang::is_call(expr)) return(FALSE)
+  if (length(expr) == 1) expr <- expr[[1]]
+  is_dollar <- rlang::is_call(expr, name = "$", n = 2) &&
+    rlang::is_symbol(expr[[2]], "output") &&
+    rlang::is_symbol(expr[[3]])
+  is_bracket <- rlang::is_call(expr, name = "[[", n = 2) &&
+    rlang::is_symbol(expr[[2]], "output") &&
+    is.character(expr[[3]])
+  is_dollar || is_bracket
+}
+
 prefix_class <- function (x, y) {
   # Can't set attributes on a symbol, but that's alright because
   # we don't need to flag or compute on symbols
@@ -948,8 +785,4 @@ remove_class <- function(x, y) {
   if (is.symbol(x) || !is.language(x)) return(x)
   oldClass(x) <- setdiff(oldClass(x), y)
   x
-}
-
-quotedList <- function(...) {
-  enquote(...)
 }
