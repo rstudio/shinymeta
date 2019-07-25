@@ -17,31 +17,11 @@
 #' @export
 metaRender <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE,
                        localize = "auto", bindToReturn = FALSE) {
-  # # Can't use this code, because rlang::exprs(...) causes `!!` to be expanded,
-  # # which we don't want. If there was a way to substitute ... without causing
-  # # `!!` expansion, that's what we'd want to do.
-  # exprs <- rlang::exprs(...)
-  # if (length(exprs) == 0) {
-  #   stop("render function invoked without any arguments")
-  # }
-  # exprs_nm <- names(exprs)
-  # expr <- if (is.null(exprs_nm)) {
-  #   exprs[[1]]
-  # } else if ("expr" %in% exprs_nm) {
-  #   exprs[["expr"]]
-  # } else if ("" %in% exprs_nm) {
-  #   exprs[exprs_nm == ""][[1]]
-  # }
-
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
   }
 
-  # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
-  # so, because we want to keep any `!!` contained in expr intact (i.e. too
-  # early to perform expansion of expr here).
-  #
   # Even though expr itself is quoted, wrapExpr will effectively unquote it by
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
   expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)

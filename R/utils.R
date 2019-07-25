@@ -15,17 +15,9 @@ wrapExpr <- function(func, ...) {
   ))
 }
 
-# Takes an expr that contains !!, and expands the expr so that all !! are
-# resolved. This is similar to rlang::quo except that 1) expr is already
-# quoted, and 2) you can specify the data/env from which !! should be
-# resolved. For example,
-#
-# local({
-#   a <- quote(one)
-#   b <- quote(three)
-#   env <- environment()
-#   expandExpr(quote(!!a + !!b), env)
-# })
+# Expands (i.e. evaluated) all ..() function calls in an expression
+# which mainly useful for unquoting away reactive inputs/values
+# when generating code in meta-mode
 expandExpr <- function(expr, env) {
 
   if (rlang::is_call(expr, "..")) {

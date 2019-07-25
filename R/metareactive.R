@@ -44,7 +44,7 @@
 #'
 #' y <- metaReactive({
 #'   req(input$x)
-#'   a <- !!input$x + 1
+#'   a <- ..(input$x) + 1
 #'   b <- a + 1
 #'   c + 1
 #' })
@@ -56,7 +56,7 @@
 #'   req(input$x)
 #'
 #'   metaExpr({
-#'     a <- !!input$x + 1
+#'     a <- ..(input$x) + 1
 #'     b <- a + 1
 #'     c + 1
 #'   }, bindToReturn = TRUE)
@@ -239,9 +239,8 @@ switchMetaMode <- function(normal, meta, mixed) {
 #
 # mr2 <- metaReactive2({
 #   mr1() # returns 2
-#   !!mr1() # `!!`` is treated as double-boolean (NOT unquote), so: TRUE
 #   metaExpr(
-#     !!mr1() # returns quote(1 + 1)
+#     ..(mr1()) # returns quote(1 + 1)
 #   )
 # })
 #
@@ -415,15 +414,15 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' There are two ways to extract code from meta objects (i.e. [metaReactive()],
 #' [metaObserve()], and [metaRender()]): `withMetaMode()` and `expandChain()`.
 #' The simplest is `withMetaMode(obj())`, which crawls the tree of meta-reactive
-#' dependencies and expands each `!!` in place.
+#' dependencies and expands each `..()` in place.
 #'
 #' For example, consider these meta objects:
 #'
 #' ```
 #'     nums <- metaReactive({ runif(100) })
 #'     obs <- metaObserve({
-#'       summary(!!nums())
-#'       hist(!!nums())
+#'       summary(..(nums()))
+#'       hist(..(nums()))
 #'     })
 #' ```
 #'
@@ -439,13 +438,13 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'     plot(runif(100))
 #' ```
 #'
-#' Notice how `runif(100)` is inlined wherever `!!nums()`
+#' Notice how `runif(100)` is inlined wherever `..(nums())`
 #' appears, which is not desirable if we wish to reuse the same
 #' values for `summary()` and `plot()`.
 #'
 #' The `expandChain` function helps us workaround this issue
 #' by assigning return values of `metaReactive()` expressions to
-#' a name, then replaces relevant expansion (e.g., `!!nums()`)
+#' a name, then replaces relevant expansion (e.g., `..(nums())`)
 #' with the appropriate name (e.g. `nums`).
 #'
 #' ```
@@ -524,10 +523,10 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' ```
 #'     data <- metaReactive2({
 #'       req(input$file_upload)
-#'       metaExpr(read.csv(!!input$file_upload$datapath))
+#'       metaExpr(read.csv(.(input$file_upload$datapath)))
 #'     })
 #'     obs <- metaObserve({
-#'       summary(!!data())
+#'       summary(..(data()))
 #'     })
 #' ```
 #'
@@ -571,22 +570,22 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' # varname is only required if srcref aren't supported
 #' # (R CMD check disables them for some reason?)
 #' mr <- metaReactive({
-#'   get(!!input$dataset, "package:datasets")
+#'   get(..(input$dataset), "package:datasets")
 #' })
 #'
 #' top <- metaReactive({
-#'   head(!!mr())
+#'   head(..(mr()))
 #' })
 #'
 #' bottom <- metaReactive({
-#'   tail(!!mr())
+#'   tail(..(mr()))
 #' })
 #'
 #' obs <- metaObserve({
 #'   message("Top:")
-#'   summary(!!top())
+#'   summary(..(top()))
 #'   message("Bottom:")
-#'   summary(!!bottom())
+#'   summary(..(bottom()))
 #' })
 #'
 #' # Simple case

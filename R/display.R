@@ -22,7 +22,7 @@
 #'   )
 #'   server <- function(input, output) {
 #'     output$p <- metaRender(renderPlot, {
-#'       plot(sample(!!input$n))
+#'       plot(sample(..(input$n)))
 #'     })
 #'     observeEvent(input$code, {
 #'       code <- expandChain(output$p())
