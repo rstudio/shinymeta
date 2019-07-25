@@ -911,6 +911,8 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
 
       val <- if (is_comment(x)) {
         do.call(metaExpr, list(rlang::expr({!!x; {}})))
+      } else if (inherits(x, "shinymeta_symbol")) {
+        as.symbol(x)
       } else if (is.language(x)) {
         x
       } else if (is.null(x)) {
