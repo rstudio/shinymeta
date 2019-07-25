@@ -40,8 +40,7 @@ expandExpr <- function(expr, data, env) {
     expandExpr(x, data, env)
   })
 
-  if (rlang::is_call(expr, "..")) {
-    # TODO: stop if this call doesn't have a single, unnamed argument
+  if (rlang::is_call(expr, "..", n = 1) && is.null(names(expr))) {
     res <- eval(expr[[2]], data, env)
     if (inherits(res, "shinymeta_symbol")) {
       as.symbol(res)
@@ -57,8 +56,7 @@ expandExpr <- function(expr, data, env) {
 
 cleanExpr <- function(expr) {
   expr <- walk_ast(expr, cleanExpr)
-  if (rlang::is_call(expr, "..")) {
-    # TODO: stop if this call doesn't have a single, unnamed argument
+  if (rlang::is_call(expr, "..", n = 1) && is.null(names(expr))) {
     expr[[2]]
   } else {
     expr
