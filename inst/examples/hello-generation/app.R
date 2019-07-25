@@ -11,13 +11,13 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  df <- metaReactive(
-    get(!!input$dataset, "package:datasets")
-  )
+  df <- metaReactive({
+    get(..(input$dataset), "package:datasets")
+  })
 
-  filtered <- metaReactive(
-    !!df() %>% head(!!input$n)
-  )
+  filtered <- metaReactive({
+    ..(df()) %>% head(..(input$n))
+  })
 
   output$text <- renderPrint({
     summary(filtered())

@@ -42,33 +42,45 @@ server <- function(input, output) {
     } else {
       outliers(c(row_id, outliers()))
     }
+
+    print(outliers())
   })
 
   data_discard <- metaReactive({
-    filter(data, .row_ids %in% !!outliers())
+    filter(data, .row_ids %in% ..(outliers()))
   })
 
   data_kept <- metaReactive({
-    filter(data, !.row_ids %in% !!outliers())
+    filter(data, !.row_ids %in% ..(outliers()))
   })
 
   model_fit <- metaReactive2({
     req(input$degree)
 
+    # just say no to as.formula
+    form <- substitute(
+      y ~ poly(x, degree = degree),
+      list(
+        y = input$yvar,
+        x = input$xvar,
+        degree = as.numeric(input$degree)
+      )
+    )
+
     metaExpr(
-      lm(!!input$yvar ~ poly(!!input$xvar, degree = !!as.numeric(input$degree)), data = !!data_kept())
+      lm(form, data = ..(data_kept()))
     )
   })
 
   data_fitted <- metaReactive({
-    modelr::add_predictions(!!data_kept(), !!model_fit())
+    modelr::add_predictions(..(data_kept()), ..(model_fit()))
   })
 
   output$plot <- metaRender(renderPlot, {
-    ggplot(!!data_kept(), aes(x = !!input$xvar, y = !!input$yvar)) +
+    ggplot(..(data_kept()), aes(x = !!..(input$xvar), y = !!..(input$yvar))) +
       geom_point() +
-      geom_line(data = !!data_fitted(), aes_string(y = "pred"), color = "gray50") +
-      geom_point(data = !!data_discard(), fill = NA, color = "black", alpha = 0.25) +
+      geom_line(data = ..(data_fitted()), aes(y = pred), color = "gray50") +
+      geom_point(data = ..(data_discard()), fill = NA, color = "black", alpha = 0.25) +
       theme_bw(base_size = 14)
   })
 
