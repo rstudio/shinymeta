@@ -42,8 +42,6 @@ server <- function(input, output) {
     } else {
       outliers(c(row_id, outliers()))
     }
-
-    print(outliers())
   })
 
   data_discard <- metaReactive({

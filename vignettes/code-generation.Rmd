@@ -116,7 +116,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   downloads <- metaReactive({
     "# Retrieve a year's worth of daily download data"
-    cranlogs::cran_downloads(.(input$package), from = Sys.Date() - 365, to = Sys.Date())
+    cranlogs::cran_downloads(..(input$package), from = Sys.Date() - 365, to = Sys.Date())
   })
   
   downloads_rolling <- metaReactive2({
@@ -124,12 +124,12 @@ server <- function(input, output, session) {
     
     metaExpr({
       "# Convert daily data to 7 day rolling average"
-      .(downloads()) %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
+      ..(downloads()) %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
     })
   })
   
   output$plot <- metaRender(renderPlot, {
-      ggplot(.(downloads_rolling()), aes(date, count)) + geom_line() + ggtitle("Seven day rolling average")
+      ggplot(..(downloads_rolling()), aes(date, count)) + geom_line() + ggtitle("Seven day rolling average")
   })
   
   output$code <- renderPrint({
@@ -152,7 +152,7 @@ So, what has changed in the implementation between the original Shiny app and th
 * Each reactive building block (e.g., `reactive()`, `renderPlot()`) has been replaced by a meta variant (e.g., `metaReactive()`, `metaRender()`)
   * This example doesn't have `observe()`, but these [covers their meta variant as well](#observers). 
   * Meta variants have a second version (e.g. `metaReactive2()`) that allows you to completely [ignore Shiny-specific logic](#ignore-code) by wrapping only the code you care about in `metaExpr()`.
-* Each read of a meta-reactive or an `input` value has been surrounded with `.()`.
+* Each read of a meta-reactive or an `input` value has been surrounded with `..()`.
 * Comments are retained by surrounding them in quotes.
 * The output of interest (`output$plot`) is invoked inside `expandChain()`, which generates code to reproduce that output.
     * `expandChain()` also accepts `quote()`d expressions, which allows you to supply any setup code that the user might need (for example, loading libraries).
@@ -191,20 +191,20 @@ However, `metaReactive()`s have the added ability to return code expressions whe
 expandChain(downloads())
 ```
 
-Notice how the generated code here depends on the input variable `input$package`. If we were to run this code in a new R session, it would error because `input$package` isn't defined outside of the shiny session. We can, however, replace the literal name "`input$package`" with the value it represents (by 'unquoting' it with `.()`), which allows the code to run an environment where `input` isn't defined. 
+Notice how the generated code here depends on the input variable `input$package`. If we were to run this code in a new R session, it would error because `input$package` isn't defined outside of the shiny session. We can, however, replace the literal name "`input$package`" with the value it represents (by 'unquoting' it with `..()`), which allows the code to run an environment where `input` isn't defined. 
 
 ```{r}
 downloads <- metaReactive({
-  cranlogs::cran_downloads(.(input$package), from = Sys.Date() - 365, to = Sys.Date())
+  cranlogs::cran_downloads(..(input$package), from = Sys.Date() - 365, to = Sys.Date())
 })
 expandChain(downloads())
 ```
 
-> #### Takeaway: replace reactive inputs/values with their static value via `.()`
+> #### Takeaway: replace reactive inputs/values with their static value via `..()`
 
 ## Unquoting {#unquoting}
 
-In computing, functions that return code expressions (e.g., `quote()`) are known as quoting functions. A quoting function that allow you to also evaluate (i.e., unquote) certain parts of an expression is known as a quasi-quoting function. Both base R's `bquote()` and **rlang**'s `expr()` are quasi-quoting functions. The former unquotes terms wrapped in `.()`  whereas the latter uses `!!`:
+In computing, functions that return code expressions (e.g., `quote()`) are known as quoting functions. A quoting function that allow you to also evaluate (i.e., unquote) certain parts of an expression is known as a quasi-quoting function. Both base R's `bquote()` and **rlang**'s `expr()` are quasi-quoting functions. The former unquotes terms wrapped in `..()`  whereas the latter uses `!!`:
 
 ```{r}
 a <- 2
@@ -219,14 +219,14 @@ bquote(.(a) + 1)
 rlang::expr(!!a + 1)
 ```
 
-When meta-reactives are invoked in meta-mode, they perform quasi-quotation by evaluating terms wrapped in `.()` (like `bquote()` does).^[When invoked normally, the `.()` is ignored, ensuring normal execution behaves as you'd expect it to.] We've already seen how `.()` can be used to replace reactive inputs with their static values (**note**: this also works with `reactiveVal()`/`reactiveValues()`), but this can also be useful for customizing non-reactive aspects of the code that you generate.
+When meta-reactives are invoked in meta-mode, they perform quasi-quotation by evaluating terms wrapped in `..()`.^[When invoked normally, the `..()` is ignored, ensuring normal execution behaves as you'd expect it to.] We've already seen how `..()` can be used to replace reactive inputs with their static values (**note**: this also works with `reactiveVal()`/`reactiveValues()`), but this can also be useful for customizing non-reactive aspects of the code that you generate.
 
 For example, by unquoting the value supplied to the `from` argument in `downloads()`, we'll inline the value that the code expression `Sys.Date() - 365` represents, so that when the generated code is run in the future, we always get downloads starting `from` a year prior to *the day the code was generated* (instead of a year prior to *the day the generated code is run*).
 
 ```{r}
-# NOTE: there's an important difference between `.(Sys.Date()) - 365` and `.(Sys.Date() - 365)`!
+# NOTE: there's an important difference between `..(Sys.Date()) - 365` and `..(Sys.Date() - 365)`!
 downloads <- metaReactive({
-  cranlogs::cran_downloads(.(input$package), from = .(Sys.Date() - 365), to = Sys.Date())
+  cranlogs::cran_downloads(..(input$package), from = ..(Sys.Date() - 365), to = Sys.Date())
 })
 expandChain(downloads())
 ```
@@ -235,7 +235,7 @@ At first, this result may be suprising (i.e., what's `structure()` doing there?)
 
 ```{r}
 downloads <- metaReactive({
-  cranlogs::cran_downloads(.(input$package), from = .(format(Sys.Date() - 365)), to = Sys.Date())
+  cranlogs::cran_downloads(..(input$package), from = ..(format(Sys.Date() - 365)), to = Sys.Date())
 })
 expandChain(downloads())
 ```
@@ -264,12 +264,12 @@ So, similar to the problem we had before with `input$package`, the generated cod
 
 ```{r}
 downloads_rolling <- metaReactive({
-  .(downloads()) %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
+  ..(downloads()) %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
 })
 expandChain(downloads_rolling())
 ```
 
-> #### Takeaway: unquote meta-reactive reads (i.e., `.(downloads())`) that appear within other meta-reactives
+> #### Takeaway: unquote meta-reactive reads (i.e., `..(downloads())`) that appear within other meta-reactives
 
 ## Ignoring Shiny logic {#ignore-code}
 
@@ -289,7 +289,7 @@ downloads_rolling <- metaReactive2({
   validate(need(sum(downloads()$count) > 0, "Input a valid package name"))
   
   metaExpr({
-    .(downloads()) %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
+    ..(downloads()) %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
   })
 })
 
@@ -312,7 +312,7 @@ Creating a meta variant of `observe()` is very similar to creating a meta varian
 
 ```{r}
 msgObs <- metaObserve({
-  message(.(input$package), " has an daily download average of ", mean(.(downloads())$count))
+  message(..(input$package), " has an daily download average of ", mean(..(downloads())$count))
 })
 expandChain(msgObs())
 ```
@@ -325,7 +325,7 @@ Since package authors are allowed to create their own output rendering functions
 
 ```{r}
 output$plot <- metaRender(renderPlot, {
-  ggplot(.(downloads_rolling()), aes(date, count)) + geom_line() + ggtitle("Seven day rolling average")
+  ggplot(..(downloads_rolling()), aes(date, count)) + geom_line() + ggtitle("Seven day rolling average")
 })
 ```
 
@@ -351,7 +351,7 @@ You can also give `expandChain()` multiple meta-reactives and it will know not t
 ```{r}
 # add another output just to demonstrate
 output$summary <- metaRender(renderPrint, {
-  summary(.(downloads())$count)
+  summary(..(downloads())$count)
 })
 
 expandChain(
