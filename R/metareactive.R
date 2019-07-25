@@ -830,7 +830,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
 
     exec <- function() {
       subfunc <- .expansionContext$uidToSubstitute$get(uid)
-      result <- if (!is.null(subfunc)) {
+      if (!is.null(subfunc)) {
         withMetaMode(subfunc())
       } else {
         x
@@ -846,7 +846,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     # varname as we used last time.
     varname <- uidToVarname$get(uid)
     if (!is.null(varname)) {
-      return(as.symbol(varname))
+      return(structure(varname, class = "shinymeta_symbol"))
     }
 
     # OK, we haven't seen this UID before. We need to figure out what variable
@@ -883,7 +883,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
 
     # This is what we're returning to the caller; whomever wanted the code for
     # this metaReactive is going to get this variable name instead.
-    as.symbol(varname)
+    return(structure(varname, class = "shinymeta_symbol"))
   }
   on.exit(.globals$rexprMetaReadFilter <- oldFilter, add = TRUE, after = FALSE)
 

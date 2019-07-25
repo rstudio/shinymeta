@@ -35,18 +35,34 @@ wrapExpr <- function(func, ...) {
 #   expandExpr(quote(!!a + !!b), list(a = quote(two)), env)
 # })
 expandExpr <- function(expr, data, env) {
-  do.call(bquote, list(expr = expr, where = env))
+
+  expr <- walk_ast(expr, function(x) {
+    expandExpr(x, data, env)
+  })
+
+  if (rlang::is_call(expr, "..")) {
+    # TODO: stop if this call doesn't have a single, unnamed argument
+    res <- eval(expr[[2]], data, env)
+    if (inherits(res, "shinymeta_symbol")) {
+      as.symbol(res)
+    } else if (is.symbol(res)) {
+      call("as.symbol", as.character(res))
+    } else {
+      res
+    }
+  } else {
+    expr
+  }
 }
 
 cleanExpr <- function(expr) {
-  walk_ast(expr, function(x) {
-    if (rlang::is_call(x, ".")) {
-      # TODO: stop if this call doesn't have a single, unnamed argument
-      cleanExpr(x[[2]])
-    } else {
-      cleanExpr(x)
-    }
-  })
+  expr <- walk_ast(expr, cleanExpr)
+  if (rlang::is_call(expr, "..")) {
+    # TODO: stop if this call doesn't have a single, unnamed argument
+    expr[[2]]
+  } else {
+    expr
+  }
 }
 
 
