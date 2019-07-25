@@ -55,7 +55,10 @@ expandChain(mean_by_cyl())
 
 TODO: 
  1. Do an example where `input$var` represent a symbol 
+   - Explain why `..(input$var)` returns `as.symbol("xyz")`
+     - Makes it so `!!` works in both contexts 
  2. Are there any **tidyeval** patterns that totally conflict with **shinymeta**?  
+ 3. Perhaps talk about NSE escape hatches like `_at()` variants?
 
 
 ## Capturing setup code

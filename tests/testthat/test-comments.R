@@ -181,7 +181,7 @@ describe("various edge cases", isolate({
   })
 
   mr2 <- metaReactive({
-    !!mr()
+    ..(mr())
     NULL
   })
 
@@ -215,7 +215,7 @@ describe("various edge cases", isolate({
 
   x2 <- metaReactive({
     "# This comment should appear above the assignment"
-    !!x() + 1
+    ..(x()) + 1
   })
   expect_equal(
     capturePrint(expandChain(invisible(x2()))),

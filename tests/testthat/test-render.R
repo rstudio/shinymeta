@@ -39,8 +39,8 @@ describe("metaRender", isolate({
       env <- environment()
       list(
         expr0 = quote({ paste(a, b) }),
-        expr1 = quote({ paste(!!a, !!b) }),
-        expr2 = quote(metaExpr({ paste(!!a, !!b) })),
+        expr1 = quote({ paste(..(a), ..(b)) }),
+        expr2 = quote(metaExpr({ paste(..(a), ..(b)) })),
         env = env
       )
     })
@@ -75,7 +75,7 @@ describe("metaRender", isolate({
 
     data <- metaReactive({ dplyr::sample_n(diamonds, 1000) })
     output$plot <- metaRender(renderPlot, {
-      ggplot(!!data(), aes(carat, price)) + geom_point()
+      ggplot(..(data()), aes(carat, price)) + geom_point()
     })
     x1 <- expandChain(
       "# top-level comment",
@@ -106,7 +106,7 @@ describe("metaRender", isolate({
     expect_true(formatCode(code) == "mr1 <- 1 + 1")
 
     mr2 <- metaReactive({
-      !!quote({1 + 1})
+      ..(quote({1 + 1}))
     })
 
     code <- expandChain(invisible(mr2()))
