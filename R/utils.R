@@ -36,8 +36,22 @@ wrapExpr <- function(func, ...) {
 # })
 expandExpr <- function(expr, data, env) {
 
-  if (rlang::is_call(expr, "..", n = 1) && is.null(names(expr))) {
+  if (rlang::is_call(expr, "..")) {
+    # make sure ..() contains a single unnamed argument
+    if (!rlang::is_call(expr, "..", n = 1)) {
+      stop("..() must contain a single argument.")
+    }
+    if (!is.null(names(expr))) {
+      stop("..() cannot contain a named argument: '", names(expr)[2], "'.")
+    }
+    # make sure ..() isn't being used for something else
+    if (exists("..", env) && rlang::is_function(get("..", env))) {
+      stop("The ..() function call is reserved for unquoting in shinymeta.")
+    }
+    # unquote
     expr <- eval(expr[[2]], data, env)
+    # Expand symbols to code that generates that symbol, as opposed
+    # to just the symbol itself
     expr <- if (inherits(expr, "shinymeta_symbol")) {
       as.symbol(expr)
     } else if (is.symbol(expr)) {
