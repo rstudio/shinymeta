@@ -32,46 +32,40 @@ describe(
         '  a + 1',
         '})'
       )
-      expect_code_string(expandCode(!!mr()), expected)
-      expect_code_string(expandCode({!!mr()}), expected)
+      expect_code_string(withMetaMode(mr()), expected)
     })
 
-    # TODO: can we reliably do with with `=` assignment?
     it("with assignment", {
       expected <- c(
-        'x <- local({',
+        'mr <- local({',
         '  a <- 1 + 1',
         '  if (T) {',
         '    return("b")',
         '  }',
         '  a + 1',
-        '})'
+        '})',
+        'mr'
       )
-      expect_code_string(expandCode(x <- !!mr()), expected)
-      expect_code_string(expandCode({x <- !!mr()}), expected)
+      expect_code_string(expandChain(mr()), expected)
     })
 
-    it("with multiple assignments", {
+    it("with chaining", {
+      mr2 <- metaReactive({
+        !!mr() + 1
+      })
+
       expect_code_string(
-        expandCode({
-          mr1 <- !!mr()
-          mr2 <- !!mr()
-        }),
+        expandChain(mr2()),
         c(
-          'mr1 <- local({',
+          'mr <- local({',
           '  a <- 1 + 1',
           '  if (T) {',
           '    return("b")',
           '  }',
           '  a + 1',
           '})',
-          'mr2 <- local({',
-          '  a <- 1 + 1',
-          '  if (T) {',
-          '    return("b")',
-          '  }',
-          '  a + 1',
-          '})'
+          'mr2 <- mr + 1',
+          'mr2'
         )
       )
     })
@@ -82,9 +76,9 @@ describe(
       })
 
       expect_code_string(
-        expandCode(two <- !!mrx()),
+        withMetaMode(mrx()),
         c(
-          'two <- unlist(lapply(1:5, function(x) {',
+          'unlist(lapply(1:5, function(x) {',
           '  if (x == 2) {',
           '    return(x)',
           '  }',
@@ -102,9 +96,9 @@ describe(
       })
 
       expect_code_string(
-        expandCode(three <- !!mrl()),
+        withMetaMode(mrl()),
         c(
-          'three <- local({',
+          'local({',
           '  a <- 1',
           '  a + 2',
           '})'
@@ -131,7 +125,7 @@ describe(
     it("single assign works", {
 
       expect_code_string(
-        expandCode({mr <- !!mr()}),
+        expandChain(invisible(mr())),
         c(
           'a <- 1 + 1',
           'b <- a + 1',
@@ -141,18 +135,28 @@ describe(
     })
 
     it("double assign works", {
+
+      mr2 <- metaReactive({
+        a <- 1 + 1
+        b <- a + 1
+        b + 1
+      }, bindToReturn = TRUE)
+
+      mrx <- metaReactive({
+        !!mr() + !!mr2()
+      })
+
       expect_code_string(
-        expandCode({
-          mr1 <- !!mr()
-          mr2 <- !!mr()
-        }),
+        expandChain(mrx()),
         c(
           'a <- 1 + 1',
           'b <- a + 1',
-          'mr1 <- b + 1',
+          'mr <- b + 1',
           'a <- 1 + 1',
           'b <- a + 1',
-          'mr2 <- b + 1'
+          'mr2 <- b + 1',
+          'mrx <- mr + mr2',
+          'mrx'
         )
       )
     })
@@ -167,21 +171,14 @@ describe(
       }, local = TRUE, bindToReturn = TRUE)
 
       expect_code_string(
-        expandCode({
-          mr1 <- !!mr()
-          mr2 <- !!mr()
-        }),
+        expandChain(mr()),
         c(
-          'mr1 <- local({',
+          'mr <- local({',
           '  a <- 1 + 1',
           '  b <- a + 1',
           '  b + 1',
           '})',
-          'mr2 <- local({',
-          '  a <- 1 + 1',
-          '  b <- a + 1',
-          '  b + 1',
-          '})'
+          'mr'
         )
       )
 

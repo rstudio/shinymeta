@@ -25,7 +25,7 @@
 #'       plot(sample(!!input$n))
 #'     })
 #'     observeEvent(input$code, {
-#'       code <- expandObjects(output$p)
+#'       code <- expandChain(output$p())
 #'       displayEditor(code)
 #'     })
 #'   }

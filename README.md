@@ -55,7 +55,7 @@ This example illustrates the bare minimum of what you must do to get your Shiny 
 * Each read of reactive value has been unquoted (i.e., prepended with `!!`).
 * Output(s) of interest are supplied to `expandChain()`.
 
-For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/code-distribution.html)
+For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/code-distribution.html). You can also watch Joe Cheng's useR keynote on **shinymeta** [here](https://youtu.be/5KByRC6eqC8?t=727).
 
 ## A motivating example
 
@@ -75,7 +75,7 @@ We hope this example helps illustrate and inspire several reasons why you might 
     
     * **Enabling**: Shiny is great for enabling others to interface with an R script you've written, but what if your users wish to explore things that your interface doesn't allow for? By exposing the core logic of your app, you make it easier for motivated users to modify and build upon your work in ways you never thought about.
     
-    * **Documentation**: This one is especially relevant for exploratory analysis apps that allow you to derive insight from a dataset. A great example is the ANOVA example app in the [case studies vignette](04-case-studies.html#ANOVA), where you can upload a dataset, run an ANOVA analysis, then download a report with all ANOVA results as well as the code to reproduce it.
+    * **Documentation**: This one is especially relevant for exploratory analysis apps that allow you to derive insight from a dataset. A great example is the ANOVA example app in the [case studies vignette](case-studies.html#ANOVA), where you can upload a dataset, run an ANOVA analysis, then download a report with all ANOVA results as well as the code to reproduce it.
 
 * **Permanence**: Using a Shiny app can have an ephemeral feeling to it; what happens in the future if the server goes down, or the app's features change? With a reproducible report, your users can download a more permanent artifact that can be saved locally.
     

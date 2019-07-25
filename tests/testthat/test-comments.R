@@ -25,8 +25,8 @@ describe("metaReactive", isolate({
         1 + 1
       })
     })
-    expected_output <- c("# a comment", "1 + 1")
-    actual_output <- capturePrint(expandCode(!!mr2()))
+    expected_output <- c("# a comment", "mr2 <- 1 + 1")
+    actual_output <- capturePrint(expandChain(invisible(mr2())))
     expect_equal(expected_output, actual_output)
   })
 
@@ -54,7 +54,7 @@ describe("metaObserve", isolate({
       1 + 1
     })
     expected_output <- c("# a comment", "1 + 1")
-    actual_output <- capturePrint(expandCode(!!mo()))
+    actual_output <- capturePrint(expandChain(mo()))
     expect_equal(expected_output, actual_output)
   })
 
@@ -108,7 +108,7 @@ describe("metaRender", isolate({
       })
     })
     expected_output <- c("# a comment", "1 + 1")
-    actual_output <- capturePrint(expandCode(!!mrt2()))
+    actual_output <- capturePrint(expandChain(mrt2()))
     expect_equal(expected_output, actual_output)
   })
 
@@ -128,49 +128,46 @@ describe("metaRender", isolate({
 }))
 
 describe("various edge cases", isolate({
-  expect_equal(
-    capturePrint(expandCode({
-      "# Escaped \"quotes\" should \'be' supported"
-      NULL
-    })),
-    c(
-      "# Escaped \"quotes\" should 'be' supported",
-      "NULL"
-    )
+  mr <- metaReactive({
+    "# Escaped \"quotes\" should \'be' supported"
+    NULL
+  })
+  mr2 <- metaReactive({
+    '# Escaped \"quotes" should \'be\' supported'
+    NULL
+  })
+  expected <- c(
+    "# Escaped \"quotes\" should 'be' supported",
+    "NULL"
   )
-
   expect_equal(
-    capturePrint(expandCode({
-      '# Escaped \"quotes" should \'be\' supported'
-      NULL
-    })),
-    c(
-      "# Escaped \"quotes\" should 'be' supported",
-      "NULL"
-    )
+    capturePrint(withMetaMode(mr())), expected
   )
-
   expect_equal(
-    capturePrint(expandCode({
-      " # This shouldn't count as a comment " # Leading whitespace
-      " '# This either' "                     # Nested quote
-      " \"# Or this\" "                       # Nested dbl-quote
-    })),
+    capturePrint(withMetaMode(mr2())), expected
+  )
+  mr <- metaReactive({
+    " # This shouldn't count as a comment " # Leading whitespace
+    " '# This either' "                     # Nested quote
+    " \"# Or this\" "                       # Nested dbl-quote
+  })
+  expect_equal(
+    capturePrint(withMetaMode(mr())),
     c(
       deparse(" # This shouldn't count as a comment "),
       deparse(" '# This either' "),
       deparse(" \"# Or this\" ")
     )
   )
-
+  mr <- metaReactive({
+    "# This should be a comment"
+    paste(
+      "# But this should not",
+      "be a comment"
+    )
+  })
   expect_equal(
-    capturePrint(expandCode({
-      "# This should be a comment"
-      paste(
-        "# But this should not",
-        "be a comment"
-      )
-    })),
+    capturePrint(withMetaMode(mr())),
     c(
       "# This should be a comment",
       "paste(\"# But this should not\", \"be a comment\")"
@@ -207,7 +204,7 @@ describe("various edge cases", isolate({
     1 + 1
   })
 
-  out <- capturePrint(expandCode(x <- !!x()))
+  out <- capturePrint(expandChain(invisible(x())))
   expect_equal(
     out,
     c(
@@ -216,33 +213,17 @@ describe("various edge cases", isolate({
     )
   )
 
-  code <- expandCode({
-    x <- !!x()
-    x2 <- !!x()
+  x2 <- metaReactive({
+    "# This comment should appear above the assignment"
+    !!x() + 1
   })
   expect_equal(
-    capturePrint(code),
+    capturePrint(expandChain(invisible(x2()))),
     c(
       "# This comment should appear above the assignment",
       "x <- 1 + 1",
       "# This comment should appear above the assignment",
-      "x2 <- 1 + 1"
-    )
-  )
-
-  code <- expandCode({
-    {
-      "# A comment"
-      a
-    } + b
-  })
-  expect_equal(
-    capturePrint(code),
-    c(
-      "{",
-      "  # A comment",
-      "  a",
-      "} + b"
+      "x2 <- x + 1"
     )
   )
 
