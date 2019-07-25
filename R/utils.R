@@ -42,6 +42,8 @@ expandExpr <- function(expr, data, env) {
       as.symbol(expr)
     } else if (is.symbol(expr)) {
       call("as.symbol", as.character(expr))
+    } else {
+      expr
     }
   }
 
