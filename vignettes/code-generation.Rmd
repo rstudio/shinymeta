@@ -149,60 +149,45 @@ knitr::include_graphics("https://i.imgur.com/T9a60Fm.gif")
 
 So, what has changed in the implementation between the original Shiny app and the one that generates code? There a few high-level observations we can make here that should hold true for most apps that leverage **shinymeta** to generate code:
 
-* Each reactive building block (e.g., `reactive()`, `renderPlot()`) has been replaced by a meta variant (e.g., `metaReactive()`, `metaRender()`)
-  * This example doesn't have `observe()`, but these [covers their meta variant as well](#observers). 
-  * Meta variants have a second version (e.g. `metaReactive2()`) that allows you to completely [ignore Shiny-specific logic](#ignore-code) by wrapping only the code you care about in `metaExpr()`.
-* Each read of a meta-reactive or an `input` value has been surrounded with `..()`.
+* Each reactive building block (e.g., `reactive()`, `renderPlot()`, etc) has been replaced by a meta-variant (e.g., `metaReactive()`, `metaRender()`, etc). All code within these meta-variants are considered to be "domain logic" (i.e. code that you'd like to export).
+  * In situations where part of the code *isn't* domain logic, **shinymeta** provides a second version (e.g. `metaReactive2()`, `metaRender2()`, etc) that allows you to completely [ignore non-domain logic](#ignore-code) (by wrapping only the code you care about in `metaExpr()`).
+  * This example doesn't have `observe()`, but these [covers their meta variant as well](#observers).
+* Each read of a meta-reactive or an `input` value has been wrapped in `..()`.
 * Comments are retained by surrounding them in quotes.
 * The output of interest (`output$plot`) is invoked inside `expandChain()`, which generates code to reproduce that output.
-    * `expandChain()` also accepts `quote()`d expressions, which allows you to supply any setup code that the user might need (for example, loading libraries).
+    * `expandChain()` also accepts `quote()`d expressions, which allows you to supply any setup code that the user might need (for example, loading of libraries).
 
-On the surface, these changes are pretty straight-forward, but for those who really want to understand the details and how it all fits together, we'll have to unpack some fairly sophisticated concepts related to metaprogramming (i.e., writing code that generates code). If you're new to metaprogramming, we recommend reading [Advanced R](https://adv-r.hadley.nz) (especially the [Quasi-quotation chapter](https://adv-r.hadley.nz/quasiquotation.html)), but that shouldn't be necessary to get the gist of what's happening in **shinymeta**.
+For most existing Shiny applications, you should be able to apply these changes, and the code generation should "just work". In some scenarios, however, you may have to adjust your Shiny app logic, and in doing so, it will payoff to have a more thorough understanding of how **shinymeta** works, especially when surrounding reactive reads in `..()`.  For part of the story, it will help to have some familiarity with metaprogramming (especially [quasi-quotation](https://adv-r.hadley.nz/quasiquotation.html)), but it shouldn't be necessary to gain a basic understanding of what's happening in  **shinymeta**.
 
 ## Meta execution
 
-Let's start with this particular reactive expression from the original app:
-
-```{r}
-downloads <- reactive({
-  cranlogs::cran_downloads(input$package, from = Sys.Date() - 365, to = Sys.Date())
-})
-```
-
-Reactive expressions are great at the job they were designed for: lazy, caching, reactivity-aware calculators of results. However, they don't help in the second part of our goal, which is capturing logic within the app, and making it reusable for others outside of Shiny.
-
-Enter `metaReactive()`. Let's do nothing besides change `reactive()` to `metaReactive()`:
+Meta-reactives (e.g., `metaReactive()`, `metaRender()`, etc) can be invoked in two different modes: meta or normal (the default). In normal execution, the behavior of the meta-reactive is exactly the same as the non-meta version (e.g., `downloads()` still evaluates and caches results just like a normal `reactive()` does):
 
 ```{r}
 downloads <- metaReactive({
   cranlogs::cran_downloads(input$package, from = Sys.Date() - 365, to = Sys.Date())
 })
-```
-
-By default, the behavior of `downloads()` doesn't change at all: it still evaluates and caches results just like a normal `reactive()` does:
-
-```{r}
 downloads()
 ```
 
-However, `metaReactive()`s have the added ability to return code expressions when invoked in "meta mode". **shinymeta** currently provides two ways to invoke reactives in meta mode: `withMetaMode()` and `expandChain()`. In practice, you'll almost always want to use `expandChain()` over `withMetaMode()`: it has the added ability of assigning return values to a name and reusing that name when necessary, which helpful for avoiding redundant code and computation when [expanding a chain of reactives](#chaining).
+On the other hand, when invoked in meta mode, meta-variants return a code expression instead of fully evaluating the expression (i.e., they quote their input). **shinymeta** currently provides two ways to invoke meta-reactives in meta mode: `withMetaMode()` and `expandChain()`. In practice, you'll almost always want to use `expandChain()` over `withMetaMode()`: it has the added feature of assigning return values to a name and intelligently reusing names to avoid redundant computation when [generating code from a chain of reactives](#expandChain), but we'll start by using `withMetaMode()` here to facilitate discussion.
 
 ```{r}
-expandChain(downloads())
+withMetaMode(downloads())
 ```
 
-Notice how the generated code here depends on the input variable `input$package`. If we were to run this code in a new R session, it would error because `input$package` isn't defined outside of the shiny session. We can, however, replace the literal name "`input$package`" with the value it represents (by 'unquoting' it with `..()`), which allows the code to run an environment where `input` isn't defined. 
+Notice how the generated code here depends on the input variable `input$package`. If we were to run this code in a new R session, it would error because `input$package` isn't defined outside of the shiny session. We can, however, replace the literal name "`input$package`" with the value it represents by wrapping it in`..()` (which allows the resulting code expression to run an environment where `input` isn't defined). In simpler terms, __use `..()` to replace reactive values (e.g. `input$package`) with their static value__.
 
 ```{r}
 downloads <- metaReactive({
   cranlogs::cran_downloads(..(input$package), from = Sys.Date() - 365, to = Sys.Date())
 })
-expandChain(downloads())
+withMetaMode(downloads())
 ```
 
-> #### Takeaway: replace reactive inputs/values with their static value via `..()`
+More generally, `..()` evaluates (i.e., unquotes) *anything* that appears inside of it when invoked in meta mode (we'll explore this idea further in the next section). On the other hand, in normal execution, the `..()` is ignored (think of it like `identity()`), which ensures your app behaves just as it would without **shinymeta** integration.
 
-## Unquoting {#unquoting}
+## Unquoting in general {#unquoting}
 
 In computing, functions that return code expressions (e.g., `quote()`) are known as quoting functions. A quoting function that allow you to also evaluate (i.e., unquote) certain parts of an expression is known as a quasi-quoting function. Both base R's `bquote()` and **rlang**'s `expr()` are quasi-quoting functions. The former unquotes terms wrapped in `..()`  whereas the latter uses `!!`:
 
@@ -219,32 +204,30 @@ bquote(.(a) + 1)
 rlang::expr(!!a + 1)
 ```
 
-When meta-reactives are invoked in meta-mode, they perform quasi-quotation by evaluating terms wrapped in `..()`.^[When invoked normally, the `..()` is ignored, ensuring normal execution behaves as you'd expect it to.] We've already seen how `..()` can be used to replace reactive inputs with their static values (**note**: this also works with `reactiveVal()`/`reactiveValues()`), but this can also be useful for customizing non-reactive aspects of the code that you generate.
-
-For example, by unquoting the value supplied to the `from` argument in `downloads()`, we'll inline the value that the code expression `Sys.Date() - 365` represents, so that when the generated code is run in the future, we always get downloads starting `from` a year prior to *the day the code was generated* (instead of a year prior to *the day the generated code is run*).
+When meta-reactives are invoked in meta-mode, they perform quasi-quotation by evaluating terms wrapped in `..()`. We've already seen how `..()` can be used to replace reactive inputs with their static values (**note**: this also works with `reactiveVal()`/`reactiveValues()`), but you can put whatever you want inside `..()` so you can use it to have full control over the generated code. For example, by unquoting the value supplied to the `from` argument in `downloads()`, we'll inline the value that the code expression `Sys.Date() - 365` represents, so that when the generated code is run in the future, we always get downloads starting `from` a year prior to *the day the code was generated* (instead of a year prior to *the day the generated code is run*).
 
 ```{r}
 # NOTE: there's an important difference between `..(Sys.Date()) - 365` and `..(Sys.Date() - 365)`!
 downloads <- metaReactive({
   cranlogs::cran_downloads(..(input$package), from = ..(Sys.Date() - 365), to = Sys.Date())
 })
-expandChain(downloads())
+withMetaMode(downloads())
 ```
 
-At first, this result may be suprising (i.e., what's `structure()` doing there?), but it's necessary to retain any attributes (e.g. `class`) of unquoted objects. In this case, since the `from` argument accepts string in `"yyyy-mm-dd"` format (i.e., the `Date` class isn't necessary), we can use `format()` to coerce the `Date` object into a string (and thus, more human-readable).
+At first, this result may be a little suprising (i.e., what's `structure()` doing there?), but it's necessary to retain any attributes (e.g. `class`) of unquoted objects. In this case, since the `from` argument accepts string in `"yyyy-mm-dd"` format (i.e., the `Date` class isn't necessary), we can use `format()` to coerce the `Date` object into a string (and thus, more human-readable).
 
 ```{r}
 downloads <- metaReactive({
   cranlogs::cran_downloads(..(input$package), from = ..(format(Sys.Date() - 365)), to = Sys.Date())
 })
-expandChain(downloads())
+withMetaMode(downloads())
 ```
 
-> #### Takeaway: (optionally) unquote non-reactive code to further control logic in generated code 
+Unquoting is fairly straightforward when the name you're unquoting (`e.g. input$package`) represents a constant value (e.g. `"ggplot2"`), but is a bit more complicated when those values become more complicated. 
 
-In summary, unquoting replaces a name with the value that it represents; and thus, is a essential tool for generating code that can run outside of a shiny session. That's because, in a Shiny app, we often refer to reactive values that are only defined inside a shiny runtime. Unquoting is fairly straightforward when the name you're unquoting (`e.g. input$package`) represents a constant value (e.g. `"ggplot2"`), but is a bit more complicated when those values become more complicated. In the next section, we'll be chaining meta-reactive expressions, which requires unquoting names that represent meta-reactives. That means, these names can actually be thought of as un-evaluated expressions!
+In the next section, we'll be chaining meta-reactive expressions, which requires unquoting names that represent meta-reactives. That means, these names can actually be thought of as un-evaluated expressions!
 
-## Chaining meta-reactives {#chaining}
+## Unquoting reactive reads {#chaining}
 
 Chaining of reactive expressions is a very useful pattern that allows Shiny to intelligently cache computations for you. Note that our example app has a reactive chain: the acquistion of daily downloads is done in one reactive expression, `downloads()`, then `downloads_rolling()` uses the return value of `downloads()` to compute a weekly rolling average. For now, let's imagine `download_rolling()` is implemented this way (in the next section, we'll cover actual implementation):
 
@@ -254,24 +237,24 @@ downloads_rolling <- metaReactive({
 })
 ```
 
-Recall that, when invoked with meta-mode enabled, `metaReactive()`, like `bquote()`, quotes its input, which is why `downloads()` appears in the code produced by `downloads_rolling()`:
+Remember that, when invoked in meta-mode, `metaReactive()` quotes its input, which is why `downloads()` appears in the code produced by `downloads_rolling()`:
 
 ```{r}
-expandChain(downloads_rolling())
+withMetaMode(downloads_rolling())
 ```
 
-So, similar to the problem we had before with `input$package`, the generated code relies on something that won't be defined in a new R session (`downloads()`). However, by unquoting `downloads()`, we can replace it with the value it represents: a code expression (when invoked in meta mode)!
+So, similar to the problem we had before with `input$package`, the generated code relies on something that won't be defined in a new R session (`downloads()`). By unquoting `downloads()`, we can replace it with the value it represents: a code expression!
 
 ```{r}
 downloads_rolling <- metaReactive({
   ..(downloads()) %>% mutate(count = zoo::rollapply(count, 7, mean, fill = "extend"))
 })
-expandChain(downloads_rolling())
+withMetaMode(downloads_rolling())
 ```
 
 > #### Takeaway: unquote meta-reactive reads (i.e., `..(downloads())`) that appear within other meta-reactives
 
-## Ignoring Shiny logic {#ignore-code}
+## Ignoring non-domain logic {#ignore-code}
 
 Recall that the actual implementation of `downloads_rolling()` uses Shiny's input validation helpers (e.g. `validate()`, `need()`, and `req()`) to relay an informative message to the user if they've input a package name that doesn't exist on CRAN:
 
@@ -282,7 +265,7 @@ downloads_rolling <- reactive({
 })
 ```
 
-Input validation is helpful for your shiny app, but it probably just adds unnecessary complexity to your generated code. For this reason, **shinymeta** provides a second version of each meta-reactive (e.g., `metaReactive2()`, `metaObserve2()`, `metaRender2()`, etc), which allows you to capture only the code you care about with `metaExpr()`. Inside these `-2` variants, only the meta-reactive reads inside `metaExpr()` undergo meta execution. In other words, in the example below, the read of `downloads()` that appears before `metaExpr()` *always* returns it's a data frame (the `validate()` wouldn't make sense if `downloads()` returned code!). 
+Input validation is helpful improving the user experience of your shiny app, but it's irrelevant outside of a Shiny runtime context. For this reason, **shinymeta** provides a second version of each meta-reactive (e.g., `metaReactive2()`, `metaObserve2()`, `metaRender2()`, etc), which allows you to capture only the code you care about with `metaExpr()`. Inside these `-2` variants, only the meta-reactive reads inside `metaExpr()` undergo meta execution. In other words, in the example below, the read of `downloads()` that appears before `metaExpr()` *always* returns it's a data frame (the `validate()` wouldn't make sense if `downloads()` returned code!). 
 
 ```{r}
 downloads_rolling <- metaReactive2({
@@ -293,7 +276,7 @@ downloads_rolling <- metaReactive2({
   })
 })
 
-expandChain(downloads_rolling())
+withMetaMode(downloads_rolling())
 ```
 
 When using these `-2` variants, make sure the return value of the expression is a `metaExpr()` object (In practice, the code you want to capture might depend on other input value(s). In that case, you can use control flow [similar to this](https://github.com/cpsievert/cranview/blob/f4989a9/app.R#L71-L89), just make sure to return a `metaExpr()`!).
@@ -314,7 +297,7 @@ Creating a meta variant of `observe()` is very similar to creating a meta varian
 msgObs <- metaObserve({
   message(..(input$package), " has an daily download average of ", mean(..(downloads())$count))
 })
-expandChain(msgObs())
+withMetaMode(msgObs())
 ```
 
 The traditional `observe()` function returns an object that can be used to control aspects of the observer, though most Shiny apps don't bother to save it. See `?observe` for the different methods available. The object returned from `metaObserve()` can be used in the same way (`msgObs$suspend()`, for example) but has the additional capability of being called like a function, as in the previous code example.
@@ -332,21 +315,12 @@ output$plot <- metaRender(renderPlot, {
 Similar to `metaReactive()` and `metaObserve()`, invoking an output inside `expandChain()` generates the code required to reproduce it.^[If meta mode is not enabled, `output$OUTPUT_ID()` will intentionally produce an error.]
 
 ```{r}
-expandChain(output$plot())
+withMetaMode(output$plot())
 ```
 
-## Controlling code generation {#code-expansion}
+## Expanding reactive chains {#expandChain}
 
-So far we've seen relatively simple use of `expandChain()`: give it any meta-reactive and it returns the code that the meta-reactive depends on. Often times, though, that code captured inside meta-reactives isn't 100% sufficient for reproducing a code result. For example, in order for the code generated by `expandChain(output$plot())` to run in a fresh R session, you'd need to first load **ggplot2**. For this, and other reasons, `expandChain()` allows you to pass in `quote()`d expressions:
-
-```{r}
-expandChain(
-  quote(library(ggplot2)),
-  output$plot()
-)
-```
-
-You can also give `expandChain()` multiple meta-reactives and it will know not to duplicate the code that they depend on:
+In practice, you'll likely want to use `expandChain()` over `withMetaMode()`: it also invokes meta-reactives in meta-mode, but has the additional feature of assigning return values to a name and intelligently reusing names to avoid redundant computation. `expandChain()` also allows you to supply arbitrary quoted expressions, which is primarily useful for any setup code not captured in reactive expressions (e.g. loading of libraries):
 
 ```{r}
 # add another output just to demonstrate
