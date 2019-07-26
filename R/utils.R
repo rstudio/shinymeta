@@ -19,40 +19,41 @@ wrapExpr <- function(func, ...) {
 # which mainly useful for unquoting away reactive inputs/values
 # when generating code in meta-mode
 expandExpr <- function(expr, env) {
+  walk_ast(expr, preorder = TRUE, function(x) {
+    if (!rlang::is_call(x, "..")) return(x)
 
-  if (rlang::is_call(expr, "..")) {
     # make sure ..() contains a single unnamed argument
-    if (!rlang::is_call(expr, "..", n = 1)) {
+    if (!rlang::is_call(x, "..", n = 1)) {
       stop("..() must contain a single argument.")
     }
-    if (!is.null(names(expr))) {
-      stop("..() cannot contain a named argument: '", names(expr)[2], "'.")
+    if (!is.null(names(x))) {
+      stop("..() cannot contain a named argument: '", names(x)[2], "'.")
     }
     # make sure ..() isn't being used for something else
-    if (exists("..", env) && rlang::is_function(get("..", env))) {
-      stop("The ..() function call is reserved for unquoting in shinymeta.")
+    if (exists("..", env, mode = "function", inherits = TRUE)) {
+      warning("The ..() function call is reserved for unquoting in shinymeta.")
     }
     # unquote
-    expr <- eval(expr[[2]], list(), env)
+    x <- eval(x[[2]], list(), env)
     # Expand symbols to code that generates that symbol, as opposed
     # to just the symbol itself
-    expr <- if (inherits(expr, "shinymeta_symbol")) {
-      as.symbol(expr)
-    } else if (is.symbol(expr)) {
-      call("as.symbol", as.character(expr))
+    if (inherits(x, "shinymeta_symbol")) {
+      as.symbol(x)
+    } else if (is.symbol(x)) {
+      call("as.symbol", as.character(x))
     } else {
-      expr
+      x
     }
-  }
-
-  walk_ast(expr, expandExpr, env)
+  })
 }
 
 cleanExpr <- function(expr) {
-  if (rlang::is_call(expr, "..", n = 1) && is.null(names(expr))) {
-    expr <- expr[[2]]
-  }
-  walk_ast(expr, cleanExpr)
+  walk_ast(expr, function(x) {
+    if (rlang::is_call(x, "..", n = 1) && is.null(names(x))) {
+      x <- x[[2]]
+    }
+    x
+  })
 }
 
 

@@ -29,7 +29,7 @@ selectColumn <- function(input, output, session, df) {
   })
 
   output$average <- metaRender(renderText, {
-    paste("Average of", ..(input$col), "is", ..(avg()))
+    paste("Average of", ..(as.character(input$col)), "is", ..(avg()))
   })
 
   list(

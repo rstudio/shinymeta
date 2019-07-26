@@ -34,15 +34,15 @@ has_return <- function(x) {
 #   b <- 1 + a
 #   x <- b + 1
 # }
-bind_to_return <- function(x) {
-
-  if (is_assign(x) && rlang::is_call(x[[3]], "{") && inherits(x[[3]], "bindToReturn")) {
-    rhs <- x[[3]]
-    rhs[[length(rhs)]] <- call("<-", x[[2]], rhs[[length(rhs)]])
-    x <- rhs
-  }
-
-  walk_ast(x, bind_to_return)
+bind_to_return <- function(expr) {
+  walk_ast(expr, function(x) {
+    if (is_assign(x) && rlang::is_call(x[[3]], "{") && inherits(x[[3]], "bindToReturn")) {
+      rhs <- x[[3]]
+      rhs[[length(rhs)]] <- call("<-", x[[2]], rhs[[length(rhs)]])
+      x <- rhs
+    }
+    x
+  })
 }
 
 # Modify a call like (also works with a collection of them)
@@ -55,31 +55,30 @@ bind_to_return <- function(x) {
 #  "# my comment"
 #  a <- 1+1
 # }
-elevate_comments <- function(x) {
-
-  if (is_assign(x) && rlang::is_call(x[[3]], "{", n = 2)) {
-    if (isTRUE(attr(x[[3]][[2]], "shinymeta_comment"))) {
-      x <- call(
-        "{", x[[3]][[2]], call("<-", x[[2]], x[[3]][[3]])
-      )
+elevate_comments <- function(expr) {
+  walk_ast(expr, function(x) {
+    if (is_assign(x) && rlang::is_call(x[[3]], "{", n = 2)) {
+      if (isTRUE(attr(x[[3]][[2]], "shinymeta_comment"))) {
+        x <- call(
+          "{", x[[3]][[2]], call("<-", x[[2]], x[[3]][[3]])
+        )
+      }
     }
-  }
-
-  walk_ast(x, elevate_comments)
+    x
+  })
 }
 
 
 # Find and flag (i.e. attach attributes) to comment-like strings
-comment_flags <- function(x) {
-
-  if (rlang::is_call(x, "{")) {
-
+comment_flags <- function(expr) {
+  walk_ast(expr, function(x) {
     # comment must appear as a direct child of a `{` call
+    if (!rlang::is_call(x, "{")) return(x)
+
     x[-1] <- lapply(x[-1], function(y) {
       if (is_comment(y) && !is_illegal(y)) attr(y, "shinymeta_comment") <- TRUE
       y
     })
-
     # If the comment appears as the last child of a `{` call,
     # it might be an assignment value, so we throw a warning if that occurs
     # and tag it so that if and when we arrive at the string in the future,
@@ -89,28 +88,23 @@ comment_flags <- function(x) {
       attr(x[[length(x)]], "shinymeta_comment") <- "illegal"
     }
 
-  }
-
-  walk_ast(x, comment_flags)
+    x
+  })
 }
 
 
 # Find flagged comment strings and enclose that string with
 # an identifier we remove during deparseCode().
-comment_flags_to_enclosings <- function(x) {
-  walk_ast(
-    x,
-    comment_flags_to_enclosings,
-    constant = {
-      if (isTRUE(attr(x, "shinymeta_comment"))) {
-        paste0(comment_start, x, comment_end)
-      } else if (length(attr(x, "shinymeta_comment"))) {
-        structure(x, shinymeta_comment = NULL)
-      } else {
-        x
-      }
+comment_flags_to_enclosings <- function(expr) {
+  walk_ast(expr, function(x) {
+    if (isTRUE(attr(x, "shinymeta_comment"))) {
+      paste0(comment_start, x, comment_end)
+    } else if (length(attr(x, "shinymeta_comment"))) {
+      structure(x, shinymeta_comment = NULL)
+    } else {
+      x
     }
-  )
+  })
 }
 
 
@@ -118,40 +112,15 @@ comment_flags_to_enclosings <- function(x) {
 # Helpers
 # ---------------------------------------------------------
 
-
-# Inspired by Hadley Wickham's AST walking helpers
-# https://adv-r.hadley.nz/expressions.html#ast-funs
-expr_type <- function(x) {
-  if (rlang::is_syntactic_literal(x)) {
-    "constant"
-  } else if (is.symbol(x)) {
-    "symbol"
-  } else if (is.call(x)) {
-    "call"
-  } else if (is.pairlist(x)) {
-    "pairlist"
-  } else {
-    typeof(x)
-  }
-}
-
 # Apply a function to each node of an AST
-walk_ast <- function(x, fun, ..., constant = x, symbol = x) {
-  switch(
-    expr_type(x),
-    constant = constant,
-    symbol = symbol,
-    call = {
-      res <- as.call(lapply(x, fun, ...))
-      if (inherits(x, "bindToReturn")) {
-        prefix_class(res, "bindToReturn")
-      } else {
-        res
-      }
-    },
-    pairlist = as.pairlist(lapply(x, fun, ...)),
-    x
-  )
+# (similar to htmltools:::rewriteTags)
+walk_ast <- function(x, fun, preorder = FALSE) {
+  if (preorder) x <- fun(x)
+  if (is.call(x)) {
+    x[] <- lapply(x, walk_ast, fun, preorder = preorder)
+  }
+  if (!preorder) x <- fun(x)
+  return(x)
 }
 
 is_assign <- function(x) {
