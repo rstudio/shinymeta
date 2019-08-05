@@ -14,6 +14,23 @@
 #' @inheritParams metaReactive
 #' @seealso [metaExpr()]
 #' @export
+#' @examples
+#'
+#' # observers execute 'immediately'
+#' x <- 1
+#' mo <- metaObserve({
+#'   x <<- x + 1
+#' })
+#' shiny:::flushReact()
+#' print(x)
+#'
+#' # It only makes sense to invoke an meta-observer
+#' # if we're in meta-mode (i.e., generating code)
+#' expandChain(mo())
+#'
+#' # Intentionally produces an error
+#' \dontrun{mo()}
+#'
 metaObserve <- function(expr, env = parent.frame(), quoted = FALSE,
   label = NULL, domain = getDefaultReactiveDomain(),
   localize = "auto", bindToReturn = FALSE) {
@@ -62,7 +79,7 @@ metaObserveImpl <- function(expr, env, label, domain) {
     function() {
       metaDispatch(
         normal = {
-          stop("Meta mode must be activated when calling the function returned by `metaObserve()`: did you mean to call this function inside of `shinymeta::withMetaMode()`?")
+          stop("Meta mode must be activated when calling the function returned by `metaObserve()`: did you mean to call this function inside of `expandChain()`?")
         },
         meta = {
           r_meta()

@@ -12,64 +12,253 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  message = FALSE,
+  fig.align = "center",
+  out.width = "80%",
+  class.output = "R",
+  comment = ""
+)
+options(shiny.suppressMissingContextError = TRUE)
 ```
 
-## tidyeval and shinymeta
+## Meta counterparts to `observeEvent()` & `eventReactive()`
 
-Many **tidyverse** function arguments quote their input and evaluate those code expression in some special context (e.g., within a data frame). That's how **dplyr** knows, for example, to evaluate symbols (e.g. `cyl`) and calls (e.g., `mean(mpg)`) within a context defined by `mtcars`:
+**shinymeta** currently does not provide meta-counterparts for `eventReactive()` and `observeEvent()`, but it's possible to 'hand-roll' your own counterpart from existing building blocks (namely, `metaReactive2()`, `metaObserve2()`, and `metaExpr()`) Both of these functions are essentially a wrapper for a common reactive pattern where you want `isolate()` all reactive values except for one value/input. For example, if you want to 
+
+```{r, eval = FALSE}
+r <- eventReactive(input$x, {
+  c(input$x, input$y)
+})
+```
+
+is equivalent to:
+
+```{r, eval = FALSE}
+r <- reactive({
+  req(input$x)
+  isolate({
+    c(input$x, input$y)
+  })
+})
+```
+
+so, to create the meta-counterpart:
+
+```{r, eval = FALSE}
+r <- metaReactive2({
+  req(input$x)
+  isolate(metaExpr({
+    c(input$x, input$y)
+  }))
+})
+```
+
+Similarly, for `observeEvent()`:
+
+```{r, eval = FALSE}
+observeEvent(input$x, {
+  message(input$x + input$y)
+})
+```
+
+is equivalent to:
+
+```{r, eval = FALSE}
+observe({
+  req(input$x)
+  isolate({
+    message(input$x, input$y)
+  })
+})
+```
+
+so, to create the meta-counterpart:
+
+```{r, eval = FALSE}
+o <- metaObserve2({
+  req(input$x)
+  isolate(metaExpr({
+    message(input$x + input$y)
+  }))
+})
+```
+
+**Warning:** Do not attempt to use existing `eventReactive()`/`observeEvent()` by calling `metaExpr()` within their handler bodies. It won't work with either one. `eventReactive()` won't work because it caches its results, oblivious to whether it's in normal mode or meta mode; and `observeEvent()` won't work because (non-meta) observers don't even have a way to return values, period.
+
+
+## Shiny modules
+
+**shinymeta** is designed to work with Shiny modules, [here's an example](https://github.com/rstudio/shinymeta/blob/master/inst/examples/modules/app.R).
+Modifying an existing Shiny app that uses modules may be more involved than simply capturing domain logic and marking reactive reads. For example, if you have one or more `callModule()` calls which create a (namespaced) output object(s), you may want to have that module function return the output object so you can `expandChain()` various meta-outputs from different modules at the same time ([as done in the example app](https://github.com/rstudio/shinymeta/blob/master/inst/examples/modules/app.R#L32)).
+
+## Debugging shinymeta
+
+As mentioned in [The execution model](#execution), **shinymeta**'s marking/unquoting operator, `..()`, is only defined in meta-execution mode. 
+
+
+## Shiny, tidyeval, and shinymeta
+
+> TL;DR: The same steps in the [overview](#overview) will work for a Shiny app that uses [tidyeval](https://tidyeval.tidyverse.org/), but it probably won't produce the most readable code. To workaround that, if possible, try to avoid unquoting (i.e., `!!`/`!!!`) by using a functional interface that accepts character strings (instead of symbolic names).
+
+Most **tidyverse** functions evaluate code expressions in a special context (e.g., they search for names within a data frame). That's how **dplyr** knows, for example, to lookup names (e.g. `cyl`) and evaluate calls (e.g., `mean(mpg)`) within a context defined by `mtcars`:
 
 ```{r}
-library(tidyverse)
+library(dplyr)
 
+# compute mean miles per gallon (mpg) by cylinder (cyl)
 mtcars %>% 
   group_by(cyl) %>% 
   summarise(avg = mean(mpg))
 ```
 
-This design is great for interactive use, but it also complicates things if we wish to pass variables into these quoted arguments. For example, if we were to program a Shiny app that allowed us to compute the average of diffferent variables, you might use something like `rlang::sym()` (or `as.symbol()`) to turn a string into a symbol this way:
+This approach makes for an expressive interactive interface, but it also complicates things if we wish to pass variables into (i.e., program around) these functions (because they quote their arguments). For example, if you had a variable, named `var`, that represented another name with the column name of interest, **dplyr** thinks you're looking for a column named `var`, not `mpg`:
 
 ```{r}
-input <- list(var = "mpg")
-mean_by_cyl <- reactive({
-  var_sym <- sym(input$var)
-  mtcars %>%
-    group_by(cyl) %>% 
-    summarise(mean_mpg = mean(!!var_sym))
-})
-mean_by_cyl()
+var <- as.name("mpg")
+
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(avg = mean(var))
 ```
 
-Making the **shinymeta** variant that works 
+To workaround this problem, **tidyverse** functions allow you to unquote (i.e., replace a name with it's value) via the `!!` operator. Just to demonstrate, if we unquote `var`, we'd get back the name (i.e., symbol) `mpg`.
 
 ```{r}
-input <- list(var = "mpg")
-mean_by_cyl <- metaReactive({
-  var_sym <- sym(..(input$var))
-  mtcars %>%
-    group_by(cyl) %>% 
-    summarise(mean_mpg = mean(!!var_sym))
-}, bindToReturn = TRUE)
-expandChain(mean_by_cyl())
+rlang::expr(!!var)
 ```
 
-TODO: 
- 1. Do an example where `input$var` represent a symbol 
-   - Explain why `..(input$var)` returns `as.symbol("xyz")`
-     - Makes it so `!!` works in both contexts 
- 2. Are there any **tidyeval** patterns that totally conflict with **shinymeta**?  
- 3. Perhaps talk about NSE escape hatches like `_at()` variants?
+That's why this code gives us the desired result of average miles per gallon (`mpg`) per cylinder (`cyl`).
+
+```{r}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise(avg = mean(!!var))
+```
+
+Often times in a Shiny app we wish to pass an input value to a **tidyverse** function argument (as a variable). In most cases, that requires converting a string into a symbolic name, which can be done via `as.symbol()` or `rlang::sym()`. For example, here's a Shiny app to compute the mean of different `mtcars` variables by cylinder (`cyl`). 
+
+```{r, eval = FALSE}
+library(shiny)
+library(tidyverse)
+ui <- fluidPage(
+  selectInput("var", "Select a variable", names(mtcars)),
+  verbatimTextOutput("out")
+)
+server <- function(input, output) {
+  output$out <- renderPrint({
+    var_sym <- sym(input$var)
+    mtcars %>%
+      group_by(cyl) %>% 
+      summarise(mean_mpg = mean(!!var_sym))
+  })
+}
+shinyApp(ui, server)
+```
+
+Adding **shinymeta** support in this case is straight-forward. As with any other app, you'll have to capture the domain logic (i.e., wrap `renderPrint()` with `metaRender()`), then mark reactive read `..()`.
+
+```{r, eval = FALSE}
+server <- function(input, output) {
+  output$out <- metaRender(renderPrint, {
+    var_sym <- sym(..(input$var))
+    mtcars %>%
+      group_by(cyl) %>% 
+      summarise(mean_mpg = mean(!!var_sym))
+  })
+  observe(print(expandChain(output$out())))
+}
+```
+
+This pattern also works when you need to convert a character vector of strings into a list of symbolic names (splice them into a function call using `!!!`).
+
+```{r, eval = FALSE}
+ui <- fluidPage(
+  selectInput("var", "Select variables", names(mtcars), multiple = TRUE),
+  verbatimTextOutput("out")
+)
+server <- function(input, output) {
+  output$out <- metaRender(renderPrint, {
+    var_sym <- syms(..(input$var))
+    select(mtcars, !!!var_sym)
+  })
+  observe(print(expandChain(output$out())))
+}
+shinyApp(ui, server)
+```
+
+In version v1.2.0, **shiny** introduced `varSelectInput()` essentially to remove the need to convert character string(s) into symbolic name(s). For example, in the app below, `input$var` already represents the symbolic name of interest, so you can do:
+
+```{r, eval = FALSE}
+ui <- fluidPage(
+  varSelectInput("var", "Select a variable", mtcars),
+  verbatimTextOutput("out")
+)
+server <- function(input, output) {
+  output$out <- renderPrint({
+    mtcars %>%
+      group_by(cyl) %>% 
+      summarise(mean_mpg = mean(!!input$var))
+  })
+}
+shinyApp(ui, server)
+```
+
+As in the other examples, you can mark the reactive read with `..()` (before unquoting with `!!`) and the code generation should "just work". Technically speaking, this works because, when `..()` encounters a symbolic name that it doesn't recognize, it returns the code *to generate* the symbol instead of the bare symbol (i.e., it returns `as.symbol("mpg")` instead of `mpg` which makes the `!!` work in both normal and meta execution).
+
+```{r, eval = FALSE}
+server <- function(input, output) {
+  output$out <- metaRender(renderPrint, {
+    mtcars %>%
+      group_by(cyl) %>% 
+      summarise(mean_mpg = mean(!!..(input$var)))
+  })
+  observe(print(expandChain(output$out())))
+}
+shinyApp(ui, server)
+```
+
+In all the cases we've encountered thus far, the generated code is a bit different from how a human would write it. This last example produces code that looks like this:
+
+```{r, eval = FALSE}
+mtcars %>%
+  group_by(cyl) %>% 
+  summarise(mean_mpg = mean(!!as.symbol("mpg")))
+```
+
+But what you'd probably want your app to generate is this:
+
+```{r, eval = FALSE}
+mtcars %>%
+  group_by(cyl) %>% 
+  summarise(mean_mpg = mean(mpg))
+```
+
+At least currently, there is no great workaround for this problem other than to use alternative **tidyverse** functions that allow you to avoid unquoting by using character strings instead of symbolic names. Most **dplyr** functions provide this alternative through `_at()` variants. These variants allow you to write code like:
+
+```{r, eval = FALSE}
+mtcars %>%
+  group_by(cyl) %>% 
+  summarise_at("mpg", mean)
+```
+
+In this case, the implementation of the app is a lot simpler because we don't have to worry about unquoting; plus, the code that the app generates looks a lot more like code a human would write:
+
+```{r, eval = FALSE}
+ui <- fluidPage(
+  selectInput("var", "Select a variable", names(mtcars)),
+  verbatimTextOutput("out")
+)
+server <- function(input, output) {
+  output$out <- metaRender(renderPrint, {
+    mtcars %>%
+      group_by(cyl) %>% 
+      summarise_at(..(input$var), mean)
+  })
+  observe(print(expandChain(output$out())))
+}
+shinyApp(ui, server)
+```
 
 
-## Capturing setup code
-
-## Meta variants of `observeEvent()`/`eventReactive()`
-
-## Debugging meta-reactives
-
-To debug code that contains `..()`, use `metaExpr()`
-
-
-## Shiny modules
-
-See example app

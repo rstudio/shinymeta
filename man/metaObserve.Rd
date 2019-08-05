@@ -46,6 +46,24 @@ If you wish to capture specific code inside of \code{expr} (e.g. ignore code
 that has no meaning outside shiny, like \code{\link[=req]{req()}}), use \code{metaObserve2()} in combination
 with \code{metaExpr()}. When using \code{metaObserve2()}, \code{expr} must return a \code{metaExpr()}.
 }
+\examples{
+
+# observers execute 'immediately'
+x <- 1
+mo <- metaObserve({
+  x <<- x + 1
+})
+shiny:::flushReact()
+print(x)
+
+# It only makes sense to invoke an meta-observer
+# if we're in meta-mode (i.e., generating code)
+expandChain(mo())
+
+# Intentionally produces an error
+\dontrun{mo()}
+
+}
 \seealso{
 \code{\link[=metaExpr]{metaExpr()}}
 }

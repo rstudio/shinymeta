@@ -16,13 +16,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -49,6 +51,7 @@ code expression (instead of evaluating that expression and returning the value).
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
+
 
 
   </head>
@@ -80,14 +83,20 @@ code expression (instead of evaluating that expression and returning the value).
   <a href="../articles/code-distribution.html">Code distribution</a>
 </li>
 <li>
+  <a href="../articles/special-topics.html">Special topics</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../news/index.html">News</a>
 </li>
       </ul>
       
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/rstudio/shinymeta">
-    <span class="fa fa-github fa-lg"></span>
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -98,6 +107,7 @@ code expression (instead of evaluating that expression and returning the value).
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -116,10 +126,10 @@ code expression (instead of evaluating that expression and returning the value).
     
     </div>
 
-    <pre class="usage"><span class='fu'>metaRender</span>(<span class='no'>renderFunc</span>, <span class='no'>expr</span>, <span class='no'>...</span>, <span class='kw'>env</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sys.parent'>parent.frame</a></span>(), <span class='kw'>quoted</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+    <pre class="usage"><span class='fu'>metaRender</span>(<span class='no'>renderFunc</span>, <span class='no'>expr</span>, <span class='no'>...</span>, <span class='kw'>env</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span>(), <span class='kw'>quoted</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>localize</span> <span class='kw'>=</span> <span class='st'>"auto"</span>, <span class='kw'>bindToReturn</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
-<span class='fu'>metaRender2</span>(<span class='no'>renderFunc</span>, <span class='no'>expr</span>, <span class='no'>...</span>, <span class='kw'>env</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sys.parent'>parent.frame</a></span>(),
+<span class='fu'>metaRender2</span>(<span class='no'>renderFunc</span>, <span class='no'>expr</span>, <span class='no'>...</span>, <span class='kw'>env</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span>(),
   <span class='kw'>quoted</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -127,7 +137,7 @@ code expression (instead of evaluating that expression and returning the value).
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>renderFunc</th>
-      <td><p>A reactive output function (e.g., <a href='https://www.rdocumentation.org/packages/shiny/topics/renderPlot'>shiny::renderPlot</a>, <a href='https://www.rdocumentation.org/packages/shiny/topics/renderText'>shiny::renderText</a>, <a href='https://www.rdocumentation.org/packages/shiny/topics/renderUI'>shiny::renderUI</a>, etc).</p></td>
+      <td><p>A reactive output function (e.g., <a href='https://rdrr.io/pkg/shiny/man/renderPlot.html'>shiny::renderPlot</a>, <a href='https://rdrr.io/pkg/shiny/man/renderText.html'>shiny::renderText</a>, <a href='https://rdrr.io/pkg/shiny/man/renderUI.html'>shiny::renderUI</a>, etc).</p></td>
     </tr>
     <tr>
       <th>expr</th>
@@ -147,12 +157,12 @@ non-reactive expression.</p></td>
       <th>quoted</th>
       <td><p>Is the expression quoted? By default, this is <code>FALSE</code>.
 This is useful when you want to use an expression that is stored in a
-variable; to do so, it must be quoted with <code><a href='https://www.rdocumentation.org/packages/base/topics/substitute'>quote()</a></code>.</p></td>
+variable; to do so, it must be quoted with <code><a href='https://rdrr.io/r/base/substitute.html'>quote()</a></code>.</p></td>
     </tr>
     <tr>
       <th>localize</th>
-      <td><p>Whether or not to wrap the returned expression in <code><a href='https://www.rdocumentation.org/packages/base/topics/eval'>local()</a></code>.
-The default, <code>"auto"</code>, only wraps expressions with a top-level <code><a href='https://www.rdocumentation.org/packages/base/topics/function'>return()</a></code>
+      <td><p>Whether or not to wrap the returned expression in <code><a href='https://rdrr.io/r/base/eval.html'>local()</a></code>.
+The default, <code>"auto"</code>, only wraps expressions with a top-level <code><a href='https://rdrr.io/r/base/function.html'>return()</a></code>
 statement (i.e., return statements in anonymized functions are ignored).</p></td>
     </tr>
     <tr>
@@ -165,14 +175,47 @@ of a meta expression be applied to the <em>last child</em> of the top-level <cod
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>If you wish to capture specific code inside of <code>expr</code> (e.g. ignore code
-that has no meaning outside shiny, like <code>req()</code>), use <code>metaRender2()</code> in combination
+that has no meaning outside shiny, like <code><a href='https://rdrr.io/pkg/shiny/man/req.html'>req()</a></code>), use <code>metaRender2()</code> in combination
 with <code><a href='metaExpr.html'>metaExpr()</a></code>. When using <code>metaRender2()</code>, <code>expr</code> must return a <code><a href='metaExpr.html'>metaExpr()</a></code>.</p>
+<p>Since package authors are allowed to create their own output rendering functions,
+creating a meta-counterpart of an output renderer (e.g. <code><a href='https://rdrr.io/pkg/shiny/man/renderPlot.html'>renderPlot()</a></code>) needs to be
+more general than prefixing <code>meta</code> to the function name (as with <code><a href='metaReactive.html'>metaReactive()</a></code> and <code><a href='metaObserve.html'>metaObserve()</a></code>).
+<code>metaRender()</code> makes some assumptions about the arguments taken by the render function,
+assumptions that we believe are true for all existing render functions.
+If you encounter a render function that doesn't seem to work properly,
+please let us know by <a href='https://github.com/rstudio/shinymeta/issues'>filing an issue on GitHub</a>.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='metaExpr.html'>metaExpr()</a></code></p></div>
     
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'>
+<span class='kw'>if</span> (<span class='fu'><a href='https://rdrr.io/r/base/interactive.html'>interactive</a></span>()) {
+  <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shiny</span>)
+  <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shinymeta</span>)
+
+  <span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/fluidPage.html'>fluidPage</a></span>(
+    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/selectInput.html'>selectInput</a></span>(<span class='st'>"var"</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"Choose a variable"</span>, <span class='kw'>choices</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>cars</span>)),
+    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/verbatimTextOutput.html'>verbatimTextOutput</a></span>(<span class='st'>"Summary"</span>),
+    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/verbatimTextOutput.html'>verbatimTextOutput</a></span>(<span class='st'>"code"</span>)
+  )
+
+  <span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>) {
+    <span class='no'>var</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span>({
+      <span class='no'>cars</span><span class='kw'>[[</span><span class='fu'>..</span>(<span class='no'>input</span>$<span class='no'>var</span>)]]
+    })
+    <span class='no'>output</span>$<span class='no'>Summary</span> <span class='kw'>&lt;-</span> <span class='fu'>metaRender</span>(<span class='no'>renderPrint</span>, {
+      <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='fu'>..</span>(<span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>var</a></span>()))
+    })
+    <span class='no'>output</span>$<span class='no'>code</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/renderPrint.html'>renderPrint</a></span>({
+      <span class='fu'><a href='expandChain.html'>expandChain</a></span>(<span class='no'>output</span>$<span class='fu'><a href='https://rdrr.io/r/base/groupGeneric.html'>Summary</a></span>())
+    })
+  }
+
+  <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/shinyApp.html'>shinyApp</a></span>(<span class='no'>ui</span>, <span class='no'>server</span>)
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -182,10 +225,13 @@ with <code><a href='metaExpr.html'>metaExpr()</a></code>. When using <code>metaR
       <li><a href="#details">Details</a></li>
 
       <li><a href="#see-also">See also</a></li>
-          </ul>
+      
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -193,13 +239,16 @@ with <code><a href='metaExpr.html'>metaExpr()</a></code>. When using <code>metaR
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.9100.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

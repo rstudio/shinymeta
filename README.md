@@ -18,7 +18,7 @@ remotes::install_github("rstudio/shinymeta")
 
 ## Generating code with shinymeta
 
-In short, **shinymeta** provides variants of **shiny**'s reactive building blocks (e.g., `reactive()` -> `metaReactive()`, `observe()` -> `metaObserve()`, `render()` -> `metaRender()`). When invoked with **shinymeta**'s meta mode enabled (i.e., invoked via `withMetaMode()` or `expandChain()`), these variants return [quasi-quoted](https://adv-r.hadley.nz/quasiquotation.html) expressions. In this context, quasiquotation is primarily useful for replacing *reactive* value(s) with their *static* value(s), so the resulting code can run outside of a Shiny session. Below is a basic Shiny app demonstrating how one can leverage **shinymeta** to generate code to reproduce an output (e.g., `output$Summary()`) by unquoting reactive values (e.g., `input$var`) and reactive expressions (e.g., `var()`) with `..()`.
+In short, **shinymeta** provides counterparts to Shiny's reactive building blocks (e.g., `reactive()` -> `metaReactive()`, `observe()` -> `metaObserve()`, `render()` -> `metaRender()`) that have the added ability to capture and expose the logic needed to recreate their current state *outside of the Shiny runtime*. Once the appropriate logic has been captured by these meta-counterparts and reactive reads (e.g., `input$var`, `var()`) have been marked by a special `..()` operator, then `expandChain()` can produce code to replicate the state of a particular meta-counterpart (e.g., `output$Summary`).
 
 ```r
 library(shiny)
@@ -49,13 +49,7 @@ shinyApp(ui, server)
   <img src="https://i.imgur.com/5gNquPE.gif" width="67%" />
 </div>
 
-This example illustrates the bare minimum of what you must do to get your Shiny app generating reproducible non-Shiny code:
-
-* Each reactive building block (i.e., `reactive()` and `renderPrint()`) has been modified to use it's meta variant.
-* Each read of reactive value has been unquoted (i.e., wrapped in `..()`).
-* Output(s) of interest are supplied to `expandChain()`.
-
-For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/code-distribution.html). You can also watch Joe Cheng's useR keynote on **shinymeta** [here](https://youtu.be/5KByRC6eqC8?t=727).
+For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/code-distribution.html).
 
 ## A motivating example
 
