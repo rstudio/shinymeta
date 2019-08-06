@@ -70,7 +70,7 @@ code expression (instead of evaluating that expression and returning the value).
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shinymeta</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -187,7 +187,7 @@ please let us know by <a href='https://github.com/rstudio/shinymeta/issues'>fili
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='metaExpr.html'>metaExpr()</a></code></p></div>
+    <div class='dont-index'><p><code><a href='metaExpr.html'>metaExpr()</a></code>, <code>..</code></p></div>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -204,10 +204,10 @@ please let us know by <a href='https://github.com/rstudio/shinymeta/issues'>fili
 
   <span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>) {
     <span class='no'>var</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span>({
-      <span class='no'>cars</span><span class='kw'>[[</span><span class='fu'>..</span>(<span class='no'>input</span>$<span class='no'>var</span>)]]
+      <span class='no'>cars</span><span class='kw'>[[</span><span class='fu'><a href='dotdot.html'>..</a></span>(<span class='no'>input</span>$<span class='no'>var</span>)]]
     })
     <span class='no'>output</span>$<span class='no'>Summary</span> <span class='kw'>&lt;-</span> <span class='fu'>metaRender</span>(<span class='no'>renderPrint</span>, {
-      <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='fu'>..</span>(<span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>var</a></span>()))
+      <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>var</a></span>()))
     })
     <span class='no'>output</span>$<span class='no'>code</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/renderPrint.html'>renderPrint</a></span>({
       <span class='fu'><a href='expandChain.html'>expandChain</a></span>(<span class='no'>output</span>$<span class='fu'><a href='https://rdrr.io/r/base/groupGeneric.html'>Summary</a></span>())

@@ -70,7 +70,7 @@ only its own code to be written, but that of its dependencies as well." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shinymeta</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -163,7 +163,7 @@ passed to multiple <code>expandChain()</code> calls.</p>
     <p>There are two ways to extract code from meta objects (i.e. <code><a href='metaReactive.html'>metaReactive()</a></code>,
 <code><a href='metaObserve.html'>metaObserve()</a></code>, and <code><a href='metaRender.html'>metaRender()</a></code>): <code><a href='withMetaMode.html'>withMetaMode()</a></code> and <code>expandChain()</code>.
 The simplest is <code><a href='withMetaMode.html'>withMetaMode(obj())</a></code>, which crawls the tree of meta-reactive
-dependencies and expands each <code>..()</code> in place.</p>
+dependencies and expands each <code><a href='dotdot.html'>..()</a></code> in place.</p>
 <p>For example, consider these meta objects:</p><pre>    nums &lt;- metaReactive({ runif(100) })
     obs &lt;- metaObserve({
       summary(..(nums()))
@@ -178,12 +178,12 @@ dependencies and expands each <code>..()</code> in place.</p>
     plot(runif(100))
 </pre>
 
-<p>Notice how <code><a href='https://rdrr.io/r/stats/Uniform.html'>runif(100)</a></code> is inlined wherever <code>..(nums())</code>
+<p>Notice how <code><a href='https://rdrr.io/r/stats/Uniform.html'>runif(100)</a></code> is inlined wherever <code><a href='dotdot.html'>..(nums())</a></code>
 appears, which is not desirable if we wish to reuse the same
 values for <code><a href='https://rdrr.io/r/base/summary.html'>summary()</a></code> and <code><a href='https://rdrr.io/r/graphics/plot.html'>plot()</a></code>.</p>
 <p>The <code>expandChain</code> function helps us workaround this issue
 by assigning return values of <code><a href='metaReactive.html'>metaReactive()</a></code> expressions to
-a name, then replaces relevant expansion (e.g., <code>..(nums())</code>)
+a name, then replaces relevant expansion (e.g., <code><a href='dotdot.html'>..(nums())</a></code>)
 with the appropriate name (e.g. <code>nums</code>).</p><pre>    expandChain(obs())
 </pre>
 
@@ -292,22 +292,22 @@ with <code>inline = TRUE</code>, then every time it is encountered).</p>
 <span class='co'># varname is only required if srcref aren't supported</span>
 <span class='co'># (R CMD check disables them for some reason?)</span>
 <span class='no'>mr</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span>({
-  <span class='fu'><a href='https://rdrr.io/r/base/get.html'>get</a></span>(<span class='fu'>..</span>(<span class='no'>input</span>$<span class='no'>dataset</span>), <span class='st'>"package:datasets"</span>)
+  <span class='fu'><a href='https://rdrr.io/r/base/get.html'>get</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='no'>input</span>$<span class='no'>dataset</span>), <span class='st'>"package:datasets"</span>)
 })
 
 <span class='no'>top</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span>({
-  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='fu'>..</span>(<span class='fu'>mr</span>()))
+  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='fu'>mr</span>()))
 })
 
 <span class='no'>bottom</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span>({
-  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>tail</a></span>(<span class='fu'>..</span>(<span class='fu'>mr</span>()))
+  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>tail</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='fu'>mr</span>()))
 })
 
 <span class='no'>obs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaObserve.html'>metaObserve</a></span>({
   <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span>(<span class='st'>"Top:"</span>)
-  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='fu'>..</span>(<span class='fu'>top</span>()))
+  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='fu'>top</span>()))
   <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span>(<span class='st'>"Bottom:"</span>)
-  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='fu'>..</span>(<span class='fu'>bottom</span>()))
+  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='fu'>bottom</span>()))
 })
 
 <span class='co'># Simple case</span>

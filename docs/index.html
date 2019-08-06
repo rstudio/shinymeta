@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">shinymeta</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
 <div id="generating-code-with-shinymeta" class="section level2">
 <h2 class="hasAnchor">
 <a href="#generating-code-with-shinymeta" class="anchor"></a>Generating code with shinymeta</h2>
-<p>In short, <strong>shinymeta</strong> provides counterparts to Shiny’s reactive building blocks (e.g., <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html">reactive()</a></code> -&gt; <code><a href="reference/metaReactive.html">metaReactive()</a></code>, <code><a href="https://rdrr.io/pkg/shiny/man/observe.html">observe()</a></code> -&gt; <code><a href="reference/metaObserve.html">metaObserve()</a></code>, <code>render()</code> -&gt; <code><a href="reference/metaRender.html">metaRender()</a></code>) that have the added ability to capture and expose the logic needed to recreate their current state <em>outside of the Shiny runtime</em>. Once the appropriate logic has been captured by these meta-counterparts and reactive reads (e.g., <code>input$var</code>, <code><a href="https://rdrr.io/r/stats/cor.html">var()</a></code>) have been marked by a special <code>..()</code> operator, then <code><a href="reference/expandChain.html">expandChain()</a></code> can produce code to replicate the state of a particular meta-counterpart (e.g., <code>output$Summary</code>).</p>
+<p>In short, <strong>shinymeta</strong> provides counterparts to Shiny’s reactive building blocks (e.g., <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html">reactive()</a></code> -&gt; <code><a href="reference/metaReactive.html">metaReactive()</a></code>, <code><a href="https://rdrr.io/pkg/shiny/man/observe.html">observe()</a></code> -&gt; <code><a href="reference/metaObserve.html">metaObserve()</a></code>, <code>render()</code> -&gt; <code><a href="reference/metaRender.html">metaRender()</a></code>) that have the added ability to capture and expose the logic needed to recreate their current state <em>outside of the Shiny runtime</em>. Once the appropriate logic has been captured by these meta-counterparts and reactive reads (e.g., <code>input$var</code>, <code><a href="https://rdrr.io/r/stats/cor.html">var()</a></code>) have been marked by a special <code><a href="reference/dotdot.html">..()</a></code> operator, then <code><a href="reference/expandChain.html">expandChain()</a></code> can produce code to replicate the state of a particular meta-counterpart (e.g., <code>output$Summary</code>).</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(shiny)</span>
 <span id="cb2-2"><a href="#cb2-2"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(shinymeta)</span>
 <span id="cb2-3"><a href="#cb2-3"></a></span>
@@ -101,10 +101,10 @@
 <span id="cb2-9"><a href="#cb2-9"></a></span>
 <span id="cb2-10"><a href="#cb2-10"></a>server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output) {</span>
 <span id="cb2-11"><a href="#cb2-11"></a>  var &lt;-<span class="st"> </span><span class="kw"><a href="reference/metaReactive.html">metaReactive</a></span>({</span>
-<span id="cb2-12"><a href="#cb2-12"></a>    cars[[<span class="kw">..</span>(input<span class="op">$</span>var)]]</span>
+<span id="cb2-12"><a href="#cb2-12"></a>    cars[[<span class="kw"><a href="reference/dotdot.html">..</a></span>(input<span class="op">$</span>var)]]</span>
 <span id="cb2-13"><a href="#cb2-13"></a>  })</span>
 <span id="cb2-14"><a href="#cb2-14"></a>  output<span class="op">$</span>Summary &lt;-<span class="st"> </span><span class="kw"><a href="reference/metaRender.html">metaRender</a></span>(renderPrint, {</span>
-<span id="cb2-15"><a href="#cb2-15"></a>    <span class="kw"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="kw">..</span>(<span class="kw"><a href="https://rdrr.io/r/stats/cor.html">var</a></span>()))</span>
+<span id="cb2-15"><a href="#cb2-15"></a>    <span class="kw"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="kw"><a href="reference/dotdot.html">..</a></span>(<span class="kw"><a href="https://rdrr.io/r/stats/cor.html">var</a></span>()))</span>
 <span id="cb2-16"><a href="#cb2-16"></a>  })</span>
 <span id="cb2-17"><a href="#cb2-17"></a>  output<span class="op">$</span>code &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html">renderPrint</a></span>({</span>
 <span id="cb2-18"><a href="#cb2-18"></a>    <span class="kw"><a href="reference/expandChain.html">expandChain</a></span>(output<span class="op">$</span><span class="kw"><a href="https://rdrr.io/r/base/groupGeneric.html">Summary</a></span>())</span>

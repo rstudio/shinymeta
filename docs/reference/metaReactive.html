@@ -70,7 +70,7 @@ code expression (instead of evaluating that expression and returning the value).
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shinymeta</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -192,7 +192,7 @@ bound to the meta-reactive object. In order for this inference to work, the
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='metaExpr.html'>metaExpr()</a></code></p></div>
+    <div class='dont-index'><p><code><a href='metaExpr.html'>metaExpr()</a></code>, <code>..</code></p></div>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -204,7 +204,7 @@ bound to the meta-reactive object. In order for this inference to work, the
 
 <span class='no'>y</span> <span class='kw'>&lt;-</span> <span class='fu'>metaReactive</span>({
   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/req.html'>req</a></span>(<span class='no'>input</span>$<span class='no'>x</span>)
-  <span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'>..</span>(<span class='no'>input</span>$<span class='no'>x</span>) + <span class='fl'>1</span>
+  <span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='dotdot.html'>..</a></span>(<span class='no'>input</span>$<span class='no'>x</span>) + <span class='fl'>1</span>
   <span class='no'>b</span> <span class='kw'>&lt;-</span> <span class='no'>a</span> + <span class='fl'>1</span>
   <span class='no'>c</span> + <span class='fl'>1</span>
 })
@@ -223,7 +223,7 @@ bound to the meta-reactive object. In order for this inference to work, the
   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/req.html'>req</a></span>(<span class='no'>input</span>$<span class='no'>x</span>)
 
   <span class='fu'><a href='metaExpr.html'>metaExpr</a></span>({
-    <span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'>..</span>(<span class='no'>input</span>$<span class='no'>x</span>) + <span class='fl'>1</span>
+    <span class='no'>a</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='dotdot.html'>..</a></span>(<span class='no'>input</span>$<span class='no'>x</span>) + <span class='fl'>1</span>
     <span class='no'>b</span> <span class='kw'>&lt;-</span> <span class='no'>a</span> + <span class='fl'>1</span>
     <span class='no'>c</span> + <span class='fl'>1</span>
   }, <span class='kw'>bindToReturn</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)

@@ -68,7 +68,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shinymeta</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -191,7 +191,7 @@ from a call to <code>removeModal()</code> on the server.</p></td>
   )
   <span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>) {
     <span class='no'>output</span>$<span class='no'>p</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaRender.html'>metaRender</a></span>(<span class='no'>renderPlot</span>, {
-      <span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span>(<span class='fu'>..</span>(<span class='no'>input</span>$<span class='no'>n</span>)))
+      <span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='no'>input</span>$<span class='no'>n</span>)))
     })
     <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/observeEvent.html'>observeEvent</a></span>(<span class='no'>input</span>$<span class='no'>code</span>, {
       <span class='no'>code</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='expandChain.html'>expandChain</a></span>(<span class='no'>output</span>$<span class='fu'><a href='https://rdrr.io/pkg/shiny/man/builder.html'>p</a></span>())
