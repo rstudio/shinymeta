@@ -5,7 +5,8 @@
 \title{Mark an expression as a meta-expression}
 \usage{
 metaExpr(expr, env = parent.frame(), quoted = FALSE,
-  localize = "auto", bindToReturn = FALSE)
+  localize = "auto", bindToReturn = FALSE,
+  echo = getOption("shinymeta.echo", FALSE))
 }
 \arguments{
 \item{expr}{An expression (quoted or unquoted).}
@@ -21,10 +22,16 @@ statement (i.e., return statements in anonymized functions are ignored).}
 
 \item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
 of a meta expression be applied to the \emph{last child} of the top-level \code{\{} call?}
+
+\item{echo}{If \code{TRUE}, then during normal execution, \code{metaExpr} will print
+its code body after processing \code{..()} but before executing. This is intended
+to aid in debugging if you're unclear on how \code{..()} will affect your code.
+You can set \code{options(shinymeta.echo=TRUE)} to turn this option on globally,
+or explicitly set \code{echo=TRUE} for specific instances you are interested in.}
 }
 \description{
 Mark an expression as a meta-expression
 }
 \seealso{
-\code{\link[=metaReactive2]{metaReactive2()}}, \code{\link[=metaObserve2]{metaObserve2()}}, \code{\link[=metaRender2]{metaRender2()}}
+\code{\link[=metaReactive2]{metaReactive2()}}, \code{\link[=metaObserve2]{metaObserve2()}}, \code{\link[=metaRender2]{metaRender2()}}, \code{\link[shinymeta:dotdot]{..}}
 }

@@ -34,7 +34,7 @@
 #' @inheritParams shiny::reactive
 #' @inheritParams metaExpr
 #' @export
-#' @seealso [metaExpr()]
+#' @seealso [metaExpr()], [`..`][shinymeta::dotdot]
 #' @examples
 #'
 #' library(shiny)
@@ -66,7 +66,8 @@
 #'
 metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
   varname = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE,
-  localize = "auto", bindToReturn = FALSE) {
+  localize = "auto", bindToReturn = FALSE,
+  echo = getOption("shinymeta.echo", FALSE)) {
 
   if (!quoted) {
     expr <- substitute(expr)
@@ -81,7 +82,8 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
   #
   # Even though expr itself is quoted, wrapExpr will effectively unquote it by
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
+  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE,
+    localize = localize, bindToReturn = bindToReturn, echo = echo)
 
   metaReactiveImpl(expr = expr, env = env, varname = varname, domain = domain, inline = inline)
 }
@@ -280,6 +282,66 @@ withMetaMode <- function(expr, mode = TRUE) {
   force(expr)
 }
 
+#' Unquoting subexpressions
+#'
+#' In shinymeta, the `..()` function is used to _annotate_ parts of the code
+#' that goes into `metaExpr` (or its higher-level friends `metaReactive`,
+#' `metaObserve`, and `metaRender`). These `meta-` functions should find the
+#' `..()` calls, and replace them with... something else (see Details). In
+#' practice, all reads of reactive values or metareactive expressions should be
+#' wrapped in `..()`, as well as any expressions that should be unquoted at code
+#' generation time.
+#'
+#' **When the containing meta-object is invoked normally (execution mode), the
+#' code is rewritten to simply strip the `..()` call.** For example,
+#' `..(dataset())` becomes `dataset()`, and `..(format(Sys.Date()))` becomes
+#' `format(Sys.Date())`.
+#'
+#' **When the containing meta-object is asked for its code (meta mode), as in
+#' [expandChain()], the argument to `..()` is unquoted**. Reads of
+#' `metaReactive` and `metaReactive2` are turned into variable names (i.e.
+#' `..(dataset())` becomes `dataset` or similar) and other code is replaced with
+#' its results (`..(format(Sys.Date()))` becomes e.g. `"2019-08-06"`).
+#'
+#' Note that the `..` function itself has no usable implementation; the `..` is
+#' simply intended as a marker that `metaExpr` (and `metaReactive`,
+#' `metaObserve`, and `metaRender`) should look for as it crawls over user code.
+#' The `..()` function should never actually be executed in properly written
+#' shinymeta apps.
+#'
+#' If you're seeing the error "It looks like you're attempting to execute the
+#' '..()' function", it probably means you've done one of several things:
+#'
+#' 1. You've called `..()` from outside of `metaExpr`, `metaReactive`,
+#' `metaObserve`, or `metaRender`. Calling from elsewhere is not allowed--this
+#' includes the non-`metaExpr` portions of `metaReactive2`, `metaObserve2`, and
+#' `metaRender2`.
+#'
+#' 2. You've inserted a `browser()` prompt into a `metaExpr` or similar, and
+#' from inside the `Browse>` prompt, you've called `..()`. This is also not
+#' allowed, because the purpose of `..()` is to be searched-and-replaced away
+#' _before_ `metaExpr` begins executing the code. In a `Browse>` prompt, the
+#' search-and-replace is in the past.
+#'
+#' 3. Crafted a bit of code that use `..()` in a way that was too clever (or
+#' too, well, _opposite of clever_) for shinymeta to understand. For example,
+#' `lapply(1:5, ..)` is syntactically valid R code, but it's nonsense from a
+#' shinymeta perspective.
+#'
+#' @seealso [metaExpr()], [metaReactive()], [metaObserve()], [metaRender()]
+#'
+#' @param expr A single code expression. Required.
+#'
+#' @rdname dotdot
+#' @keywords internal
+#' @export
+.. <- function(expr) {
+  stop(call. = FALSE,
+    "It looks like you're attempting to execute the ..() function. ",
+    "This isn't allowed: see ?shinymeta::.. for details."
+  )
+}
+
 #' Mark an expression as a meta-expression
 #'
 #'
@@ -293,10 +355,17 @@ withMetaMode <- function(expr, mode = TRUE) {
 #' statement (i.e., return statements in anonymized functions are ignored).
 #' @param bindToReturn For non-`localize`d expressions, should an assignment
 #' of a meta expression be applied to the _last child_ of the top-level `\{` call?
+#' @param echo If `TRUE`, then during normal execution, `metaExpr` will print
+#' its code body after processing `..()` but before executing. This is intended
+#' to aid in debugging if you're unclear on how `..()` will affect your code.
+#' You can set `options(shinymeta.echo=TRUE)` to turn this option on globally,
+#' or explicitly set `echo=TRUE` for specific instances you are interested in.
 #'
-#' @seealso [metaReactive2()], [metaObserve2()], [metaRender2()]
+#' @seealso [metaReactive2()], [metaObserve2()], [metaRender2()], [`..`][shinymeta::dotdot]
 #' @export
-metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE) {
+metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE,
+  echo = getOption("shinymeta.echo", FALSE)) {
+
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
@@ -304,6 +373,12 @@ metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "aut
 
   if (switchMetaMode(normal = TRUE, meta = FALSE, mixed = FALSE)) {
     expr <- cleanExpr(expr)
+    if (echo) {
+      message(
+        "Executing code:\n    ",
+        paste(collapse = "\n    ", deparseCode(expr, getOption("width", 80) - 10))
+      )
+    }
     return(rlang::eval_tidy(expr, env = env))
   }
 

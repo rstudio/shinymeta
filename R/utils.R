@@ -29,10 +29,6 @@ expandExpr <- function(expr, env) {
     if (!is.null(names(x))) {
       stop("..() cannot contain a named argument: '", names(x)[2], "'.")
     }
-    # make sure ..() isn't being used for something else
-    if (exists("..", env, mode = "function", inherits = TRUE)) {
-      warning("The ..() function call is reserved for unquoting in shinymeta.")
-    }
     # unquote
     x <- eval(x[[2]], list(), env)
     # Expand symbols to code that generates that symbol, as opposed

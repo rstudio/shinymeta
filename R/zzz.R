@@ -3,6 +3,11 @@
   options(shiny.allowoutputreads = TRUE)
 
   message(
-    "Thanks for trying out shinymeta! This package is currently\n*experimental* and will definitely have breaking changes in the near\nfuture; please use caution, especially when upgrading to a newer\nshinymeta build. https://github.com/rstudio/shinymeta/blob/master/NEWS.md"
+    "********************************************************************\n",
+    "* Thanks for trying out shinymeta! This package is currently       *\n",
+    "* _experimental_ and the API is still evolving. Please use         *\n",
+    "* caution, especially when upgrading to a newer shinymeta          *\n",
+    "* build. https://github.com/rstudio/shinymeta/blob/master/NEWS.md  *\n",
+    "********************************************************************"
   )
 }
