@@ -66,8 +66,7 @@
 #'
 metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
   varname = NULL, domain = shiny::getDefaultReactiveDomain(), inline = FALSE,
-  localize = "auto", bindToReturn = FALSE,
-  echo = getOption("shinymeta.echo", FALSE)) {
+  localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
@@ -82,8 +81,7 @@ metaReactive <- function(expr, env = parent.frame(), quoted = FALSE,
   #
   # Even though expr itself is quoted, wrapExpr will effectively unquote it by
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE,
-    localize = localize, bindToReturn = bindToReturn, echo = echo)
+  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
 
   metaReactiveImpl(expr = expr, env = env, varname = varname, domain = domain, inline = inline)
 }
@@ -359,16 +357,10 @@ withMetaMode <- function(expr, mode = TRUE) {
 #' statement (i.e., return statements in anonymized functions are ignored).
 #' @param bindToReturn For non-`localize`d expressions, should an assignment
 #' of a meta expression be applied to the _last child_ of the top-level `\{` call?
-#' @param echo If `TRUE`, then during normal execution, `metaExpr` will print
-#' its code body after processing `..()` but before executing. This is intended
-#' to aid in debugging if you're unclear on how `..()` will affect your code.
-#' You can set `options(shinymeta.echo=TRUE)` to turn this option on globally,
-#' or explicitly set `echo=TRUE` for specific instances you are interested in.
 #'
 #' @seealso [metaReactive2()], [metaObserve2()], [metaRender2()], [`..`][shinymeta::dotdot]
 #' @export
-metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE,
-  echo = getOption("shinymeta.echo", FALSE)) {
+metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
@@ -377,12 +369,6 @@ metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "aut
 
   if (switchMetaMode(normal = TRUE, meta = FALSE, mixed = FALSE)) {
     expr <- cleanExpr(expr)
-    if (echo) {
-      message(
-        "Executing code:\n    ",
-        paste(collapse = "\n    ", deparseCode(expr, getOption("width", 80) - 10))
-      )
-    }
     return(rlang::eval_tidy(expr, env = env))
   }
 

@@ -51,8 +51,7 @@
 #' }
 #'
 metaRender <- function(renderFunc, expr, ..., env = parent.frame(),
-  quoted = FALSE, localize = "auto", bindToReturn = FALSE,
-  echo = getOption("shinymeta.echo", FALSE)) {
+  quoted = FALSE, localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
@@ -62,7 +61,7 @@ metaRender <- function(renderFunc, expr, ..., env = parent.frame(),
   # Even though expr itself is quoted, wrapExpr will effectively unquote it by
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
   expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE,
-    localize = localize, bindToReturn = bindToReturn, echo = echo)
+    localize = localize, bindToReturn = bindToReturn)
 
   metaRender2(renderFunc, expr, ..., env = env, quoted = quoted)
 }

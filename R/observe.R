@@ -34,8 +34,7 @@
 #'
 metaObserve <- function(expr, env = parent.frame(), quoted = FALSE,
   label = NULL, domain = getDefaultReactiveDomain(),
-  localize = "auto", bindToReturn = FALSE,
-  echo = getOption("shinymeta.echo", FALSE)) {
+  localize = "auto", bindToReturn = FALSE) {
 
   if (!quoted) {
     expr <- substitute(expr)
@@ -44,8 +43,7 @@ metaObserve <- function(expr, env = parent.frame(), quoted = FALSE,
 
   # Even though expr itself is quoted, wrapExpr will effectively unquote it by
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE,
-    localize = localize, bindToReturn = bindToReturn, echo = echo)
+  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
 
   metaObserveImpl(expr = expr, env = env, label = label, domain = domain)
 }
