@@ -2,7 +2,7 @@
 % Please edit documentation in R/metareactive.R
 \name{..}
 \alias{..}
-\title{Unquoting subexpressions}
+\title{The dot-dot operator}
 \usage{
 ..(expr)
 }
@@ -10,50 +10,54 @@
 \item{expr}{A single code expression. Required.}
 }
 \description{
-In shinymeta, the \code{..()} function is used to \emph{annotate} parts of the code
-that goes into \code{metaExpr} (or its higher-level friends \code{metaReactive},
-\code{metaObserve}, and \code{metaRender}). These \code{meta-} functions should find the
-\code{..()} calls, and replace them with... something else (see Details). In
-practice, all reads of reactive values or metareactive expressions should be
-wrapped in \code{..()}, as well as any expressions that should be unquoted at code
-generation time.
+In shinymeta, \code{..()} is designed for \emph{annotating} portions of code
+inside a \code{metaExpr} (or its higher-level friends \code{metaReactive},
+\code{metaObserve}, and \code{metaRender}). At run time, these \code{meta-} functions search for
+\code{..()} calls and replace them with something else (see Details). Outside
+of these \code{meta-} functions, \code{..()} is not defined, so one must take extra care when
+interrogating any code within a \code{meta-} function that contains \code{..()} (see Debugging).
 }
 \details{
-\strong{When the containing meta-object is invoked normally (execution mode), the
-code is rewritten to simply strip the \code{..()} call.} For example,
-\code{..(dataset())} becomes \code{dataset()}, and \code{..(format(Sys.Date()))} becomes
+As discussed in the \href{https://rstudio.github.io/shinymeta/articles/code-generation.html}{Code Generation}
+vignette, \code{..()} is used to mark reactive reads and unquote expressions inside
+\code{metaExpr} (or its higher-level friends \code{metaReactive}, \code{metaObserve}, and \code{metaRender}).
+The actual behavior of \code{..()} depends on the current
+\href{https://rstudio.github.io/shinymeta/articles/code-generation.html#execution}{mode of execution}:
+\itemize{
+\item \strong{Normal execution}: the \code{..()} call is stripped from the expression before evaluation.
+For example, \code{..(dataset())} becomes \code{dataset()}, and \code{..(format(Sys.Date()))} becomes
 \code{format(Sys.Date())}.
+\item \strong{Meta execution} (as in \code{\link[=expandChain]{expandChain()}}): reactive reads are replaced with a suitable
+name or value (i.e. \code{..(dataset())} becomes \code{dataset} or similar) and other code is
+replaced with its result (\code{..(format(Sys.Date()))} becomes e.g. \code{"2019-08-06"}).
+}
+}
+\section{Debugging}{
 
-\strong{When the containing meta-object is asked for its code (meta mode), as in
-\code{\link[=expandChain]{expandChain()}}, the argument to \code{..()} is unquoted}. Reads of
-\code{metaReactive} and \code{metaReactive2} are turned into variable names (i.e.
-\code{..(dataset())} becomes \code{dataset} or similar) and other code is replaced with
-its results (\code{..(format(Sys.Date()))} becomes e.g. \code{"2019-08-06"}).
-
-Note that the \code{..} function itself has no usable implementation; the \code{..} is
-simply intended as a marker that \code{metaExpr} (and \code{metaReactive},
-\code{metaObserve}, and \code{metaRender}) should look for as it crawls over user code.
-The \code{..()} function should never actually be executed in properly written
-shinymeta apps.
-
-If you're seeing the error "It looks like you're attempting to execute the
-'..()' function", it probably means you've done one of several things:
+If \code{..()} is called in a context where it isn't defined (that is, outside of a meta-expression),
+you'll see an error like: "..() is only defined inside shinymeta meta-expressions".
+In practice, this problem can manifest itself in at least 3 different ways:
 \enumerate{
-\item You've called \code{..()} from outside of \code{metaExpr}, \code{metaReactive},
-\code{metaObserve}, or \code{metaRender}. Calling from elsewhere is not allowed--this
-includes the non-\code{metaExpr} portions of \code{metaReactive2}, \code{metaObserve2}, and
-\code{metaRender2}.
-\item You've inserted a \code{browser()} prompt into a \code{metaExpr} or similar, and
-from inside the \code{Browse>} prompt, you've called \code{..()}. This is also not
-allowed, because the purpose of \code{..()} is to be searched-and-replaced away
-\emph{before} \code{metaExpr} begins executing the code. In a \code{Browse>} prompt, the
-search-and-replace is in the past.
-\item Crafted a bit of code that use \code{..()} in a way that was too clever (or
-too, well, \emph{opposite of clever}) for shinymeta to understand. For example,
-\code{lapply(1:5, ..)} is syntactically valid R code, but it's nonsense from a
-shinymeta perspective.
+\item Execution is halted, perhaps by inserting \code{browser()}, and from inside the \code{Browse>} prompt,
+\code{..()} is called directly. This is also not allowed, because the purpose of \code{..()} is to be
+searched-and-replaced away \emph{before} \code{metaExpr} begins executing the code. As a result,
+if you want to interrogate code that contains \code{..()} at the \code{Browse>} prompt,
+make sure it's wrapped in \code{metaExpr} before evaluating it. Also, note that when
+stepping through a \code{metaExpr} at the \code{Browse>} prompt with \code{n}, the debugger
+will echo the actual code that's evaluated during normal execution (i.e., \code{..()} is stripped),
+so that's another option for interrogating what happens during normal execution.
+On the other hand, if you are wanting to interrogate what happens during meta-execution,
+you can wrap a \code{metaExpr} with \code{expandChain()}.
+\item \code{..()} is used in a non-\code{metaExpr} portions of \code{metaReactive2}, \code{metaObserve2}, and
+\code{metaRender2}. As discussed in \href{https://rstudio.github.io/shinymeta/articles/code-generation.html#execution}{The execution model},
+non-\code{metaExpr} portions of \code{-2} variants always use normal execution and are completely
+ignored at code generation time, so \code{..()} isn't needed in this context.
+\item Crafted a bit of code that uses \code{..()} in a way that was too clever for
+shinymeta to understand. For example, \code{lapply(1:5, ..)} is syntactically valid R code,
+but it's nonsense from a shinymeta perspective.
 }
 }
+
 \seealso{
 \code{\link[=metaExpr]{metaExpr()}}, \code{\link[=metaReactive]{metaReactive()}}, \code{\link[=metaObserve]{metaObserve()}}, \code{\link[=metaRender]{metaRender()}}
 }

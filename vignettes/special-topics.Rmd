@@ -93,11 +93,6 @@ o <- metaObserve2({
 **shinymeta** is designed to work with Shiny modules, [here's an example](https://github.com/rstudio/shinymeta/blob/master/inst/examples/modules/app.R).
 Modifying an existing Shiny app that uses modules may be more involved than simply capturing domain logic and marking reactive reads. For example, if you have one or more `callModule()` calls which create a (namespaced) output object(s), you may want to have that module function return the output object so you can `expandChain()` various meta-outputs from different modules at the same time ([as done in the example app](https://github.com/rstudio/shinymeta/blob/master/inst/examples/modules/app.R#L32)).
 
-## Debugging shinymeta
-
-As mentioned in [The execution model](#execution), **shinymeta**'s marking/unquoting operator, `..()`, is only defined in meta-execution mode. 
-
-
 ## Shiny, tidyeval, and shinymeta
 
 > TL;DR: The same steps in the [overview](#overview) will work for a Shiny app that uses [tidyeval](https://tidyeval.tidyverse.org/), but it probably won't produce the most readable code. To workaround that, if possible, try to avoid unquoting (i.e., `!!`/`!!!`) by using a functional interface that accepts character strings (instead of symbolic names).
