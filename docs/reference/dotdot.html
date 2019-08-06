@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Evaluate an expression with meta mode activated — withMetaMode • shinymeta</title>
+<title>The dot-dot operator — .. • shinymeta</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -34,9 +34,14 @@
 
   <link href="../extra.css" rel="stylesheet">
   
-<meta property="og:title" content="Evaluate an expression with meta mode activated — withMetaMode" />
+<meta property="og:title" content="The dot-dot operator — .." />
 
-<meta property="og:description" content="Evaluate an expression with meta mode activated" />
+<meta property="og:description" content="In shinymeta, ..() is designed for annotating portions of code
+inside a metaExpr (or its higher-level friends metaReactive,
+metaObserve, and metaRender). At run time, these meta- functions search for
+..() calls and replace them with something else (see Details). Outside
+of these meta- functions, ..() is not defined, so one must take extra care when
+interrogating any code within a meta- function that contains ..() (see Debugging)." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -111,35 +116,79 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Evaluate an expression with meta mode activated</h1>
+    <h1>The dot-dot operator</h1>
     <small class="dont-index">Source: <a href='https://github.com/rstudio/shinymeta/blob/master/R/metareactive.R'><code>R/metareactive.R</code></a></small>
-    <div class="hidden name"><code>withMetaMode.Rd</code></div>
+    <div class="hidden name"><code>dotdot.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Evaluate an expression with meta mode activated</p>
+    <p>In shinymeta, <code>..()</code> is designed for <em>annotating</em> portions of code
+inside a <code>metaExpr</code> (or its higher-level friends <code>metaReactive</code>,
+<code>metaObserve</code>, and <code>metaRender</code>). At run time, these <code>meta-</code> functions search for
+<code>..()</code> calls and replace them with something else (see Details). Outside
+of these <code>meta-</code> functions, <code>..()</code> is not defined, so one must take extra care when
+interrogating any code within a <code>meta-</code> function that contains <code>..()</code> (see Debugging).</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>withMetaMode</span>(<span class='no'>expr</span>, <span class='kw'>mode</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>..</span>(<span class='no'>expr</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>expr</th>
-      <td><p>an expression.</p></td>
-    </tr>
-    <tr>
-      <th>mode</th>
-      <td><p>whether or not to evaluate expression in meta mode.</p></td>
+      <td><p>A single code expression. Required.</p></td>
     </tr>
     </table>
     
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>As discussed in the <a href='https://rstudio.github.io/shinymeta/articles/code-generation.html'>Code Generation</a>
+vignette, <code>..()</code> is used to mark reactive reads and unquote expressions inside
+<code>metaExpr</code> (or its higher-level friends <code>metaReactive</code>, <code>metaObserve</code>, and <code>metaRender</code>).
+The actual behavior of <code>..()</code> depends on the current
+<a href='https://rstudio.github.io/shinymeta/articles/code-generation.html#execution'>mode of execution</a>:</p><ul>
+<li><p><strong>Normal execution</strong>: the <code>..()</code> call is stripped from the expression before evaluation.
+For example, <code>..(dataset())</code> becomes <code>dataset()</code>, and <code>..(format(Sys.Date()))</code> becomes
+<code><a href='https://rdrr.io/r/base/format.html'>format(Sys.Date())</a></code>.</p></li>
+<li><p><strong>Meta execution</strong> (as in <code><a href='expandChain.html'>expandChain()</a></code>): reactive reads are replaced with a suitable
+name or value (i.e. <code>..(dataset())</code> becomes <code>dataset</code> or similar) and other code is
+replaced with its result (<code>..(format(Sys.Date()))</code> becomes e.g. <code>"2019-08-06"</code>).</p></li>
+</ul>
+
+    
+    <h2 class="hasAnchor" id="debugging"><a class="anchor" href="#debugging"></a>Debugging</h2>
+
+    
+
+<p>If <code>..()</code> is called in a context where it isn't defined (that is, outside of a meta-expression),
+you'll see an error like: "..() is only defined inside shinymeta meta-expressions".
+In practice, this problem can manifest itself in at least 3 different ways:</p><ol>
+<li><p>Execution is halted, perhaps by inserting <code><a href='https://rdrr.io/r/base/browser.html'>browser()</a></code>, and from inside the <code>Browse&gt;</code> prompt,
+<code>..()</code> is called directly. This is also not allowed, because the purpose of <code>..()</code> is to be
+searched-and-replaced away <em>before</em> <code>metaExpr</code> begins executing the code. As a result,
+if you want to interrogate code that contains <code>..()</code> at the <code>Browse&gt;</code> prompt,
+make sure it's wrapped in <code>metaExpr</code> before evaluating it. Also, note that when
+stepping through a <code>metaExpr</code> at the <code>Browse&gt;</code> prompt with <code>n</code>, the debugger
+will echo the actual code that's evaluated during normal execution (i.e., <code>..()</code> is stripped),
+so that's another option for interrogating what happens during normal execution.
+On the other hand, if you are wanting to interrogate what happens during meta-execution,
+you can wrap a <code>metaExpr</code> with <code><a href='expandChain.html'>expandChain()</a></code>.</p></li>
+<li><p><code>..()</code> is used in a non-<code>metaExpr</code> portions of <code>metaReactive2</code>, <code>metaObserve2</code>, and
+<code>metaRender2</code>. As discussed in <a href='https://rstudio.github.io/shinymeta/articles/code-generation.html#execution'>The execution model</a>,
+non-<code>metaExpr</code> portions of <code>-2</code> variants always use normal execution and are completely
+ignored at code generation time, so <code>..()</code> isn't needed in this context.</p></li>
+<li><p>Crafted a bit of code that uses <code>..()</code> in a way that was too clever for
+shinymeta to understand. For example, <code><a href='https://rdrr.io/r/base/lapply.html'>lapply(1:5, ..)</a></code> is syntactically valid R code,
+but it's nonsense from a shinymeta perspective.</p></li>
+</ol>
+
+    
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='expandChain.html'>expandChain()</a></code></p></div>
+    <div class='dont-index'><p><code><a href='metaExpr.html'>metaExpr()</a></code>, <code><a href='metaReactive.html'>metaReactive()</a></code>, <code><a href='metaObserve.html'>metaObserve()</a></code>, <code><a href='metaRender.html'>metaRender()</a></code></p></div>
     
 
   </div>
@@ -148,6 +197,10 @@
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       
+      <li><a href="#details">Details</a></li>
+
+      <li><a href="#debugging">Debugging</a></li>
+
       <li><a href="#see-also">See also</a></li>
           </ul>
 

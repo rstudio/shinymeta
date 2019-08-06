@@ -63,7 +63,7 @@ input <- list(x = 1)
 
 y <- metaReactive({
   req(input$x)
-  a <- !!input$x + 1
+  a <- ..(input$x) + 1
   b <- a + 1
   c + 1
 })
@@ -75,7 +75,7 @@ y <- metaReactive2({
   req(input$x)
 
   metaExpr({
-    a <- !!input$x + 1
+    a <- ..(input$x) + 1
     b <- a + 1
     c + 1
   }, bindToReturn = TRUE)
@@ -85,5 +85,5 @@ expandChain(y())
 
 }
 \seealso{
-\code{\link[=metaExpr]{metaExpr()}}
+\code{\link[=metaExpr]{metaExpr()}}, \code{\link[shinymeta:dotdot]{..}}
 }

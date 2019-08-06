@@ -16,15 +16,20 @@ selectColumn <- function(input, output, session, df) {
 
   values <- metaReactive2({
     req(input$col)
-    metaExpr(`$`(!!df(), !!input$col))
+    metaExpr({
+      ..(df()) %>%
+        dplyr::pull(!!..(input$col))
+    })
   })
 
   avg <- metaReactive({
-    round(mean(!!values()), 1)
+    ..(values()) %>%
+      mean() %>%
+      round(1)
   })
 
   output$average <- metaRender(renderText, {
-    paste("Average of", !!as.character(input$col), "is", !!avg())
+    paste("Average of", ..(as.character(input$col)), "is", ..(avg()))
   })
 
   list(
@@ -49,16 +54,15 @@ server <- function(input, output, session) {
 
   df_plot <- metaReactive({
     "# Combine x and y into data frame for plotting"
-    data.frame(x = !!x$values(), y = !!y$values())
+    data.frame(x = ..(x$values()), y = ..(y$values()))
   })
 
   output$plot <- metaRender(renderPlot, {
-    plot(!!df_plot())
+    plot(..(df_plot()))
   })
 
   observeEvent(input$plot_output_code, {
     displayCodeModal(expandChain(
-      quote(library(ggplot2)),
       output$plot(),
       x$average(),
       y$average()

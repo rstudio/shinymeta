@@ -12,8 +12,26 @@
 #'
 #' @inheritParams shiny::observe
 #' @inheritParams metaReactive
-#' @seealso [metaExpr()]
+#' @inheritParams metaExpr
+#' @seealso [metaExpr()], [`..`][shinymeta::dotdot]
 #' @export
+#' @examples
+#'
+#' # observers execute 'immediately'
+#' x <- 1
+#' mo <- metaObserve({
+#'   x <<- x + 1
+#' })
+#' shiny:::flushReact()
+#' print(x)
+#'
+#' # It only makes sense to invoke an meta-observer
+#' # if we're in meta-mode (i.e., generating code)
+#' expandChain(mo())
+#'
+#' # Intentionally produces an error
+#' \dontrun{mo()}
+#'
 metaObserve <- function(expr, env = parent.frame(), quoted = FALSE,
   label = NULL, domain = getDefaultReactiveDomain(),
   localize = "auto", bindToReturn = FALSE) {
@@ -23,10 +41,6 @@ metaObserve <- function(expr, env = parent.frame(), quoted = FALSE,
     quoted <- TRUE
   }
 
-  # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
-  # so, because we want to keep any `!!` contained in expr intact (i.e. too
-  # early to perform expansion of expr here).
-  #
   # Even though expr itself is quoted, wrapExpr will effectively unquote it by
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
   expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
@@ -66,7 +80,7 @@ metaObserveImpl <- function(expr, env, label, domain) {
     function() {
       metaDispatch(
         normal = {
-          stop("Meta mode must be activated when calling the function returned by `metaObserve()`: did you mean to call this function inside of `shinymeta::withMetaMode()`?")
+          stop("Meta mode must be activated when calling the function returned by `metaObserve()`: did you mean to call this function inside of `expandChain()`?")
         },
         meta = {
           r_meta()

@@ -15,20 +15,41 @@ wrapExpr <- function(func, ...) {
   ))
 }
 
-# Takes an expr that contains !!, and expands the expr so that all !! are
-# resolved. This is similar to rlang::quo except that 1) expr is already
-# quoted, and 2) you can specify the data/env from which !! should be
-# resolved. For example,
-#
-# local({
-#   a <- quote(one)
-#   b <- quote(three)
-#   env <- environment()
-#   expandExpr(quote(!!a + !!b), env)
-# })
+# Expands (i.e. evaluated) all ..() function calls in an expression
+# which mainly useful for unquoting away reactive inputs/values
+# when generating code in meta-mode
 expandExpr <- function(expr, env) {
-  wrappedExpr <- wrapExpr(rlang::quo, expr)
-  rlang::quo_get_expr(eval(wrappedExpr, list(), env))
+  walk_ast(expr, preorder = TRUE, function(x) {
+    if (!rlang::is_call(x, "..")) return(x)
+
+    # make sure ..() contains a single unnamed argument
+    if (!rlang::is_call(x, "..", n = 1)) {
+      stop("..() must contain a single argument.")
+    }
+    if (!is.null(names(x))) {
+      stop("..() cannot contain a named argument: '", names(x)[2], "'.")
+    }
+    # unquote
+    x <- eval(x[[2]], list(), env)
+    # Expand symbols to code that generates that symbol, as opposed
+    # to just the symbol itself
+    if (inherits(x, "shinymeta_symbol")) {
+      as.symbol(x)
+    } else if (is.symbol(x)) {
+      call("as.symbol", as.character(x))
+    } else {
+      x
+    }
+  })
+}
+
+cleanExpr <- function(expr) {
+  walk_ast(expr, function(x) {
+    if (rlang::is_call(x, "..", n = 1) && is.null(names(x))) {
+      x <- x[[2]]
+    }
+    x
+  })
 }
 
 

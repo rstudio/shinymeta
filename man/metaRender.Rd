@@ -42,7 +42,43 @@ code expression (instead of evaluating that expression and returning the value).
 If you wish to capture specific code inside of \code{expr} (e.g. ignore code
 that has no meaning outside shiny, like \code{\link[=req]{req()}}), use \code{metaRender2()} in combination
 with \code{metaExpr()}. When using \code{metaRender2()}, \code{expr} must return a \code{metaExpr()}.
+
+Since package authors are allowed to create their own output rendering functions,
+creating a meta-counterpart of an output renderer (e.g. \code{renderPlot()}) needs to be
+more general than prefixing \code{meta} to the function name (as with \code{metaReactive()} and \code{metaObserve()}).
+\code{metaRender()} makes some assumptions about the arguments taken by the render function,
+assumptions that we believe are true for all existing render functions.
+If you encounter a render function that doesn't seem to work properly,
+please let us know by \href{https://github.com/rstudio/shinymeta/issues}{filing an issue on GitHub}.
+}
+\examples{
+
+if (interactive()) {
+  library(shiny)
+  library(shinymeta)
+
+  ui <- fluidPage(
+    selectInput("var", label = "Choose a variable", choices = names(cars)),
+    verbatimTextOutput("Summary"),
+    verbatimTextOutput("code")
+  )
+
+  server <- function(input, output) {
+    var <- metaReactive({
+      cars[[..(input$var)]]
+    })
+    output$Summary <- metaRender(renderPrint, {
+      summary(..(var()))
+    })
+    output$code <- renderPrint({
+      expandChain(output$Summary())
+    })
+  }
+
+  shinyApp(ui, server)
+}
+
 }
 \seealso{
-\code{\link[=metaExpr]{metaExpr()}}
+\code{\link[=metaExpr]{metaExpr()}}, \code{\link[shinymeta:dotdot]{..}}
 }

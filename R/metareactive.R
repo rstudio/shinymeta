@@ -34,7 +34,7 @@
 #' @inheritParams shiny::reactive
 #' @inheritParams metaExpr
 #' @export
-#' @seealso [metaExpr()]
+#' @seealso [metaExpr()], [`..`][shinymeta::dotdot]
 #' @examples
 #'
 #' library(shiny)
@@ -44,7 +44,7 @@
 #'
 #' y <- metaReactive({
 #'   req(input$x)
-#'   a <- !!input$x + 1
+#'   a <- ..(input$x) + 1
 #'   b <- a + 1
 #'   c + 1
 #' })
@@ -56,7 +56,7 @@
 #'   req(input$x)
 #'
 #'   metaExpr({
-#'     a <- !!input$x + 1
+#'     a <- ..(input$x) + 1
 #'     b <- a + 1
 #'     c + 1
 #'   }, bindToReturn = TRUE)
@@ -239,9 +239,8 @@ switchMetaMode <- function(normal, meta, mixed) {
 #
 # mr2 <- metaReactive2({
 #   mr1() # returns 2
-#   !!mr1() # `!!`` is treated as double-boolean (NOT unquote), so: TRUE
 #   metaExpr(
-#     !!mr1() # returns quote(1 + 1)
+#     ..(mr1()) # returns quote(1 + 1)
 #   )
 # })
 #
@@ -281,6 +280,70 @@ withMetaMode <- function(expr, mode = TRUE) {
   force(expr)
 }
 
+#' The dot-dot operator
+#'
+#' In shinymeta, `..()` is designed for _annotating_ portions of code
+#' inside a `metaExpr` (or its higher-level friends `metaReactive`,
+#' `metaObserve`, and `metaRender`). At run time, these `meta-` functions search for
+#' `..()` calls and replace them with something else (see Details). Outside
+#' of these `meta-` functions, `..()` is not defined, so one must take extra care when
+#' interrogating any code within a `meta-` function that contains `..()` (see Debugging).
+#'
+#' As discussed in the [Code Generation](https://rstudio.github.io/shinymeta/articles/code-generation.html)
+#' vignette, `..()` is used to mark reactive reads and unquote expressions inside
+#' `metaExpr` (or its higher-level friends `metaReactive`, `metaObserve`, and `metaRender`).
+#' The actual behavior of `..()` depends on the current
+#' [mode of execution](https://rstudio.github.io/shinymeta/articles/code-generation.html#execution):
+#'
+#' * __Normal execution__: the `..()` call is stripped from the expression before evaluation.
+#' For example, `..(dataset())` becomes `dataset()`, and `..(format(Sys.Date()))` becomes
+#' `format(Sys.Date())`.
+#'
+#' * __Meta execution__ (as in [expandChain()]): reactive reads are replaced with a suitable
+#' name or value (i.e. `..(dataset())` becomes `dataset` or similar) and other code is
+#' replaced with its result (`..(format(Sys.Date()))` becomes e.g. `"2019-08-06"`).
+#'
+#' @section Debugging:
+#' If `..()` is called in a context where it isn't defined (that is, outside of a meta-expression),
+#' you'll see an error like: "..() is only defined inside shinymeta meta-expressions".
+#' In practice, this problem can manifest itself in at least 3 different ways:
+#'
+#' 1. Execution is halted, perhaps by inserting `browser()`, and from inside the `Browse>` prompt,
+#' `..()` is called directly. This is also not allowed, because the purpose of `..()` is to be
+#' searched-and-replaced away _before_ `metaExpr` begins executing the code. As a result,
+#' if you want to interrogate code that contains `..()` at the `Browse>` prompt,
+#' make sure it's wrapped in `metaExpr` before evaluating it. Also, note that when
+#' stepping through a `metaExpr` at the `Browse>` prompt with `n`, the debugger
+#' will echo the actual code that's evaluated during normal execution (i.e., `..()` is stripped),
+#' so that's another option for interrogating what happens during normal execution.
+#' On the other hand, if you are wanting to interrogate what happens during meta-execution,
+#' you can wrap a `metaExpr` with `expandChain()`.
+#'
+#' 2. `..()` is used in a non-`metaExpr` portions of `metaReactive2`, `metaObserve2`, and
+#' `metaRender2`. As discussed in [The execution model](https://rstudio.github.io/shinymeta/articles/code-generation.html#execution),
+#' non-`metaExpr` portions of `-2` variants always use normal execution and are completely
+#' ignored at code generation time, so `..()` isn't needed in this context.
+#'
+#' 3. Crafted a bit of code that uses `..()` in a way that was too clever for
+#' shinymeta to understand. For example, `lapply(1:5, ..)` is syntactically valid R code,
+#' but it's nonsense from a shinymeta perspective.
+#'
+#' @seealso [metaExpr()], [metaReactive()], [metaObserve()], [metaRender()]
+#'
+#' @param expr A single code expression. Required.
+#'
+#' @rdname dotdot
+#' @keywords internal
+#' @export
+.. <- function(expr) {
+  stop(call. = FALSE,
+      "The ..() function is not defined outside of a `metaExpr` context",
+      "(or its higher-level friends `metaReactive`, `metaObserve`, and `metaRender`).",
+      "You might need to wrap this code inside a `metaExpr` before evaluating it ",
+      "see ?shinymeta::.. for more details."
+  )
+}
+
 #' Mark an expression as a meta-expression
 #'
 #'
@@ -295,16 +358,17 @@ withMetaMode <- function(expr, mode = TRUE) {
 #' @param bindToReturn For non-`localize`d expressions, should an assignment
 #' of a meta expression be applied to the _last child_ of the top-level `\{` call?
 #'
-#' @seealso [metaReactive2()], [metaObserve2()], [metaRender2()]
+#' @seealso [metaReactive2()], [metaObserve2()], [metaRender2()], [`..`][shinymeta::dotdot]
 #' @export
 metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "auto", bindToReturn = FALSE) {
+
   if (!quoted) {
     expr <- substitute(expr)
     quoted <- TRUE
   }
 
   if (switchMetaMode(normal = TRUE, meta = FALSE, mixed = FALSE)) {
-    expr <- expandExpr(expr, env)
+    expr <- cleanExpr(expr)
     return(rlang::eval_tidy(expr, env = env))
   }
 
@@ -415,15 +479,15 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' There are two ways to extract code from meta objects (i.e. [metaReactive()],
 #' [metaObserve()], and [metaRender()]): `withMetaMode()` and `expandChain()`.
 #' The simplest is `withMetaMode(obj())`, which crawls the tree of meta-reactive
-#' dependencies and expands each `!!` in place.
+#' dependencies and expands each `..()` in place.
 #'
 #' For example, consider these meta objects:
 #'
 #' ```
 #'     nums <- metaReactive({ runif(100) })
 #'     obs <- metaObserve({
-#'       summary(!!nums())
-#'       hist(!!nums())
+#'       summary(..(nums()))
+#'       hist(..(nums()))
 #'     })
 #' ```
 #'
@@ -439,13 +503,13 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #'     plot(runif(100))
 #' ```
 #'
-#' Notice how `runif(100)` is inlined wherever `!!nums()`
+#' Notice how `runif(100)` is inlined wherever `..(nums())`
 #' appears, which is not desirable if we wish to reuse the same
 #' values for `summary()` and `plot()`.
 #'
 #' The `expandChain` function helps us workaround this issue
 #' by assigning return values of `metaReactive()` expressions to
-#' a name, then replaces relevant expansion (e.g., `!!nums()`)
+#' a name, then replaces relevant expansion (e.g., `..(nums())`)
 #' with the appropriate name (e.g. `nums`).
 #'
 #' ```
@@ -524,10 +588,10 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' ```
 #'     data <- metaReactive2({
 #'       req(input$file_upload)
-#'       metaExpr(read.csv(!!input$file_upload$datapath))
+#'       metaExpr(read.csv(..(input$file_upload$datapath)))
 #'     })
 #'     obs <- metaObserve({
-#'       summary(!!data())
+#'       summary(..(data()))
 #'     })
 #' ```
 #'
@@ -571,22 +635,22 @@ print.shinymetaExpansionContext <- function(x, ...) {
 #' # varname is only required if srcref aren't supported
 #' # (R CMD check disables them for some reason?)
 #' mr <- metaReactive({
-#'   get(!!input$dataset, "package:datasets")
+#'   get(..(input$dataset), "package:datasets")
 #' })
 #'
 #' top <- metaReactive({
-#'   head(!!mr())
+#'   head(..(mr()))
 #' })
 #'
 #' bottom <- metaReactive({
-#'   tail(!!mr())
+#'   tail(..(mr()))
 #' })
 #'
 #' obs <- metaObserve({
 #'   message("Top:")
-#'   summary(!!top())
+#'   summary(..(top()))
 #'   message("Bottom:")
-#'   summary(!!bottom())
+#'   summary(..(bottom()))
 #' })
 #'
 #' # Simple case
@@ -653,7 +717,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
 
     exec <- function() {
       subfunc <- .expansionContext$uidToSubstitute$get(uid)
-      result <- if (!is.null(subfunc)) {
+      if (!is.null(subfunc)) {
         withMetaMode(subfunc())
       } else {
         x
@@ -669,7 +733,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     # varname as we used last time.
     varname <- uidToVarname$get(uid)
     if (!is.null(varname)) {
-      return(as.symbol(varname))
+      return(structure(varname, class = "shinymeta_symbol"))
     }
 
     # OK, we haven't seen this UID before. We need to figure out what variable
@@ -706,7 +770,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
 
     # This is what we're returning to the caller; whomever wanted the code for
     # this metaReactive is going to get this variable name instead.
-    as.symbol(varname)
+    return(structure(varname, class = "shinymeta_symbol"))
   }
   on.exit(.globals$rexprMetaReadFilter <- oldFilter, add = TRUE, after = FALSE)
 
@@ -735,6 +799,8 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
 
       val <- if (is_comment(x)) {
         do.call(metaExpr, list(rlang::expr({!!x; {}})))
+      } else if (inherits(x, "shinymeta_symbol")) {
+        as.symbol(x)
       } else if (is.language(x)) {
         x
       } else if (is.null(x)) {
@@ -754,7 +820,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     res <- res[!vapply(res, is.null, logical(1))]
 
     # Expand into a block of code
-    metaExpr({!!!res})
+    metaExpr(as.call(c(list(quote(`{`)), res)), quoted = TRUE)
   })
 }
 

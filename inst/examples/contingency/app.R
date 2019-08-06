@@ -54,7 +54,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
 
-  getData <- reactive({
+  getData <- metaReactive({
     d <- switch(
       input$data,
       fly = fly,
@@ -66,7 +66,7 @@ server <- function(input, output, session) {
     if (isTRUE(input$na.rm)) na.omit(d) else d
   })
 
-  getVars <- reactive({
+  getVars <- metaReactive({
     switch(
       input$data,
       fly = list(y = "DoYouRecline", x = "UseElectronicsDuringTakeoff"),
@@ -100,8 +100,8 @@ server <- function(input, output, session) {
     # getData() in the download and have the code
     # import in that R object
     metaExpr({
-      !!getData() %>%
-        count(!!input$xvar, !!input$yvar)
+      ..(getData()) %>%
+        count(!!..(input$xvar), !!..(input$yvar))
     })
   })
 
@@ -109,9 +109,9 @@ server <- function(input, output, session) {
     req(counts_long())
 
     metaExpr({
-      !!counts_long() %>%
+      ..(counts_long()) %>%
         tidyr::pivot_wider(
-          names_from = !!input$xvar,
+          names_from = !!..(input$xvar),
           values_from = n,
           values_fill = list(n = 0)
         )
@@ -122,7 +122,7 @@ server <- function(input, output, session) {
     req(counts_wide())
 
     metaExpr({
-      !!counts_wide() %>%
+      ..(counts_wide()) %>%
         select(-1) %>%
         as.matrix()
     })
@@ -131,7 +131,7 @@ server <- function(input, output, session) {
   output$table <- metaRender2(renderTable, {
     validate(need(counts_wide(), "Choose some variables"))
     metaExpr({
-      !!counts_wide()
+      ..(counts_wide())
     })
   })
 
@@ -143,11 +143,11 @@ server <- function(input, output, session) {
     )
 
     metaExpr({
-      gg_plot <- ggplot(!!getData()) +
+      gg_plot <- ggplot(..(getData())) +
         geom_mosaic(
           aes(
-            x = product(!!input$xvar),
-            fill = !!input$yvar
+            x = product(!!..(input$xvar)),
+            fill = !!..(input$yvar)
           )
         ) +
         theme_bw() +
@@ -167,8 +167,13 @@ server <- function(input, output, session) {
     validate(need(counts_raw(), "Choose some variables"))
 
     metaExpr({
-      chisq.test(!!counts_raw(), simulate.p.value = !!isTRUE(input$simulate))
+      chisq.test(..(counts_raw()), simulate.p.value = isTRUE(..(input$simulate)))
     })
+  })
+
+  ec <- newExpansionContext()
+  ec$substituteMetaReactive(getData, function() {
+    metaExpr({readRDS("data.rds")})
   })
 
   output$plot_code <- downloadHandler(
@@ -176,14 +181,15 @@ server <- function(input, output, session) {
     content = function(out) {
       saveRDS(getData(), "data.rds")
       on.exit(unlink("data.rds"), add = TRUE)
+
       code <- expandChain(
         quote({
           library(plotly)
           library(dplyr)
           library(ggmosaic)
-          d <- readRDS("data.rds")
         }),
-        output$plot()
+        output$plot(),
+        .expansionContext = ec
       )
 
       buildRmdBundle(
@@ -200,14 +206,15 @@ server <- function(input, output, session) {
     content = function(out) {
       saveRDS(getData(), "data.rds")
       on.exit(unlink("data.rds"), add = TRUE)
+
       code <- expandChain(
         quote({
           library(plotly)
           library(dplyr)
           library(ggmosaic)
-          d <- readRDS("data.rds")
         }),
-        output$model()
+        output$model(),
+        .expansionContext = ec
       )
 
       buildRmdBundle(
@@ -228,15 +235,16 @@ server <- function(input, output, session) {
 
       saveRDS(getData(), "data.rds")
       on.exit(unlink("data.rds"), add = TRUE)
+
       code <- expandChain(
         quote({
           library(plotly)
           library(dplyr)
           library(ggmosaic)
-          d <- readRDS("data.rds")
         }),
         output$plot(),
-        output$model()
+        output$model(),
+        .expansionContext = ec
       )
 
       buildRmdBundle(

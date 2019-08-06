@@ -26,5 +26,5 @@ of a meta expression be applied to the \emph{last child} of the top-level \code{
 Mark an expression as a meta-expression
 }
 \seealso{
-\code{\link[=metaReactive2]{metaReactive2()}}, \code{\link[=metaObserve2]{metaObserve2()}}, \code{\link[=metaRender2]{metaRender2()}}
+\code{\link[=metaReactive2]{metaReactive2()}}, \code{\link[=metaObserve2]{metaObserve2()}}, \code{\link[=metaRender2]{metaRender2()}}, \code{\link[shinymeta:dotdot]{..}}
 }

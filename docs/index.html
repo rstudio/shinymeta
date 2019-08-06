@@ -7,8 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Record and Expose Shiny App Logic using Metaprogramming • shinymeta</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
 <meta property="og:title" content="Record and Expose Shiny App Logic using Metaprogramming">
 <meta property="og:description" content="Provides functions that make it easier to construct Shiny apps
@@ -32,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">shinymeta</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -45,13 +46,19 @@
   <a href="articles/code-distribution.html">Code distribution</a>
 </li>
 <li>
+  <a href="articles/special-topics.html">Special topics</a>
+</li>
+<li>
   <a href="reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="news/index.html">News</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/rstudio/shinymeta">
-    <span class="fa fa-github fa-lg"></span>
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -64,6 +71,7 @@
 <!--/.navbar -->
 
       
+
       </header><div class="row">
   <div class="contents col-md-9">
 <div id="shinymeta" class="section level1">
@@ -76,44 +84,38 @@
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p><strong>shinymeta</strong> is not yet on CRAN, but you can install it via the <strong>remotes</strong> package:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">"rstudio/shinymeta"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>remotes<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/remotes/man/install_github.html">install_github</a></span>(<span class="st">"rstudio/shinymeta"</span>)</span></code></pre></div>
 </div>
 <div id="generating-code-with-shinymeta" class="section level2">
 <h2 class="hasAnchor">
 <a href="#generating-code-with-shinymeta" class="anchor"></a>Generating code with shinymeta</h2>
-<p>In short, <strong>shinymeta</strong> provides variants of <strong>shiny</strong>’s reactive building blocks (e.g., <code><a href="https://www.rdocumentation.org/packages/shiny/topics/reactive">reactive()</a></code> -&gt; <code><a href="reference/metaReactive.html">metaReactive()</a></code>, <code><a href="https://www.rdocumentation.org/packages/shiny/topics/observe">observe()</a></code> -&gt; <code><a href="reference/metaObserve.html">metaObserve()</a></code>, <code>render()</code> -&gt; <code><a href="reference/metaRender.html">metaRender()</a></code>). When invoked with <strong>shinymeta</strong>’s meta mode enabled (i.e., invoked via <code><a href="reference/withMetaMode.html">withMetaMode()</a></code> or <code><a href="reference/expandChain.html">expandChain()</a></code>), these variants return <a href="https://adv-r.hadley.nz/quasiquotation.html">quasi-quoted</a> expressions. In this context, quasiquotation is primarily useful for replacing <em>reactive</em> value(s) with their <em>static</em> value(s), so the resulting code can run outside of a Shiny session. Below is a basic Shiny app demonstrating how one can leverage <strong>shinymeta</strong> to generate code to reproduce an output (e.g., <code>output$Summary()</code>) by unquoting reactive values (e.g., <code>input$var</code>) and reactive expressions (e.g., <code><a href="https://www.rdocumentation.org/packages/stats/topics/cor">var()</a></code>).</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(shiny)</span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(shinymeta)</span>
+<p>In short, <strong>shinymeta</strong> provides counterparts to Shiny’s reactive building blocks (e.g., <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html">reactive()</a></code> -&gt; <code><a href="reference/metaReactive.html">metaReactive()</a></code>, <code><a href="https://rdrr.io/pkg/shiny/man/observe.html">observe()</a></code> -&gt; <code><a href="reference/metaObserve.html">metaObserve()</a></code>, <code>render()</code> -&gt; <code><a href="reference/metaRender.html">metaRender()</a></code>) that have the added ability to capture and expose the logic needed to recreate their current state <em>outside of the Shiny runtime</em>. Once the appropriate logic has been captured by these meta-counterparts and reactive reads (e.g., <code>input$var</code>, <code><a href="https://rdrr.io/r/stats/cor.html">var()</a></code>) have been marked by a special <code><a href="reference/dotdot.html">..()</a></code> operator, then <code><a href="reference/expandChain.html">expandChain()</a></code> can produce code to replicate the state of a particular meta-counterpart (e.g., <code>output$Summary</code>).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(shiny)</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(shinymeta)</span>
 <span id="cb2-3"><a href="#cb2-3"></a></span>
-<span id="cb2-4"><a href="#cb2-4"></a>ui &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/fluidPage">fluidPage</a></span>(</span>
-<span id="cb2-5"><a href="#cb2-5"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/selectInput">selectInput</a></span>(<span class="st">"var"</span>, <span class="dt">label =</span> <span class="st">"Choose a variable"</span>, <span class="dt">choices =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(cars)),</span>
-<span id="cb2-6"><a href="#cb2-6"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/verbatimTextOutput">verbatimTextOutput</a></span>(<span class="st">"Summary"</span>),</span>
-<span id="cb2-7"><a href="#cb2-7"></a>  <span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/verbatimTextOutput">verbatimTextOutput</a></span>(<span class="st">"code"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4"></a>ui &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html">fluidPage</a></span>(</span>
+<span id="cb2-5"><a href="#cb2-5"></a>  <span class="kw"><a href="https://rdrr.io/pkg/shiny/man/selectInput.html">selectInput</a></span>(<span class="st">"var"</span>, <span class="dt">label =</span> <span class="st">"Choose a variable"</span>, <span class="dt">choices =</span> <span class="kw"><a href="https://rdrr.io/r/base/names.html">names</a></span>(cars)),</span>
+<span id="cb2-6"><a href="#cb2-6"></a>  <span class="kw"><a href="https://rdrr.io/pkg/shiny/man/verbatimTextOutput.html">verbatimTextOutput</a></span>(<span class="st">"Summary"</span>),</span>
+<span id="cb2-7"><a href="#cb2-7"></a>  <span class="kw"><a href="https://rdrr.io/pkg/shiny/man/verbatimTextOutput.html">verbatimTextOutput</a></span>(<span class="st">"code"</span>)</span>
 <span id="cb2-8"><a href="#cb2-8"></a>)</span>
 <span id="cb2-9"><a href="#cb2-9"></a></span>
 <span id="cb2-10"><a href="#cb2-10"></a>server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output) {</span>
 <span id="cb2-11"><a href="#cb2-11"></a>  var &lt;-<span class="st"> </span><span class="kw"><a href="reference/metaReactive.html">metaReactive</a></span>({</span>
-<span id="cb2-12"><a href="#cb2-12"></a>    cars[[<span class="op">!!</span>input<span class="op">$</span>var]]</span>
+<span id="cb2-12"><a href="#cb2-12"></a>    cars[[<span class="kw"><a href="reference/dotdot.html">..</a></span>(input<span class="op">$</span>var)]]</span>
 <span id="cb2-13"><a href="#cb2-13"></a>  })</span>
 <span id="cb2-14"><a href="#cb2-14"></a>  output<span class="op">$</span>Summary &lt;-<span class="st"> </span><span class="kw"><a href="reference/metaRender.html">metaRender</a></span>(renderPrint, {</span>
-<span id="cb2-15"><a href="#cb2-15"></a>    <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(<span class="op">!!</span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/cor">var</a></span>())</span>
+<span id="cb2-15"><a href="#cb2-15"></a>    <span class="kw"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="kw"><a href="reference/dotdot.html">..</a></span>(<span class="kw"><a href="https://rdrr.io/r/stats/cor.html">var</a></span>()))</span>
 <span id="cb2-16"><a href="#cb2-16"></a>  })</span>
-<span id="cb2-17"><a href="#cb2-17"></a>  output<span class="op">$</span>code &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/renderPrint">renderPrint</a></span>({</span>
-<span id="cb2-18"><a href="#cb2-18"></a>    <span class="kw"><a href="reference/expandChain.html">expandChain</a></span>(output<span class="op">$</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/groupGeneric">Summary</a></span>())</span>
+<span id="cb2-17"><a href="#cb2-17"></a>  output<span class="op">$</span>code &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html">renderPrint</a></span>({</span>
+<span id="cb2-18"><a href="#cb2-18"></a>    <span class="kw"><a href="reference/expandChain.html">expandChain</a></span>(output<span class="op">$</span><span class="kw"><a href="https://rdrr.io/r/base/groupGeneric.html">Summary</a></span>())</span>
 <span id="cb2-19"><a href="#cb2-19"></a>  })</span>
 <span id="cb2-20"><a href="#cb2-20"></a>}</span>
 <span id="cb2-21"><a href="#cb2-21"></a></span>
-<span id="cb2-22"><a href="#cb2-22"></a><span class="kw"><a href="https://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</span></code></pre></div>
+<span id="cb2-22"><a href="#cb2-22"></a><span class="kw"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html">shinyApp</a></span>(ui, server)</span></code></pre></div>
 <div align="center">
   <img src="https://i.imgur.com/5gNquPE.gif" width="67%">
 </div>
-<p>This example illustrates the bare minimum of what you must do to get your Shiny app generating reproducible non-Shiny code:</p>
-<ul>
-<li>Each reactive building block (i.e., <code><a href="https://www.rdocumentation.org/packages/shiny/topics/reactive">reactive()</a></code> and <code><a href="https://www.rdocumentation.org/packages/shiny/topics/renderPrint">renderPrint()</a></code>) has been modified to use it’s meta variant.</li>
-<li>Each read of reactive value has been unquoted (i.e., prepended with <code>!!</code>).</li>
-<li>Output(s) of interest are supplied to <code><a href="reference/expandChain.html">expandChain()</a></code>.</li>
-</ul>
-<p>For more details, explanation, and overview <strong>shinymeta</strong> features, see the article on <a href="http://rstudio.github.io/shinymeta/articles/code-generation.html">code generation</a> as well as <a href="http://rstudio.github.io/shinymeta/articles/code-distribution.html">code distribution</a></p>
+<p>For more details, explanation, and overview <strong>shinymeta</strong> features, see the article on <a href="http://rstudio.github.io/shinymeta/articles/code-generation.html">code generation</a> as well as <a href="http://rstudio.github.io/shinymeta/articles/code-distribution.html">code distribution</a>.</p>
 </div>
 <div id="a-motivating-example" class="section level2">
 <h2 class="hasAnchor">
@@ -129,7 +131,7 @@
 <li><p><strong>Reassurance</strong>: In the domain of data analysis, it’s usually enough hard to know exactly how a result is derived, and be confident that it’s 100% correct. Unfortunately, wrapping your analysis code in a user interface like Shiny make the situation even worse: the analysis code is now embedded inside a larger system making the overall logic even more error prone and difficult to fully understand. Export the core logic of your analysis can help reassure others (and yourself!) that your work is correct.</p></li>
 <li><p><strong>Education</strong>: For example, in the classroom, a student might use a Shiny app interactively to gain intuitive understanding of a statistical concept, then use the code to learn how to use the corresponding function from their own R scripts.</p></li>
 <li><p><strong>Enabling</strong>: Shiny is great for enabling others to interface with an R script you’ve written, but what if your users wish to explore things that your interface doesn’t allow for? By exposing the core logic of your app, you make it easier for motivated users to modify and build upon your work in ways you never thought about.</p></li>
-<li><p><strong>Documentation</strong>: This one is especially relevant for exploratory analysis apps that allow you to derive insight from a dataset. A great example is the ANOVA example app in the <a href="04-case-studies.html#ANOVA">case studies vignette</a>, where you can upload a dataset, run an ANOVA analysis, then download a report with all ANOVA results as well as the code to reproduce it.</p></li>
+<li><p><strong>Documentation</strong>: This one is especially relevant for exploratory analysis apps that allow you to derive insight from a dataset. A great example is the ANOVA example app in the <a href="case-studies.html#ANOVA">case studies vignette</a>, where you can upload a dataset, run an ANOVA analysis, then download a report with all ANOVA results as well as the code to reproduce it.</p></li>
 </ul>
 </li>
 <li><p><strong>Permanence</strong>: Using a Shiny app can have an ephemeral feeling to it; what happens in the future if the server goes down, or the app’s features change? With a reproducible report, your users can download a more permanent artifact that can be saved locally.</p></li>
@@ -161,7 +163,7 @@
 <h2>Developers</h2>
 <ul class="list-unstyled">
 <li>Joe Cheng <br><small class="roles"> Maintainer </small>  </li>
-<li>Carson Sievert <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-4958-2844" target="orcid.widget"><img src="https://members.orcid.org/sites/default/files/vector_iD_icon.svg" class="orcid" alt="ORCID" height="16"></a> </li>
+<li>Carson Sievert <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-4958-2844" target="orcid.widget"><img src="https://members.orcid.org/sites/default/files/vector_iD_icon.svg" class="orcid" alt="ORCID"></a> </li>
 <li><a href="authors.html">All authors...</a></li>
 </ul>
 </div>
@@ -177,17 +179,20 @@
 </div>
 </div>
 
+
       <footer><div class="copyright">
   <p>Developed by Joe Cheng, Carson Sievert.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.9100.</p>
 </div>
+
       </footer>
 </div>
 
   
+
 
   </body>
 </html>

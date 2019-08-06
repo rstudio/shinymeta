@@ -51,7 +51,7 @@ describe(
 
     it("with chaining", {
       mr2 <- metaReactive({
-        !!mr() + 1
+        ..(mr()) + 1
       })
 
       expect_code_string(
@@ -143,7 +143,7 @@ describe(
       }, bindToReturn = TRUE)
 
       mrx <- metaReactive({
-        !!mr() + !!mr2()
+        ..(mr()) + ..(mr2())
       })
 
       expect_code_string(

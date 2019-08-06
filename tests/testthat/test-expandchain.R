@@ -5,7 +5,7 @@ mr1 <- metaReactive({
 })
 
 mr2 <- metaReactive(
-  {!!mr1() + 2}
+  {..(mr1()) + 2}
 )
 
 # Can't infer varname, but inlined
@@ -19,7 +19,7 @@ metaReactive({
 }, varname = "mrFour") -> mr4
 
 o <- metaObserve({
-  !!mr2() + !!mr3() + !!mr4()
+  ..(mr2()) + ..(mr3()) + ..(mr4())
 })
 
 describe("expandChain", {

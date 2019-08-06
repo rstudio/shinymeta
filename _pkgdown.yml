@@ -1,5 +1,8 @@
 destination: docs
 
+toc:
+  depth: 3
+
 navbar:
   type: default
   left:
@@ -7,12 +10,12 @@ navbar:
     href: articles/code-generation.html
   - text: Code distribution
     href: articles/code-distribution.html
+  - text: Special topics
+    href: articles/special-topics.html
   - text: Reference
     href: reference/index.html
-# Eventually, when we have news.md
-#  - text: News
-#    href: news/index.html
-
+  - text: News
+    href: news/index.html
 
 reference:
 - title: Meta-reactives

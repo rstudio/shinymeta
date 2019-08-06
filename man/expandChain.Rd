@@ -38,12 +38,12 @@ only its own code to be written, but that of its dependencies as well.
 There are two ways to extract code from meta objects (i.e. \code{\link[=metaReactive]{metaReactive()}},
 \code{\link[=metaObserve]{metaObserve()}}, and \code{\link[=metaRender]{metaRender()}}): \code{withMetaMode()} and \code{expandChain()}.
 The simplest is \code{withMetaMode(obj())}, which crawls the tree of meta-reactive
-dependencies and expands each \code{!!} in place.
+dependencies and expands each \code{..()} in place.
 
 For example, consider these meta objects:\preformatted{    nums <- metaReactive({ runif(100) })
     obs <- metaObserve({
-      summary(!!nums())
-      hist(!!nums())
+      summary(..(nums()))
+      hist(..(nums()))
     })
 }
 
@@ -54,13 +54,13 @@ The result looks like this:\preformatted{    summary(runif(100))
     plot(runif(100))
 }
 
-Notice how \code{runif(100)} is inlined wherever \code{!!nums()}
+Notice how \code{runif(100)} is inlined wherever \code{..(nums())}
 appears, which is not desirable if we wish to reuse the same
 values for \code{summary()} and \code{plot()}.
 
 The \code{expandChain} function helps us workaround this issue
 by assigning return values of \code{metaReactive()} expressions to
-a name, then replaces relevant expansion (e.g., \code{!!nums()})
+a name, then replaces relevant expansion (e.g., \code{..(nums())})
 with the appropriate name (e.g. \code{nums}).\preformatted{    expandChain(obs())
 }
 
@@ -124,10 +124,10 @@ Sometimes, when generating code, we want to completely replace the
 implementation of a \code{metaReactive}. For example, our Shiny app might contain
 this logic, using \code{\link[shiny:fileInput]{shiny::fileInput()}}:\preformatted{    data <- metaReactive2({
       req(input$file_upload)
-      metaExpr(read.csv(!!input$file_upload$datapath))
+      metaExpr(read.csv(..(input$file_upload$datapath)))
     })
     obs <- metaObserve({
-      summary(!!data())
+      summary(..(data()))
     })
 }
 
@@ -166,22 +166,22 @@ input <- list(dataset = "cars")
 # varname is only required if srcref aren't supported
 # (R CMD check disables them for some reason?)
 mr <- metaReactive({
-  get(!!input$dataset, "package:datasets")
+  get(..(input$dataset), "package:datasets")
 })
 
 top <- metaReactive({
-  head(!!mr())
+  head(..(mr()))
 })
 
 bottom <- metaReactive({
-  tail(!!mr())
+  tail(..(mr()))
 })
 
 obs <- metaObserve({
   message("Top:")
-  summary(!!top())
+  summary(..(top()))
   message("Bottom:")
-  summary(!!bottom())
+  summary(..(bottom()))
 })
 
 # Simple case

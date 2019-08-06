@@ -14,30 +14,34 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   df <- metaReactive({
-    get(!!input$dataset, "package:datasets")
+    get(..(input$dataset), "package:datasets")
   })
 
   filtered <- metaReactive({
-    !!df() %>% head(!!input$n)
+    ..(df()) %>% head(..(input$n))
   })
 
   filtered2 <- metaReactive({
     "# a comment inside metaReactive()"
-    !!df() %>% tail(!!input$n)
+    ..(df()) %>% tail(..(input$n))
   })
 
   output$plot <- metaRender(renderPlot, {
     "# This is a helpful comment"
-    plot(!!filtered())
+    plot(..(filtered()))
   })
 
   obs <- metaObserve({
     "# Print filtered data"
-    print(!!filtered2())
+    print(..(filtered2()))
   })
 
   code <- reactive({
-    expandChain(output$plot(), obs())
+    expandChain(
+      quote(library(magrittr)),
+      output$plot(),
+      obs()
+    )
   })
 
   output$code <- renderPrint(code())
@@ -56,7 +60,7 @@ server <- function(input, output, session) {
 
   output$download_script <- downloadHandler("script.R",
     content = function(out) {
-      writeLines(code(), out)
+      writeLines(deparseCode(code()), out)
     }
   )
 }

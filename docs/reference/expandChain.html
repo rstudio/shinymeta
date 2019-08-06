@@ -16,13 +16,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -51,6 +53,7 @@ only its own code to be written, but that of its dependencies as well." />
 <![endif]-->
 
 
+
   </head>
 
   <body>
@@ -67,7 +70,7 @@ only its own code to be written, but that of its dependencies as well." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shinymeta</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -80,14 +83,20 @@ only its own code to be written, but that of its dependencies as well." />
   <a href="../articles/code-distribution.html">Code distribution</a>
 </li>
 <li>
+  <a href="../articles/special-topics.html">Special topics</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../news/index.html">News</a>
 </li>
       </ul>
       
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/rstudio/shinymeta">
-    <span class="fa fa-github fa-lg"></span>
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -98,6 +107,7 @@ only its own code to be written, but that of its dependencies as well." />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -127,8 +137,8 @@ only its own code to be written, but that of its dependencies as well.</p>
       <th>...</th>
       <td><p>All arguments must be unnamed, and must be one of: 1) calls to
 meta-reactive objects, 2) comment string (e.g. <code>"# A comment"</code>), 3)
-language object (e.g. <code><a href='https://www.rdocumentation.org/packages/base/topics/substitute'>quote(print(1 + 1))</a></code>), or 4) <code>NULL</code> (which will be
-ignored). Calls to meta-reactive objects can optionally be <code><a href='https://www.rdocumentation.org/packages/base/topics/invisible'>invisible()</a></code>,
+language object (e.g. <code><a href='https://rdrr.io/r/base/substitute.html'>quote(print(1 + 1))</a></code>), or 4) <code>NULL</code> (which will be
+ignored). Calls to meta-reactive objects can optionally be <code><a href='https://rdrr.io/r/base/invisible.html'>invisible()</a></code>,
 see Details.</p></td>
     </tr>
     <tr>
@@ -142,62 +152,71 @@ of <code>expandChain</code>. See Details.</p></td>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The return value of <code>expandCode</code> is a code object that's suitable for
+    <p>The return value of <code>expandChain()</code> is a code object that's suitable for
 printing or passing to <code><a href='displayCodeModal.html'>displayCodeModal()</a></code>, <code><a href='buildScriptBundle.html'>buildScriptBundle()</a></code>, or
 <code><a href='buildScriptBundle.html'>buildRmdBundle()</a></code>.</p>
 <p>The return value of <code>newExpansionContext</code> is an object that should be
-passed to multiple <code>expandCode()</code> calls.</p>
+passed to multiple <code>expandChain()</code> calls.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>There are two ways to extract code from meta objects (i.e. <code><a href='metaReactive.html'>metaReactive()</a></code>,
 <code><a href='metaObserve.html'>metaObserve()</a></code>, and <code><a href='metaRender.html'>metaRender()</a></code>): <code><a href='withMetaMode.html'>withMetaMode()</a></code> and <code>expandChain()</code>.
 The simplest is <code><a href='withMetaMode.html'>withMetaMode(obj())</a></code>, which crawls the tree of meta-reactive
-dependencies and expands each <code>!!</code> in place.</p>
+dependencies and expands each <code><a href='dotdot.html'>..()</a></code> in place.</p>
 <p>For example, consider these meta objects:</p><pre>    nums &lt;- metaReactive({ runif(100) })
     obs &lt;- metaObserve({
-      summary(!!nums())
-      hist(!!nums())
+      summary(..(nums()))
+      hist(..(nums()))
     })
 </pre>
-    <p>When code is extracted using <code>withMetaMode</code>:</p><pre>    withMetaMode(obs())
+
+<p>When code is extracted using <code>withMetaMode</code>:</p><pre>    withMetaMode(obs())
 </pre>
-    <p>The result looks like this:</p><pre>    summary(runif(100))
+
+<p>The result looks like this:</p><pre>    summary(runif(100))
     plot(runif(100))
 </pre>
-    <p>Notice how <code><a href='https://www.rdocumentation.org/packages/stats/topics/Uniform'>runif(100)</a></code> is inlined wherever <code>!!nums()</code>
+
+<p>Notice how <code><a href='https://rdrr.io/r/stats/Uniform.html'>runif(100)</a></code> is inlined wherever <code><a href='dotdot.html'>..(nums())</a></code>
 appears, which is not desirable if we wish to reuse the same
-values for <code><a href='https://www.rdocumentation.org/packages/base/topics/summary'>summary()</a></code> and <code><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot()</a></code>.</p>
+values for <code><a href='https://rdrr.io/r/base/summary.html'>summary()</a></code> and <code><a href='https://rdrr.io/r/graphics/plot.html'>plot()</a></code>.</p>
 <p>The <code>expandChain</code> function helps us workaround this issue
 by assigning return values of <code><a href='metaReactive.html'>metaReactive()</a></code> expressions to
-a name, then replaces relevant expansion (e.g., <code>!!nums()</code>)
+a name, then replaces relevant expansion (e.g., <code><a href='dotdot.html'>..(nums())</a></code>)
 with the appropriate name (e.g. <code>nums</code>).</p><pre>    expandChain(obs())
 </pre>
-    <p>The result looks like this:</p><pre>    nums &lt;- runif(100)
+
+<p>The result looks like this:</p><pre>    nums &lt;- runif(100)
     summary(nums)
     plot(nums)
 </pre>
-    <p>You can pass multiple meta objects and/or comments to <code>expandChain</code>.</p><pre>    expandChain(
+
+<p>You can pass multiple meta objects and/or comments to <code>expandChain</code>.</p><pre>    expandChain(
       "# Generate values",
       nums(),
       "# Summarize and plot",
       obs()
     )
 </pre>
-    <p>Output:</p><pre>    # Load data
+
+<p>Output:</p><pre>    # Load data
     nums &lt;- runif(100)
     nums
     # Inspect data
     summary(nums)
     plot(nums)
 </pre>
-    <p>You can suppress the printing of the <code>nums</code> vector in the previous example by
-wrapping the <code>nums()</code> argument to <code>expandChain()</code> with <code><a href='https://www.rdocumentation.org/packages/base/topics/invisible'>invisible(nums())</a></code>.</p>
+
+<p>You can suppress the printing of the <code>nums</code> vector in the previous example by
+wrapping the <code>nums()</code> argument to <code>expandChain()</code> with <code><a href='https://rdrr.io/r/base/invisible.html'>invisible(nums())</a></code>.</p>
     
     <h2 class="hasAnchor" id="preserving-dependencies-between-expandchain-calls"><a class="anchor" href="#preserving-dependencies-between-expandchain-calls"></a>Preserving dependencies between <code>expandChain()</code> calls</h2>
 
     
-    <p>Sometimes we may have related meta objects that we want to generate code for,
+
+
+<p>Sometimes we may have related meta objects that we want to generate code for,
 but we want the code for some objects in one code chunk, and the code for
 other objects in another code chunk; for example, you might be constructing
 an R Markdown report that has a specific place for each code chunk.</p>
@@ -216,23 +235,27 @@ the two calls.</p><pre>    exp_ctx &lt;- newExpansionContext()
       obs()
     )
 </pre>
-    <p>After this code is run, <code>chunk1</code> contains only the definition of <code>nums</code> and
+
+<p>After this code is run, <code>chunk1</code> contains only the definition of <code>nums</code> and
 <code>chunk2</code> contains only the code for <code>obs</code>.</p>
     
     <h2 class="hasAnchor" id="substituting-metareactive-objects"><a class="anchor" href="#substituting-metareactive-objects"></a>Substituting <code>metaReactive</code> objects</h2>
 
     
-    <p>Sometimes, when generating code, we want to completely replace the
+
+
+<p>Sometimes, when generating code, we want to completely replace the
 implementation of a <code>metaReactive</code>. For example, our Shiny app might contain
-this logic, using <code><a href='https://www.rdocumentation.org/packages/shiny/topics/fileInput'>shiny::fileInput()</a></code>:</p><pre>    data &lt;- metaReactive2({
+this logic, using <code><a href='https://rdrr.io/pkg/shiny/man/fileInput.html'>shiny::fileInput()</a></code>:</p><pre>    data &lt;- metaReactive2({
       req(input$file_upload)
-      metaExpr(read.csv(!!input$file_upload$datapath))
+      metaExpr(read.csv(..(input$file_upload$datapath)))
     })
     obs &lt;- metaObserve({
-      summary(!!data())
+      summary(..(data()))
     })
 </pre>
-    <p>Shiny's file input works by saving uploading files to a temp directory. The
+
+<p>Shiny's file input works by saving uploading files to a temp directory. The
 file referred to by <code>input$file_upload$datapath</code> won't be available when
 another user tries to run the generated code.</p>
 <p>You can use the expansion context object to swap out the implementation of
@@ -240,12 +263,15 @@ another user tries to run the generated code.</p>
     ec$substituteMetaReactive(data, function() {
       metaExpr(read.csv("data.csv"))
     })
+
     expandChain(.expansionContext = ec, obs())
 </pre>
-    <p>Result:</p><pre>    data &lt;- read.csv("data.csv")
+
+<p>Result:</p><pre>    data &lt;- read.csv("data.csv")
     summary(data)
 </pre>
-    <p>Just make sure this code ends up in a script or Rmd bundle that includes the
+
+<p>Just make sure this code ends up in a script or Rmd bundle that includes the
 uploaded file as <code>data.csv</code>, and the user will be able to reproduce your
 analysis.</p>
 <p>The <code>substituteMetaReactive</code> method takes two arguments: the <code>metaReactive</code>
@@ -261,27 +287,27 @@ with <code>inline = TRUE</code>, then every time it is encountered).</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>input</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>dataset</span> <span class='kw'>=</span> <span class='st'>"cars"</span>)
+    <pre class="examples"><div class='input'><span class='no'>input</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>dataset</span> <span class='kw'>=</span> <span class='st'>"cars"</span>)
 
 <span class='co'># varname is only required if srcref aren't supported</span>
 <span class='co'># (R CMD check disables them for some reason?)</span>
 <span class='no'>mr</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span>({
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/get'>get</a></span>(!!<span class='no'>input</span>$<span class='no'>dataset</span>, <span class='st'>"package:datasets"</span>)
+  <span class='fu'><a href='https://rdrr.io/r/base/get.html'>get</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='no'>input</span>$<span class='no'>dataset</span>), <span class='st'>"package:datasets"</span>)
 })
 
 <span class='no'>top</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span>({
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/head'>head</a></span>(!!<span class='fu'>mr</span>())
+  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='fu'>mr</span>()))
 })
 
 <span class='no'>bottom</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span>({
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/head'>tail</a></span>(!!<span class='fu'>mr</span>())
+  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>tail</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='fu'>mr</span>()))
 })
 
 <span class='no'>obs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='metaObserve.html'>metaObserve</a></span>({
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/message'>message</a></span>(<span class='st'>"Top:"</span>)
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/summary'>summary</a></span>(!!<span class='fu'>top</span>())
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/message'>message</a></span>(<span class='st'>"Bottom:"</span>)
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/summary'>summary</a></span>(!!<span class='fu'>bottom</span>())
+  <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span>(<span class='st'>"Top:"</span>)
+  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='fu'>top</span>()))
+  <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span>(<span class='st'>"Bottom:"</span>)
+  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='fu'><a href='dotdot.html'>..</a></span>(<span class='fu'>bottom</span>()))
 })
 
 <span class='co'># Simple case</span>
@@ -304,8 +330,8 @@ with <code>inline = TRUE</code>, then every time it is encountered).</p>
 <span class='co'># Separate into two code chunks</span>
 <span class='no'>exp_ctx</span> <span class='kw'>&lt;-</span> <span class='fu'>newExpansionContext</span>()
 <span class='fu'>expandChain</span>(<span class='kw'>.expansionContext</span> <span class='kw'>=</span> <span class='no'>exp_ctx</span>,
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/invisible'>invisible</a></span>(<span class='fu'>top</span>()),
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/invisible'>invisible</a></span>(<span class='fu'>bottom</span>()))</div><div class='output co'>#&gt; mr </span><span style='color: #00BB00;'>&lt;-</span><span> </span><span style='color: #00BBBB;'>get</span><span>(</span><span style='color: #BBBB00;'>"cars"</span><span>, </span><span style='color: #BBBB00;'>"package:datasets"</span><span>)
+  <span class='fu'><a href='https://rdrr.io/r/base/invisible.html'>invisible</a></span>(<span class='fu'>top</span>()),
+  <span class='fu'><a href='https://rdrr.io/r/base/invisible.html'>invisible</a></span>(<span class='fu'>bottom</span>()))</div><div class='output co'>#&gt; mr </span><span style='color: #00BB00;'>&lt;-</span><span> </span><span style='color: #00BBBB;'>get</span><span>(</span><span style='color: #BBBB00;'>"cars"</span><span>, </span><span style='color: #BBBB00;'>"package:datasets"</span><span>)
 #&gt; top </span><span style='color: #00BB00;'>&lt;-</span><span> </span><span style='color: #00BBBB;'>head</span><span>(mr)
 #&gt; bottom </span><span style='color: #00BB00;'>&lt;-</span><span> </span><span style='color: #00BBBB;'>tail</span><span>(mr)</div><div class='input'><span class='fu'>expandChain</span>(<span class='kw'>.expansionContext</span> <span class='kw'>=</span> <span class='no'>exp_ctx</span>,
   <span class='fu'>obs</span>())</div><div class='output co'>#&gt; </span><span style='color: #00BBBB;'>message</span><span>(</span><span style='color: #BBBB00;'>"Top:"</span><span>)
@@ -335,19 +361,23 @@ with <code>inline = TRUE</code>, then every time it is encountered).</p>
   </div>
 </div>
 
+
       <footer>
       <div class="copyright">
   <p>Developed by Joe Cheng, Carson Sievert.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.9100.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

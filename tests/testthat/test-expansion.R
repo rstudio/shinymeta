@@ -6,12 +6,12 @@ describe("expansion", isolate({
     1
   })
   two <- metaReactive({
-    !!one()
+    ..(one())
   })
 
   it("basically works", {
     res <- withMetaMode(
-      metaExpr(!!two())
+      metaExpr(..(two()))
     )
     q1 <- quote(1)
     expect_equal(res, q1)
@@ -22,11 +22,11 @@ describe("expansion", isolate({
   # does, since fetching code can have side effects
   it("metaMode doesn't cache in meta mode only", {
     rand <- metaReactive({
-      !!runif(1)
+      ..(runif(1))
     })
 
-    x1 <- withMetaMode(metaExpr(!!rand()))
-    x2 <- withMetaMode(metaExpr(!!rand()))
+    x1 <- withMetaMode(metaExpr(..(rand())))
+    x2 <- withMetaMode(metaExpr(..(rand())))
     expect_true(!identical(x1, x2))
 
     y1 <- rand()
@@ -35,10 +35,10 @@ describe("expansion", isolate({
   })
 
   it("has clean pipeline stages", {
-    x1 <- metaReactive({ !!one() + 2 })
+    x1 <- metaReactive({ ..(one()) + 2 })
     expect_equal(withMetaMode(x1()), quote(1 + 2))
 
-    x2 <- metaReactive({ !!one() %>% print() })
+    x2 <- metaReactive({ ..(one()) %>% print() })
     expect_equal(withMetaMode(x2()), quote(1 %>% print()))
   })
 
@@ -60,7 +60,7 @@ describe("mixed mode", isolate({
   # Try this scenario with each of the different kinds of objects.
   lapply(srcs, function(src) {
 
-    mr <- metaReactive(!!src(), inline = TRUE)
+    mr <- metaReactive(..(src()), inline = TRUE)
     expect_equal(withMetaMode(mr()), quote(1 + 1))
 
     v <- reactiveVal(0) # cache busting reactive val
@@ -82,20 +82,20 @@ describe("mixed mode", isolate({
 
     v(isolate(v()) + 1) # bust cache for mr2
     mr3 <- metaReactive({
-      !!mr2()
+      ..(mr2())
     })
     expect_equal(withMetaMode(mr3()), quote(1 + 1))
 
 
     # Test observer
     v(isolate(v()) + 1) # bust cache for mr2
-    mr4 <- metaObserve(!!src())
+    mr4 <- metaObserve(..(src()))
     expect_equal(withMetaMode(mr4()), quote(1 + 1))
     mr4$destroy()  # Otherwise throws errors on next flushReact
 
     # Test renderer
     v(isolate(v()) + 1) # bust cache for mr2
-    mr5 <- metaRender(renderText, !!src())
+    mr5 <- metaRender(renderText, ..(src()))
     expect_equal(withMetaMode(mr5()), quote(1 + 1))
   })
 }))
