@@ -93,7 +93,7 @@ mrexprSrcrefToLabel <- function(srcref, defaultLabel) {
     firstLine <- lines[firstLineIdx]
   }
 
-  m <- regexec("(.*)(<-|=)\\s*metaReactive2?\\s*\\($", firstLine)
+  m <- regexec("(.*)(<-|=)\\s*metaReactive2?\\s*\\(", firstLine)
   if (m[[1]][1] == -1) {
     return(defaultLabel)
   }

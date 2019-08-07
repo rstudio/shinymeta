@@ -116,11 +116,11 @@ describe(
 describe(
   "bindToReturn", isolate({
 
-    mr <- metaReactive({
+    mr <- metaReactive(bindToReturn = TRUE, {
       a <- 1 + 1
       b <- a + 1
       b + 1
-    }, bindToReturn = TRUE)
+    })
 
     it("single assign works", {
 
