@@ -115,6 +115,7 @@ comment_flags_to_enclosings <- function(expr) {
 # Apply a function to each node of an AST
 # (similar to htmltools:::rewriteTags)
 walk_ast <- function(x, fun, preorder = FALSE) {
+  if (rlang::is_missing(x)) return(x)
   if (preorder) x <- fun(x)
   if (is.call(x)) {
     x[] <- lapply(x, walk_ast, fun, preorder = preorder)
