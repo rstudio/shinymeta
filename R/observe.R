@@ -43,7 +43,7 @@ metaObserve <- function(expr, env = parent.frame(), quoted = FALSE,
 
   # Even though expr itself is quoted, wrapExpr will effectively unquote it by
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
+  expr <- wrapExpr(shinymeta::metaExpr, expr, quoted = FALSE, localize = localize, bindToReturn = bindToReturn)
 
   metaObserveImpl(expr = expr, env = env, label = label, domain = domain)
 }
@@ -70,7 +70,7 @@ metaObserveImpl <- function(expr, env, label, domain) {
 
   r_meta <- function() {
     shiny::withReactiveDomain(domain, {
-      rlang::eval_tidy(expr, NULL, env)
+      eval(expr, envir = env)
     })
   }
 

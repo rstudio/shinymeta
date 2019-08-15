@@ -60,7 +60,7 @@ metaRender <- function(renderFunc, expr, ..., env = parent.frame(),
 
   # Even though expr itself is quoted, wrapExpr will effectively unquote it by
   # interpolating it into the `metaExpr()` call, thus quoted = FALSE.
-  expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE,
+  expr <- wrapExpr(shinymeta::metaExpr, expr, quoted = FALSE,
     localize = localize, bindToReturn = bindToReturn)
 
   metaRender2(renderFunc, expr, ..., env = env, quoted = quoted)
@@ -79,7 +79,7 @@ metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FA
   normal <- renderFunc(expr = expr, ..., env = env, quoted = quoted)
   meta <- function() {
     shiny::withReactiveDomain(domain, {
-      rlang::eval_tidy(expr, env = env)
+      eval(expr, envir = env)
     })
   }
 

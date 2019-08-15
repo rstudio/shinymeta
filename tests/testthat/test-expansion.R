@@ -42,6 +42,40 @@ describe("expansion", isolate({
     expect_equal(withMetaMode(x2()), quote(1 %>% print()))
   })
 
+  it("reads from enclosing environment", {
+    x <- 1
+    e <- environment()
+    result <- local({
+      x <- 2
+      metaExpr({ ..(x) }, env = e)
+    })
+    expect_equal(result, 1)
+
+    result2 <- local({
+      x <- 2
+      metaExpr({ ..(x) })
+    })
+    expect_equal(result2, 2)
+
+    result3 <- local({
+      x <- 2
+      metaExpr({ x }, env = e)
+    })
+    expect_equal(result3, 1)
+
+    result4 <- local({
+      x <- 2
+      metaExpr({ x })
+    })
+    expect_equal(result4, 2)
+  })
+
+  it("doesn't introduce a scope", {
+    a <- 1
+    metaExpr(a <- 2)
+    expect_equal(a, 2)
+  })
+
 }))
 
 
