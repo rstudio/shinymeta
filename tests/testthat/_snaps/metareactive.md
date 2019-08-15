@@ -21,10 +21,6 @@
       }
     }
 
-# metaAction: basically works
-
-    a <- 6
-
 # metaAction: unquotes properly
 
     x <- TRUE

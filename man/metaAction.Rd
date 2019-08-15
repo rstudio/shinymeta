@@ -4,37 +4,34 @@
 \alias{metaAction}
 \title{Run/capture non-reactive code for side effects}
 \usage{
-metaAction(expr, env = parent.frame(), quoted = FALSE, run = TRUE)
+metaAction(expr, env = parent.frame(), quoted = FALSE)
 }
 \arguments{
-\item{expr}{An expression (quoted or unquoted).}
+\item{expr}{A code expression that will immediately be executed (before the
+call to \code{metaAction} returns), and also stored for later retrieval (i.e.
+meta mode).}
 
 \item{env}{An environment.}
 
 \item{quoted}{Is the expression quoted? This is useful when you want to use an expression
 that is stored in a variable; to do so, it must be quoted with \code{\link[=quote]{quote()}}.}
-
-\item{run}{If \code{TRUE} (the default), the code will be executed immediately,
-before \code{metaAction} returns.}
 }
 \value{
-A function that, when called, will either run the code you passed in
-or return the code in quoted form (which behavior you get depends on
-whether you're in the middle of \code{\link[=expandChain]{expandChain()}}, similar to calling a meta
-reactive object). In fact, you can think of \code{metaAction} as being very
-similar to creating a regular \code{function}, except 1) the code body will be
-wrapped in \code{\link[=metaExpr]{metaExpr()}} automatically, and 2) unlike function execution,
-\code{metaAction} execution does not introduce a temporary environment; any
-"local" variables you create or overwrite will affect the \code{env}
-environment.
+A function that, when called in meta mode (i.e. inside
+\code{\link[=expandChain]{expandChain()}}), will return the code in quoted form. If this function is
+ever called outside of meta mode, it throws an error, as it is definitely
+being called incorrectly.
 }
 \description{
 Most apps start out with setup code that is non-reactive, such as
 \code{\link[base:library]{library()}} calls, loading of static data into local
 variables, or \code{\link[base:source]{source}}-ing of supplemental R scripts.
-\code{metaAction} provides a convenient way to run such code for its side
-effects (including declaring new variables) while making it easy to
-export that code using \code{\link[=expandChain]{expandChain()}}.
+\code{metaAction} provides a convenient way to run such code for its side effects
+(including declaring new variables) while making it easy to export that code
+using \code{\link[=expandChain]{expandChain()}}. Note that \code{metaAction} executes code directly in the
+\code{env} environment (which defaults to the caller's environment), so any local
+variables that are declared in the \code{expr} will be available outside of
+\code{metaAction} as well.
 }
 \examples{
 

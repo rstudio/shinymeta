@@ -71,13 +71,6 @@ describe("metaAction", {
     }), env = env, quoted = TRUE)
     expect_identical(a, 3)
     expect_identical(env[["a"]], 5)
-
-    act <- metaAction(
-      a <- 6,
-      run = FALSE
-    )
-    expect_identical(a, 3)
-    expect_snapshot_output(withMetaMode(act()))
   })
 
   it("unquotes properly", {
@@ -94,5 +87,10 @@ describe("metaAction", {
     })
     expect_identical(y, FALSE)
     expect_snapshot_output(expandChain(act()))
+  })
+
+  it("errors on non-meta usage", {
+    ma <- metaAction({})
+    expect_error(ma())
   })
 })
