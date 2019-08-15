@@ -180,23 +180,22 @@ metaReactiveImpl <- function(expr, env, varname, domain, inline) {
 #' Most apps start out with setup code that is non-reactive, such as
 #' [`library()`][base::library()] calls, loading of static data into local
 #' variables, or [`source`][base::source()]-ing of supplemental R scripts.
-#' `metaAction` provides a convenient way to run such code for its side
-#' effects (including declaring new variables) while making it easy to
-#' export that code using [expandChain()].
+#' `metaAction` provides a convenient way to run such code for its side effects
+#' (including declaring new variables) while making it easy to export that code
+#' using [expandChain()]. Note that `metaAction` executes code directly in the
+#' `env` environment (which defaults to the caller's environment), so any local
+#' variables that are declared in the `expr` will be available outside of
+#' `metaAction` as well.
 #'
 #' @inheritParams metaExpr
-#' @param run If `TRUE` (the default), the code will be executed immediately,
-#'   before `metaAction` returns.
 #'
-#' @return A function that, when called, will either run the code you passed in
-#'   or return the code in quoted form (which behavior you get depends on
-#'   whether you're in the middle of [expandChain()], similar to calling a meta
-#'   reactive object). In fact, you can think of `metaAction` as being very
-#'   similar to creating a regular `function`, except 1) the code body will be
-#'   wrapped in [metaExpr()] automatically, and 2) unlike function execution,
-#'   `metaAction` execution does not introduce a temporary environment; any
-#'   "local" variables you create or overwrite will affect the `env`
-#'   environment.
+#' @param expr A code expression that will immediately be executed (before the
+#'   call to `metaAction` returns), and also stored for later retrieval (i.e.
+#'   meta mode).
+#' @return A function that, when called in meta mode (i.e. inside
+#'   [expandChain()]), will return the code in quoted form. If this function is
+#'   ever called outside of meta mode, it throws an error, as it is definitely
+#'   being called incorrectly.
 #'
 #' @examples
 #'
@@ -220,7 +219,7 @@ metaReactiveImpl <- function(expr, env, varname, domain, inline) {
 #' )
 #'
 #' @export
-metaAction <- function(expr, env = parent.frame(), quoted = FALSE, run = TRUE) {
+metaAction <- function(expr, env = parent.frame(), quoted = FALSE) {
   force(env)
 
   if (!quoted) {
@@ -233,13 +232,17 @@ metaAction <- function(expr, env = parent.frame(), quoted = FALSE, run = TRUE) {
   # early to perform expansion of expr here).
   expr <- wrapExpr(shinymeta::metaExpr, expr)
 
-  func <- function() {
-    eval(expr, envir = env)
+  eval(expr, envir = env)
+  function() {
+    metaDispatch(
+      normal = {
+        stop("Meta mode must be activated when calling the function returned by `metaAction()`: did you mean to call this function inside of `expandChain()`?")
+      },
+      meta = {
+        eval(expr, envir = env)
+      }
+    )
   }
-  if (run) {
-    func()
-  }
-  func
 }
 
 #' @export
