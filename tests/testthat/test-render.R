@@ -142,10 +142,15 @@ describe("metaRender", isolate({
     mr <- metaReactive2({
       expect_identical(outer_var, 104)
       outer_var <<- outer_var + 1
-      metaExpr(outer_var <<- outer_var + 1)
+      metaExpr(outer_var <<- ..(outer_var + 1))
     })
     mr()
     expect_identical(outer_var, 106)
+
+    outer_var <- 104
+    res <- withMetaMode(mr())
+    expect_identical(outer_var, 105)
+    expect_equal(res, quote(outer_var <<- 106))
   })
 
 }))

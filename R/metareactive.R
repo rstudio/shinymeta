@@ -151,7 +151,7 @@ metaReactiveImpl <- function(expr, env, varname, domain, inline) {
   r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = varname, domain = domain)
   r_meta <- function() {
     shiny::withReactiveDomain(domain, {
-      eval(expr, envir = env)
+      eval(expr, envir = new.env(parent = env))
     })
   }
 

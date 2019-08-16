@@ -79,7 +79,7 @@ metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FA
   normal <- renderFunc(expr = expr, ..., env = env, quoted = quoted)
   meta <- function() {
     shiny::withReactiveDomain(domain, {
-      eval(expr, envir = env)
+      eval(expr, envir = new.env(parent = env))
     })
   }
 

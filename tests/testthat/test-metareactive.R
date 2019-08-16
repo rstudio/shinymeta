@@ -50,4 +50,37 @@ describe("metaAction", {
     ma <- metaAction({})
     expect_error(ma())
   })
+
+  it("obeys scoping rules", {
+    # introduces scopes
+    outer <- environment()
+    i <- 0
+
+    mr <- metaReactive({
+      inner <- environment()
+      expect_false(identical(inner, outer))
+
+      i <<- i + 1
+    })
+    isolate(mr())
+
+    expect_identical(i, 1)
+
+    mr2 <- metaReactive2({
+      inner <- environment()
+      expect_false(identical(inner, outer))
+      i <<- i + 1
+      metaExpr({
+        innermost <- environment()
+        expect_true(identical(innermost, inner))
+        i <<- i + 1
+      })
+    })
+    isolate(mr2())
+
+    expect_identical(i, 3)
+
+    withMetaMode(mr2())
+    expect_identical(i, 4)
+  })
 })
