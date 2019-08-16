@@ -70,7 +70,7 @@ metaObserveImpl <- function(expr, env, label, domain) {
 
   r_meta <- function() {
     shiny::withReactiveDomain(domain, {
-      eval(expr, envir = env)
+      eval(expr, envir = new.env(parent = env))
     })
   }
 
