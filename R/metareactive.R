@@ -337,8 +337,8 @@ withMetaMode <- function(expr, mode = TRUE) {
 #' @export
 .. <- function(expr) {
   stop(call. = FALSE,
-      "The ..() function is not defined outside of a `metaExpr` context",
-      "(or its higher-level friends `metaReactive`, `metaObserve`, and `metaRender`).",
+      "The ..() function is not defined outside of a `metaExpr` context ",
+      "(or its higher-level friends `metaReactive`, `metaObserve`, and `metaRender`). ",
       "You might need to wrap this code inside a `metaExpr` before evaluating it ",
       "see ?shinymeta::.. for more details."
   )
