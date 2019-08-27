@@ -14,17 +14,7 @@ as.character.shinyMetaExpr <- function(x, ...) {
 }
 
 #' @export
-as.character.shinyMetaString <- function(x, ...) {
-  as.character(deparseCode(x), ...)
-}
-
-#' @export
 format.shinyMetaExpr <- function(x, ...) {
-  format(deparseCode(x), ...)
-}
-
-#' @export
-format.shinyMetaString <- function(x, ...) {
   format(deparseCode(x), ...)
 }
 
@@ -32,10 +22,3 @@ format.shinyMetaString <- function(x, ...) {
 knit_print.shinyMetaExpr <- function(x, ...) {
   deparseCode(x)
 }
-
-#' @export
-knit_print.shinyMetaString <- function(x, ...) {
-  deparseCode(x)
-}
-
-

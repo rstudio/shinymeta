@@ -274,7 +274,7 @@ withMetaMode <- function(expr, mode = TRUE) {
   }
 
   if (switchMetaMode(normal = FALSE, meta = TRUE, mixed = FALSE)) {
-    expr <- prefix_class(expr, "shinyMetaExpr")
+    expr <- as_meta_expr(expr)
   }
 
   force(expr)
@@ -396,12 +396,7 @@ metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "aut
       expr <- prefix_class(expr, "bindToReturn")
     }
 
-    expr <- prefix_class(expr, "shinyMetaExpr")
-    if (is.character(expr)) {
-      oldClass(expr) <- unique(c("shinyMetaString", oldClass(expr)))
-    }
-
-    expr
+    as_meta_expr(expr)
   })
 }
 
@@ -840,16 +835,24 @@ is_output_read <- function(expr) {
   is_dollar || is_bracket
 }
 
+as_meta_expr <- function(expr) {
+  expr <- prefix_class(expr, "shinyMetaExpr")
+  if (is.character(expr)) {
+    expr <- prefix_class(expr, "shinyMetaString")
+  }
+  expr
+}
+
 prefix_class <- function (x, y) {
   # Can't set attributes on a symbol, but that's alright because
   # we don't need to flag or compute on symbols
-  if (is.symbol(x) || !is.language(x)) return(x)
+  if (is.symbol(x)) return(x)
   oldClass(x) <- unique(c(y, oldClass(x)))
   x
 }
 
 remove_class <- function(x, y) {
-  if (is.symbol(x) || !is.language(x)) return(x)
+  if (is.symbol(x)) return(x)
   oldClass(x) <- setdiff(oldClass(x), y)
   x
 }
