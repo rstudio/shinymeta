@@ -397,6 +397,9 @@ metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "aut
     }
 
     expr <- prefix_class(expr, "shinyMetaExpr")
+    if (is.character(expr)) {
+      oldClass(expr) <- unique(c("shinyMetaString", oldClass(expr)))
+    }
 
     expr
   })

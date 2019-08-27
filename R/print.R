@@ -1,10 +1,41 @@
-#' Print method for shinymeta metaExpression
-#'
-#' @param x an object of class shinyMetaExpr.
-#' @param ... arguments passed along to [formatCode()].
-#'
 #' @export
-#' @keywords internal
 print.shinyMetaExpr <- function(x, ...) {
-  print(formatCode(x, ...))
+  print(formatCode(x), ...)
 }
+
+#' @export
+print.shinyMetaString <- function(x, ...) {
+  print(deparseCode(x), ...)
+}
+
+#' @export
+as.character.shinyMetaExpr <- function(x, ...) {
+  as.character(deparseCode(x), ...)
+}
+
+#' @export
+as.character.shinyMetaString <- function(x, ...) {
+  as.character(deparseCode(x), ...)
+}
+
+#' @export
+format.shinyMetaExpr <- function(x, ...) {
+  format(deparseCode(x), ...)
+}
+
+#' @export
+format.shinyMetaString <- function(x, ...) {
+  format(deparseCode(x), ...)
+}
+
+#' @export
+knit_print.shinyMetaExpr <- function(x, ...) {
+  deparseCode(x)
+}
+
+#' @export
+knit_print.shinyMetaString <- function(x, ...) {
+  deparseCode(x)
+}
+
+

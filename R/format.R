@@ -57,6 +57,9 @@ styleText <- function(code, ...) {
 #' @rdname formatCode
 deparseCode <- function(code, width = 500L) {
   code <- comment_flags_to_enclosings(code)
+  # Ensure classes used to flag values internally
+  # aren't included in the deparsed result
+  oldClass(code) <- setdiff(oldClass(code), "shinyMetaString")
   code_text <- deparse_flatten(code, width = width)
   code_text <- comment_remove_enclosing(code_text)
   oldClass(code_text) <- "shinyMetaDeparsed"
