@@ -274,7 +274,7 @@ withMetaMode <- function(expr, mode = TRUE) {
   }
 
   if (switchMetaMode(normal = FALSE, meta = TRUE, mixed = FALSE)) {
-    expr <- as_meta_expr(expr)
+    expr <- prefix_meta_classes(expr)
   }
 
   force(expr)
@@ -396,7 +396,7 @@ metaExpr <- function(expr, env = parent.frame(), quoted = FALSE, localize = "aut
       expr <- prefix_class(expr, "bindToReturn")
     }
 
-    as_meta_expr(expr)
+    prefix_meta_classes(expr)
   })
 }
 
@@ -835,7 +835,7 @@ is_output_read <- function(expr) {
   is_dollar || is_bracket
 }
 
-as_meta_expr <- function(expr) {
+prefix_meta_classes <- function(expr) {
   expr <- prefix_class(expr, "shinyMetaExpr")
   if (is.character(expr)) {
     expr <- prefix_class(expr, "shinyMetaString")
