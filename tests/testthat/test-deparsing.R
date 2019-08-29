@@ -10,7 +10,7 @@ describe("deparsing", isolate({
 
     skip_if_not_installed("knitr")
     expect_equal(
-      knitr::knit_expand(text = "a <- {{out}}"),
+      knitr::knit_expand(text = "a <- {{out}}", out = out),
       "a <- \"foo\""
     )
   })
@@ -23,7 +23,7 @@ describe("deparsing", isolate({
 
     skip_if_not_installed("knitr")
     expect_equal(
-      knitr::knit_expand(text = "a <- {{out}}"),
+      knitr::knit_expand(text = "a <- {{out}}", out = out),
       "a <- \"foo\" + 1"
     )
   })
@@ -36,7 +36,7 @@ describe("deparsing", isolate({
 
     skip_if_not_installed("knitr")
     expect_equal(
-      knitr::knit_expand(text = "a <- {{out}}"),
+      knitr::knit_expand(text = "a <- {{out}}", out = out),
       "a <- list(a = 1)"
     )
   })
