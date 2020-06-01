@@ -4,8 +4,13 @@
 \alias{outputCodeButton}
 \title{Overlay an icon on a shiny output}
 \usage{
-outputCodeButton(outputObj, label = "Show code",
-  icon = shiny::icon("code"), width = NULL, ...)
+outputCodeButton(
+  outputObj,
+  label = "Show code",
+  icon = shiny::icon("code"),
+  width = NULL,
+  ...
+)
 }
 \arguments{
 \item{outputObj}{A shiny output container (e.g., \link[shiny:plotOutput]{shiny::plotOutput}, \link[shiny:textOutput]{shiny::textOutput}, etc)}
@@ -13,10 +18,10 @@ outputCodeButton(outputObj, label = "Show code",
 \item{label}{The contents of the button or link--usually a text label, but
 you could also use any other HTML, like an image.}
 
-\item{icon}{An optional \code{\link{icon}} to appear on the button.}
+\item{icon}{An optional \code{\link[shiny:icon]{icon()}} to appear on the button.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[shiny:validateCssUnit]{validateCssUnit()}}.}
 
 \item{...}{Named attributes to be applied to the button or link.}
 }

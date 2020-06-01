@@ -14,7 +14,7 @@ describe("expansion", isolate({
       metaExpr(..(two()))
     )
     q1 <- quote(1)
-    expect_equal(res, q1)
+    expect_equal(unclass(res), q1)
     expect_true(formatCode(res) == "1")
   })
 
@@ -36,10 +36,10 @@ describe("expansion", isolate({
 
   it("has clean pipeline stages", {
     x1 <- metaReactive({ ..(one()) + 2 })
-    expect_equal(withMetaMode(x1()), quote(1 + 2))
+    expect_true(withMetaMode(x1()) == quote(1 + 2))
 
     x2 <- metaReactive({ ..(one()) %>% print() })
-    expect_equal(withMetaMode(x2()), quote(1 %>% print()))
+    expect_true(withMetaMode(x2()) == quote(1 %>% print()))
   })
 
   it("reads from enclosing environment", {

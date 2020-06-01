@@ -32,12 +32,12 @@ Turn unevaluated shinymeta expressions into (formatted or styled) text.
 Before any formatting takes place, the unevaluated expression is
 deparsed into a string via \code{\link[=deparseCode]{deparseCode()}}, which ensures that
 shinymeta comment strings (i.e., literal strings that appear on their own line,
-and begin with one or more \code{#} characters.) are turned into comments and
-superfluous \code{\{} are removed. After deparsing, the \code{formatCode()} function then
+and begin with one or more \verb{#} characters.) are turned into comments and
+superfluous \verb{\\\{} are removed. After deparsing, the \code{formatCode()} function then
 calls the \code{formatter} function on the deparsed string to format (aka style) the code string.
 The default \code{formatter}, \code{styleText()}, uses \code{\link[styler:style_text]{styler::style_text()}} with a couple differences:
 \itemize{
-\item Pipe operators (\code{\%>\%}) are \emph{always} followed by a line break.
+\item Pipe operators (\verb{\%>\%}) are \emph{always} followed by a line break.
 \item If the token appearing after a line-break is a comma/operator, the line-break is removed.
 }
 }

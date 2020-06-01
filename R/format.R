@@ -57,10 +57,16 @@ styleText <- function(code, ...) {
 #' @rdname formatCode
 deparseCode <- function(code, width = 500L) {
   code <- comment_flags_to_enclosings(code)
+  # Don't include meta classes in the deparsed result
+  code <- walk_ast(code, remove_meta_classes)
   code_text <- deparse_flatten(code, width = width)
   code_text <- comment_remove_enclosing(code_text)
   oldClass(code_text) <- "shinyMetaDeparsed"
   code_text
+}
+
+remove_meta_classes <- function(expr) {
+  remove_class(expr, c("shinyMetaString", "shinyMetaExpr"))
 }
 
 deparse_flatten <- function(expr, width = 500L) {

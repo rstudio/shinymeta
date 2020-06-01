@@ -5,11 +5,17 @@
 \alias{metaRender2}
 \title{Create a meta-reactive output}
 \usage{
-metaRender(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE,
-  localize = "auto", bindToReturn = FALSE)
+metaRender(
+  renderFunc,
+  expr,
+  ...,
+  env = parent.frame(),
+  quoted = FALSE,
+  localize = "auto",
+  bindToReturn = FALSE
+)
 
-metaRender2(renderFunc, expr, ..., env = parent.frame(),
-  quoted = FALSE)
+metaRender2(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE)
 }
 \arguments{
 \item{renderFunc}{A reactive output function (e.g., \link[shiny:renderPlot]{shiny::renderPlot}, \link[shiny:renderText]{shiny::renderText}, \link[shiny:renderUI]{shiny::renderUI}, etc).}
@@ -31,7 +37,7 @@ The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[
 statement (i.e., return statements in anonymized functions are ignored).}
 
 \item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
-of a meta expression be applied to the \emph{last child} of the top-level \code{\{} call?}
+of a meta expression be applied to the \emph{last child} of the top-level \verb{\\\{} call?}
 }
 \description{
 Create a meta-reactive output that, when invoked with meta-mode activated
