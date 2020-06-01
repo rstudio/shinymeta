@@ -35,8 +35,6 @@ Suggests:
     ggplot2,
     cranlogs,
     zoo
-Remotes:
-    rstudio/shiny
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 Collate: 
