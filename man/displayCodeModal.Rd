@@ -4,10 +4,17 @@
 \alias{displayCodeModal}
 \title{Display a shinyAce code editor via shiny modal}
 \usage{
-displayCodeModal(code, title = NULL, clip = "clipboard",
-  footer = shiny::modalButton("Dismiss"), size = c("m", "s", "l"),
-  easyClose = TRUE, fade = TRUE,
-  session = shiny::getDefaultReactiveDomain(), ...)
+displayCodeModal(
+  code,
+  title = NULL,
+  clip = "clipboard",
+  footer = shiny::modalButton("Dismiss"),
+  size = c("m", "s", "l"),
+  easyClose = TRUE,
+  fade = TRUE,
+  session = shiny::getDefaultReactiveDomain(),
+  ...
+)
 }
 \arguments{
 \item{code}{Either a language object or a character string.}
@@ -26,7 +33,7 @@ or \code{"l"} for large.}
 clicking outside the dialog box, or be pressing the Escape key. If
 \code{FALSE} (the default), the modal dialog can't be dismissed in those
 ways; instead it must be dismissed by clicking on the dismiss button, or
-from a call to \code{\link[=removeModal]{removeModal()}} on the server.}
+from a call to \code{\link[shiny:removeModal]{removeModal()}} on the server.}
 
 \item{fade}{If \code{FALSE}, the modal dialog will have no fade-in animation
 (it will simply appear rather than fade in to view).}
@@ -53,7 +60,7 @@ if (interactive()) {
     })
     observeEvent(input$code, {
       code <- expandChain(output$p())
-      displayEditor(code)
+      displayCodeModal(code)
     })
   }
   shinyApp(ui, server)

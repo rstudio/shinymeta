@@ -5,12 +5,23 @@
 \alias{buildRmdBundle}
 \title{Produce a zip bundle of code and results}
 \usage{
-buildScriptBundle(code = NULL, output_zip_path,
-  script_name = "script.R", include_files = list(), render = TRUE,
-  render_args = list())
+buildScriptBundle(
+  code = NULL,
+  output_zip_path,
+  script_name = "script.R",
+  include_files = list(),
+  render = TRUE,
+  render_args = list()
+)
 
-buildRmdBundle(report_template, output_zip_path, vars = list(),
-  include_files = list(), render = TRUE, render_args = list())
+buildRmdBundle(
+  report_template,
+  output_zip_path,
+  vars = list(),
+  include_files = list(),
+  render = TRUE,
+  render_args = list()
+)
 }
 \arguments{
 \item{code}{A language object.}

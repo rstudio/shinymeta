@@ -4,8 +4,13 @@
 \alias{metaExpr}
 \title{Mark an expression as a meta-expression}
 \usage{
-metaExpr(expr, env = parent.frame(), quoted = FALSE,
-  localize = "auto", bindToReturn = FALSE)
+metaExpr(
+  expr,
+  env = parent.frame(),
+  quoted = FALSE,
+  localize = "auto",
+  bindToReturn = FALSE
+)
 }
 \arguments{
 \item{expr}{An expression (quoted or unquoted).}
@@ -20,7 +25,7 @@ The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[
 statement (i.e., return statements in anonymized functions are ignored).}
 
 \item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
-of a meta expression be applied to the \emph{last child} of the top-level \code{\{} call?}
+of a meta expression be applied to the \emph{last child} of the top-level \verb{\\\{} call?}
 }
 \description{
 Mark an expression as a meta-expression

@@ -5,12 +5,23 @@
 \alias{metaObserve2}
 \title{Create a meta-reactive observer}
 \usage{
-metaObserve(expr, env = parent.frame(), quoted = FALSE, label = NULL,
-  domain = getDefaultReactiveDomain(), localize = "auto",
-  bindToReturn = FALSE)
+metaObserve(
+  expr,
+  env = parent.frame(),
+  quoted = FALSE,
+  label = NULL,
+  domain = getDefaultReactiveDomain(),
+  localize = "auto",
+  bindToReturn = FALSE
+)
 
-metaObserve2(expr, env = parent.frame(), quoted = FALSE,
-  label = NULL, domain = getDefaultReactiveDomain())
+metaObserve2(
+  expr,
+  env = parent.frame(),
+  quoted = FALSE,
+  label = NULL,
+  domain = getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{expr}{An expression (quoted or unquoted).}
@@ -25,14 +36,14 @@ variable; to do so, it must be quoted with \code{quote()}.}
 
 \item{label}{A label for the observer, useful for debugging.}
 
-\item{domain}{See \link{domains}.}
+\item{domain}{See \link[shiny]{domains}.}
 
 \item{localize}{Whether or not to wrap the returned expression in \code{\link[=local]{local()}}.
 The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[=return]{return()}}
 statement (i.e., return statements in anonymized functions are ignored).}
 
 \item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
-of a meta expression be applied to the \emph{last child} of the top-level \code{\{} call?}
+of a meta expression be applied to the \emph{last child} of the top-level \verb{\\\{} call?}
 }
 \description{
 Create a \code{\link[=observe]{observe()}}r that, when invoked with meta-mode activated

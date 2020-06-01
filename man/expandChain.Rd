@@ -40,11 +40,11 @@ There are two ways to extract code from meta objects (i.e. \code{\link[=metaReac
 The simplest is \code{withMetaMode(obj())}, which crawls the tree of meta-reactive
 dependencies and expands each \code{..()} in place.
 
-For example, consider these meta objects:\preformatted{    nums <- metaReactive({ runif(100) })
-    obs <- metaObserve({
+For example, consider these meta objects:\preformatted{    nums <- metaReactive(\{ runif(100) \})
+    obs <- metaObserve(\{
       summary(..(nums()))
       hist(..(nums()))
-    })
+    \})
 }
 
 When code is extracted using \code{withMetaMode}:\preformatted{    withMetaMode(obs())
@@ -122,13 +122,13 @@ After this code is run, \code{chunk1} contains only the definition of \code{nums
 
 Sometimes, when generating code, we want to completely replace the
 implementation of a \code{metaReactive}. For example, our Shiny app might contain
-this logic, using \code{\link[shiny:fileInput]{shiny::fileInput()}}:\preformatted{    data <- metaReactive2({
+this logic, using \code{\link[shiny:fileInput]{shiny::fileInput()}}:\preformatted{    data <- metaReactive2(\{
       req(input$file_upload)
       metaExpr(read.csv(..(input$file_upload$datapath)))
-    })
-    obs <- metaObserve({
+    \})
+    obs <- metaObserve(\{
       summary(..(data()))
-    })
+    \})
 }
 
 Shiny's file input works by saving uploading files to a temp directory. The
@@ -137,9 +137,9 @@ another user tries to run the generated code.
 
 You can use the expansion context object to swap out the implementation of
 \code{data}, or any other \code{metaReactive}:\preformatted{    ec <- newExpansionContext()
-    ec$substituteMetaReactive(data, function() {
+    ec$substituteMetaReactive(data, function() \{
       metaExpr(read.csv("data.csv"))
-    })
+    \})
 
     expandChain(.expansionContext = ec, obs())
 }

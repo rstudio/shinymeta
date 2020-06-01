@@ -12,10 +12,10 @@
 \description{
 In shinymeta, \code{..()} is designed for \emph{annotating} portions of code
 inside a \code{metaExpr} (or its higher-level friends \code{metaReactive},
-\code{metaObserve}, and \code{metaRender}). At run time, these \code{meta-} functions search for
+\code{metaObserve}, and \code{metaRender}). At run time, these \verb{meta-} functions search for
 \code{..()} calls and replace them with something else (see Details). Outside
-of these \code{meta-} functions, \code{..()} is not defined, so one must take extra care when
-interrogating any code within a \code{meta-} function that contains \code{..()} (see Debugging).
+of these \verb{meta-} functions, \code{..()} is not defined, so one must take extra care when
+interrogating any code within a \verb{meta-} function that contains \code{..()} (see Debugging).
 }
 \details{
 As discussed in the \href{https://rstudio.github.io/shinymeta/articles/code-generation.html}{Code Generation}
@@ -38,12 +38,12 @@ If \code{..()} is called in a context where it isn't defined (that is, outside o
 you'll see an error like: "..() is only defined inside shinymeta meta-expressions".
 In practice, this problem can manifest itself in at least 3 different ways:
 \enumerate{
-\item Execution is halted, perhaps by inserting \code{browser()}, and from inside the \code{Browse>} prompt,
+\item Execution is halted, perhaps by inserting \code{browser()}, and from inside the \verb{Browse>} prompt,
 \code{..()} is called directly. This is also not allowed, because the purpose of \code{..()} is to be
 searched-and-replaced away \emph{before} \code{metaExpr} begins executing the code. As a result,
-if you want to interrogate code that contains \code{..()} at the \code{Browse>} prompt,
+if you want to interrogate code that contains \code{..()} at the \verb{Browse>} prompt,
 make sure it's wrapped in \code{metaExpr} before evaluating it. Also, note that when
-stepping through a \code{metaExpr} at the \code{Browse>} prompt with \code{n}, the debugger
+stepping through a \code{metaExpr} at the \verb{Browse>} prompt with \code{n}, the debugger
 will echo the actual code that's evaluated during normal execution (i.e., \code{..()} is stripped),
 so that's another option for interrogating what happens during normal execution.
 On the other hand, if you are wanting to interrogate what happens during meta-execution,

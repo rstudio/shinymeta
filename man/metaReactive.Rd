@@ -5,13 +5,25 @@
 \alias{metaReactive2}
 \title{Create a meta-reactive expression}
 \usage{
-metaReactive(expr, env = parent.frame(), quoted = FALSE,
-  varname = NULL, domain = shiny::getDefaultReactiveDomain(),
-  inline = FALSE, localize = "auto", bindToReturn = FALSE)
+metaReactive(
+  expr,
+  env = parent.frame(),
+  quoted = FALSE,
+  varname = NULL,
+  domain = shiny::getDefaultReactiveDomain(),
+  inline = FALSE,
+  localize = "auto",
+  bindToReturn = FALSE
+)
 
-metaReactive2(expr, env = parent.frame(), quoted = FALSE,
-  varname = NULL, domain = shiny::getDefaultReactiveDomain(),
-  inline = FALSE)
+metaReactive2(
+  expr,
+  env = parent.frame(),
+  quoted = FALSE,
+  varname = NULL,
+  domain = shiny::getDefaultReactiveDomain(),
+  inline = FALSE
+)
 }
 \arguments{
 \item{expr}{An expression (quoted or unquoted).}
@@ -27,7 +39,7 @@ variable; to do so, it must be quoted with \code{quote()}.}
 \item{varname}{An R variable name that this object prefers to be named when
 its code is extracted into an R script. (See also: \code{\link[=expandChain]{expandChain()}})}
 
-\item{domain}{See \link{domains}.}
+\item{domain}{See \link[shiny]{domains}.}
 
 \item{inline}{If \code{TRUE}, during code expansion, do not declare a variable for
 this object; instead, inline the code into every call site. Use this to avoid
@@ -38,7 +50,7 @@ The default, \code{"auto"}, only wraps expressions with a top-level \code{\link[
 statement (i.e., return statements in anonymized functions are ignored).}
 
 \item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
-of a meta expression be applied to the \emph{last child} of the top-level \code{\{} call?}
+of a meta expression be applied to the \emph{last child} of the top-level \verb{\\\{} call?}
 }
 \description{
 Create a \code{\link[=reactive]{reactive()}} that, when invoked with meta-mode activated
@@ -52,7 +64,7 @@ with \code{metaExpr()}. When using \code{metaReactive2()}, \code{expr} must retu
 
 If \code{varname} is unspecified, \link{srcref}s are used in attempt to infer the name
 bound to the meta-reactive object. In order for this inference to work, the
-\code{keep.source} \link{option} must be \code{TRUE} and \code{expr} must begin with \code{\{}.
+\code{keep.source} \link{option} must be \code{TRUE} and \code{expr} must begin with \verb{\\\{}.
 }
 \examples{
 
