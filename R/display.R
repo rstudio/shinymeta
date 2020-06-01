@@ -26,7 +26,7 @@
 #'     })
 #'     observeEvent(input$code, {
 #'       code <- expandChain(output$p())
-#'       displayEditor(code)
+#'       displayCodeModal(code)
 #'     })
 #'   }
 #'   shinyApp(ui, server)
