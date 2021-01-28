@@ -1,5 +1,3 @@
-context("deparsing")
-
 describe("deparsing", isolate({
 
   it("escapes strings", {

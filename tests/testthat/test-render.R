@@ -1,5 +1,3 @@
-context("render")
-
 describe("metaRender", isolate({
   it("basically works", {
     expect_identical(
@@ -13,18 +11,18 @@ describe("metaRender", isolate({
     )
 
     expect_equal(
-      withMetaMode({
+      unclass(withMetaMode({
         metaRender(shiny::renderText, { paste("foo", "bar") })()
-      }),
+      })),
       quote(
         paste("foo", "bar")
       )
     )
 
     expect_equal(
-      withMetaMode({
+      unclass(withMetaMode({
         metaRender2(shiny::renderText, metaExpr({ paste("foo", "bar") }))()
-      }),
+      })),
       quote(
         paste("foo", "bar")
       )
@@ -51,18 +49,18 @@ describe("metaRender", isolate({
     )
 
     expect_equal(
-      withMetaMode({
+      unclass(withMetaMode({
         metaRender(shiny::renderText, expr = x$expr1, env = x$env, quoted = TRUE)()
-      }),
+      })),
       quote(
         paste("foo", "bar")
       )
     )
 
     expect_equal(
-      withMetaMode({
+      unclass(withMetaMode({
         metaRender2(shiny::renderText, expr = x$expr2, env = x$env, quoted = TRUE)()
-      }),
+      })),
       quote(
         paste("foo", "bar")
       )
@@ -85,14 +83,9 @@ describe("metaRender", isolate({
       "# top-level comment",
       output[["plot"]]()
     )
-    expected <- c(
-      "# top-level comment",
-      "data <- dplyr::sample_n(diamonds, 1000)",
-      "ggplot(data, aes(carat, price)) + geom_point()"
-    )
 
-    expect_true(all(formatCode(x1) == expected))
-    expect_true(all(formatCode(x2) == expected))
+    expect_snapshot_output(formatCode(x1))
+    expect_snapshot_output(formatCode(x2))
 
     # TODO: it would be nice to have an informative error here
     # https://github.com/rstudio/shinymeta/issues/49

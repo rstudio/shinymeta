@@ -1,5 +1,3 @@
-context("test-metamodes")
-
 test_that("state machine is followed", {
   # Normal (FALSE)
 

@@ -1,18 +1,3 @@
-context("localize")
-
-expect_code_string <- function(code, expected, ...) {
-  actual <- unclass(formatCode(code, ...))
-  expect_equal(actual, expected)
-}
-
-# utility function for creating test expectations
-generate_code_string <- function(code, ...) {
-  cat("c(", "\n", "'")
-  str <- strsplit(formatCode(code, ...), "\n")[[1]]
-  cat(str, sep = "',\n'")
-  cat("'", ")")
-}
-
 describe(
   "auto-localized expressions", isolate({
 
@@ -23,30 +8,11 @@ describe(
     })
 
     it("without assignment", {
-      expected <- c(
-        'local({',
-        '  a <- 1 + 1',
-        '  if (T) {',
-        '    return("b")',
-        '  }',
-        '  a + 1',
-        '})'
-      )
-      expect_code_string(withMetaMode(mr()), expected)
+      expect_snapshot_output(withMetaMode(mr()))
     })
 
     it("with assignment", {
-      expected <- c(
-        'mr <- local({',
-        '  a <- 1 + 1',
-        '  if (T) {',
-        '    return("b")',
-        '  }',
-        '  a + 1',
-        '})',
-        'mr'
-      )
-      expect_code_string(expandChain(mr()), expected)
+      expect_snapshot_output(expandChain(mr()))
     })
 
     it("with chaining", {
@@ -54,20 +20,7 @@ describe(
         ..(mr()) + 1
       })
 
-      expect_code_string(
-        expandChain(mr2()),
-        c(
-          'mr <- local({',
-          '  a <- 1 + 1',
-          '  if (T) {',
-          '    return("b")',
-          '  }',
-          '  a + 1',
-          '})',
-          'mr2 <- mr + 1',
-          'mr2'
-        )
-      )
+      expect_snapshot_output(expandChain(mr2()))
     })
 
     it("with anonymous functions", {
@@ -75,16 +28,7 @@ describe(
         unlist(lapply(1:5, function(x) { if (x == 2) return(x) }))
       })
 
-      expect_code_string(
-        withMetaMode(mrx()),
-        c(
-          'unlist(lapply(1:5, function(x) {',
-          '  if (x == 2) {',
-          '    return(x)',
-          '  }',
-          '}))'
-        )
-      )
+      expect_snapshot_output(withMetaMode(mrx()))
     })
 
     it("with already localized expression", {
@@ -95,16 +39,7 @@ describe(
         })
       })
 
-      expect_code_string(
-        withMetaMode(mrl()),
-        c(
-          'local({',
-          '  a <- 1',
-          '  a + 2',
-          '})'
-        )
-      )
-
+      expect_snapshot_output(withMetaMode(mrl()))
     })
 
   })
@@ -124,14 +59,7 @@ describe(
 
     it("single assign works", {
 
-      expect_code_string(
-        expandChain(invisible(mr())),
-        c(
-          'a <- 1 + 1',
-          'b <- a + 1',
-          'mr <- b + 1'
-        )
-      )
+      expect_snapshot_output(expandChain(invisible(mr())))
     })
 
     it("double assign works", {
@@ -146,19 +74,7 @@ describe(
         ..(mr()) + ..(mr2())
       })
 
-      expect_code_string(
-        expandChain(mrx()),
-        c(
-          'a <- 1 + 1',
-          'b <- a + 1',
-          'mr <- b + 1',
-          'a <- 1 + 1',
-          'b <- a + 1',
-          'mr2 <- b + 1',
-          'mrx <- mr + mr2',
-          'mrx'
-        )
-      )
+      expect_snapshot_output(expandChain(mrx()))
     })
 
     it("doesn't bind on local", {
@@ -170,17 +86,7 @@ describe(
         b + 1
       }, local = TRUE, bindToReturn = TRUE)
 
-      expect_code_string(
-        expandChain(mr()),
-        c(
-          'mr <- local({',
-          '  a <- 1 + 1',
-          '  b <- a + 1',
-          '  b + 1',
-          '})',
-          'mr'
-        )
-      )
+      expect_snapshot_output(expandChain(mr()))
 
     })
 
