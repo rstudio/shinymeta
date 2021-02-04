@@ -52,7 +52,6 @@ styleText <- function(code, ...) {
 }
 
 
-#' @inheritParams formatCode
 #' @export
 #' @rdname formatCode
 deparseCode <- function(code, width = 500L) {
