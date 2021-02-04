@@ -107,3 +107,8 @@ mrexprSrcrefToLabel <- function(srcref, defaultLabel) {
 
   return(as.character(res))
 }
+
+# For R 3.3/3.4
+is_false <- function(x) {
+  is.logical(x) && length(x) == 1L && !is.na(x) && !x
+}

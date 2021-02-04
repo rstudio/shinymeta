@@ -18,7 +18,7 @@ metaRender(
 metaRender2(renderFunc, expr, ..., env = parent.frame(), quoted = FALSE)
 }
 \arguments{
-\item{renderFunc}{A reactive output function (e.g., \link[shiny:renderPlot]{shiny::renderPlot}, \link[shiny:renderText]{shiny::renderText}, \link[shiny:renderUI]{shiny::renderUI}, etc).}
+\item{renderFunc}{A reactive output function (e.g., \link[shiny:renderPlot]{shiny::renderPlot}, \link[shiny:renderPrint]{shiny::renderText}, \link[shiny:renderUI]{shiny::renderUI}, etc).}
 
 \item{expr}{An expression that generates given output expected by \code{renderFunc}.}
 
@@ -86,5 +86,5 @@ if (interactive()) {
 
 }
 \seealso{
-\code{\link[=metaExpr]{metaExpr()}}, \code{\link[shinymeta:dotdot]{..}}
+\code{\link[=metaExpr]{metaExpr()}}, \code{\link[=dotdot]{..}}
 }

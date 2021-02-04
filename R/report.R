@@ -31,7 +31,6 @@ buildScriptBundle <- function(code = NULL, output_zip_path, script_name = "scrip
 }
 
 
-#' @inheritParams buildScriptBundle
 #' @param report_template Filename of an Rmd template to be expanded by [knitr::knit_expand()].
 #' @param vars A named list of variables passed along to `...` in [knitr::knit_expand()].
 #' @export

@@ -8,3 +8,4 @@ examples
 ^tools$
 ^doc$
 ^Meta$
+^\.github$

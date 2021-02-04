@@ -1,4 +1,3 @@
-context("comments")
 library(shiny)
 
 capturePrint <- function(x) {

@@ -1,7 +1,7 @@
 # shinymeta
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.org/rstudio/shinymeta.svg?branch=master)](https://travis-ci.org/rstudio/shinymeta)
+[![R build status](https://github.com/rstudio/shinymeta/workflows/R-CMD-check/badge.svg)](https://github.com/rstudio/shinymeta/actions)
 [![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/package=shinymeta)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->

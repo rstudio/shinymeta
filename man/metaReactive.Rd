@@ -97,5 +97,5 @@ expandChain(y())
 
 }
 \seealso{
-\code{\link[=metaExpr]{metaExpr()}}, \code{\link[shinymeta:dotdot]{..}}
+\code{\link[=metaExpr]{metaExpr()}}, \code{\link[=dotdot]{..}}
 }

@@ -1,5 +1,3 @@
-context("test-expandchain")
-
 mr1 <- metaReactive({
   1
 })
