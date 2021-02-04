@@ -1,0 +1,12 @@
+---
+title: "A test template"
+output: html_document
+---
+
+{{desc}}
+
+```{r}
+{{code_chunk}}
+```
+
+The result is `r {{code_inline}}`.

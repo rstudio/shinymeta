@@ -112,3 +112,10 @@ mrexprSrcrefToLabel <- function(srcref, defaultLabel) {
 is_false <- function(x) {
   is.logical(x) && length(x) == 1L && !is.na(x) && !x
 }
+
+# Version of knit_expand that doesn't search the parent frame, and detects when
+# expansion results in unsafe Rmd input (i.e. the evaluation of {{expr}} should
+# never introduce a chunk boundary or even a new inline chunk)
+knit_expand_safe <- function(file, ..., delim = c("{{", "}}")) {
+  knitr::knit_expand(file, ..., delim = delim)
+}

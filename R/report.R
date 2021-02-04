@@ -17,7 +17,7 @@
 buildScriptBundle <- function(code = NULL, output_zip_path, script_name = "script.R",
   include_files = list(), render = TRUE, render_args = list()) {
 
-  progress <- shiny::Progress$new()
+  progress <- make_progress()
   progress$set(value = 0)
   progress$set(message = "Generating code")
 
@@ -43,7 +43,7 @@ buildRmdBundle <- function(report_template, output_zip_path, vars = list(),
   force(report_template)
   force(vars)
 
-  progress <- shiny::Progress$new()
+  progress <- make_progress()
   progress$set(value = 0)
   progress$set(message = "Generating code")
 
@@ -60,9 +60,7 @@ buildRmdBundle <- function(report_template, output_zip_path, vars = list(),
   progress$set(value = 0.1)
   progress$set(message = "Expanding Rmd template")
 
-  # TODO: Replace knit_expand with a version that doesn't allow arbitrary
-  # R expressions and doesn't search the parent frame
-  rmd_source <- do.call(knitr::knit_expand, c(list(report_template), vars))
+  rmd_source <- do.call(knit_expand_safe, c(list(report_template), vars))
   rmd_filename <- template_rename(report_template, "Rmd")
 
   build_bundle(rmd_source, rmd_filename, output_zip_path,
@@ -141,5 +139,25 @@ template_rename <- function(input_template, extension = "Rmd") {
     filename
   } else {
     paste0(filename, ".", extension)
+  }
+}
+
+# Create shiny::Progress if possible, otherwise a dummy progress object
+make_progress <- function(...) {
+  session <- shiny::getDefaultReactiveDomain()
+  if (!is.null(session)) {
+    shiny::Progress$new(session = session, ...)
+  } else {
+    # Return a dummy progress object
+    nothing <- function(...) {}
+    list(
+      set = nothing,
+      inc = nothing,
+      getMin = nothing,
+      getMax = nothing,
+      getValue = nothing,
+      close = nothing,
+      clone = nothing
+    )
   }
 }
