@@ -2,7 +2,7 @@
   # Turn on this top secret feature of Shiny! Shhhhh!
   options(shiny.allowoutputreads = TRUE)
 
-  message(
+  packageStartupMessage(
     "********************************************************************\n",
     "* Thanks for trying out shinymeta! This package is currently       *\n",
     "* _experimental_ and the API is still evolving. Please use         *\n",

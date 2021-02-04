@@ -333,6 +333,7 @@ withMetaMode <- function(expr, mode = TRUE) {
 #' @param expr A single code expression. Required.
 #'
 #' @rdname dotdot
+#' @name dotdot
 #' @keywords internal
 #' @export
 .. <- function(expr) {
@@ -770,7 +771,7 @@ expandChain <- function(..., .expansionContext = newExpansionContext()) {
     # this metaReactive is going to get this variable name instead.
     return(structure(varname, class = "shinymeta_symbol"))
   }
-  on.exit(.globals$rexprMetaReadFilter <- oldFilter, add = TRUE, after = FALSE)
+  on.exit(.globals$rexprMetaReadFilter <- oldFilter, add = TRUE)
 
   withMetaMode({
     # Trigger evaluation of the ..., which will also cause dependencyCode to be
