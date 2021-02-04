@@ -8,11 +8,11 @@ describe(
     })
 
     it("without assignment", {
-      expect_snapshot_output(withMetaMode(mr()))
+      expect_snapshot_output(cran = TRUE, withMetaMode(mr()))
     })
 
     it("with assignment", {
-      expect_snapshot_output(expandChain(mr()))
+      expect_snapshot_output(cran = TRUE, expandChain(mr()))
     })
 
     it("with chaining", {
@@ -20,7 +20,7 @@ describe(
         ..(mr()) + 1
       })
 
-      expect_snapshot_output(expandChain(mr2()))
+      expect_snapshot_output(cran = TRUE, expandChain(mr2()))
     })
 
     it("with anonymous functions", {
@@ -28,7 +28,7 @@ describe(
         unlist(lapply(1:5, function(x) { if (x == 2) return(x) }))
       })
 
-      expect_snapshot_output(withMetaMode(mrx()))
+      expect_snapshot_output(cran = TRUE, withMetaMode(mrx()))
     })
 
     it("with already localized expression", {
@@ -39,7 +39,7 @@ describe(
         })
       })
 
-      expect_snapshot_output(withMetaMode(mrl()))
+      expect_snapshot_output(cran = TRUE, withMetaMode(mrl()))
     })
 
   })
@@ -59,7 +59,7 @@ describe(
 
     it("single assign works", {
 
-      expect_snapshot_output(expandChain(invisible(mr())))
+      expect_snapshot_output(cran = TRUE, expandChain(invisible(mr())))
     })
 
     it("double assign works", {
@@ -74,7 +74,7 @@ describe(
         ..(mr()) + ..(mr2())
       })
 
-      expect_snapshot_output(expandChain(mrx()))
+      expect_snapshot_output(cran = TRUE, expandChain(mrx()))
     })
 
     it("doesn't bind on local", {
@@ -86,7 +86,7 @@ describe(
         b + 1
       }, local = TRUE, bindToReturn = TRUE)
 
-      expect_snapshot_output(expandChain(mr()))
+      expect_snapshot_output(cran = TRUE, expandChain(mr()))
 
     })
 

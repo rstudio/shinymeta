@@ -84,8 +84,8 @@ describe("metaRender", isolate({
       output[["plot"]]()
     )
 
-    expect_snapshot_output(formatCode(x1))
-    expect_snapshot_output(formatCode(x2))
+    expect_snapshot_output(cran = TRUE, formatCode(x1))
+    expect_snapshot_output(cran = TRUE, formatCode(x2))
 
     # TODO: it would be nice to have an informative error here
     # https://github.com/rstudio/shinymeta/issues/49
