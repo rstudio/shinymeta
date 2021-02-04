@@ -197,7 +197,7 @@ metaMode <- local({
     if (missing(x)) {
       value
     } else {
-      if (!isTRUE(x) && !isFALSE(x) && !identical(x, "mixed")) {
+      if (!isTRUE(x) && !is_false(x) && !identical(x, "mixed")) {
         stop("Invalid metaMode() value: legal values are TRUE, FALSE, and \"mixed\"")
       }
       value <<- x
@@ -217,7 +217,7 @@ switchMetaMode <- function(normal, meta, mixed) {
   mode <- metaMode()
   if (isTRUE(mode)) {
     meta
-  } else if (isFALSE(mode)) {
+  } else if (is_false(mode)) {
     normal
   } else if (identical(mode, "mixed")) {
     mixed
