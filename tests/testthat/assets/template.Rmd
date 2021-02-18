@@ -10,3 +10,5 @@ output: html_document
 ```
 
 The result is `r {{code_inline}}`.
+
+The values are {{x}} and {{y}}.

@@ -6,7 +6,8 @@ test_that("buildRmdBundle works", {
   buildRmdBundle(template_path, output_zip_path, vars = list(
     desc = "# Weekly report\n\nLooks like `cars` hasn't changed since last week.",
     code_chunk = metaExpr(quote({plot(cars)})),
-    code_inline = metaExpr(quote(1 + 1))
+    code_inline = metaExpr(quote(1 + 1)),
+    x = 1, y = 2
   ))
 
   working_dir <- tempfile()
@@ -22,11 +23,43 @@ test_that("buildRmdBundle works", {
 test_that("buildRmdBundle rejects unsafe knit_expand results", {
   output_zip_path <- tempfile("testbundle-", fileext = ".zip")
 
+  # (Begin code chunk) fails
   expect_error(
     buildRmdBundle(template_path, output_zip_path, vars = list(
       desc = "# Weekly report\n\nLooks like `cars` hasn't changed since last week.\n```{r}\nmessage('owned')\n```\n",
       code_chunk = metaExpr(quote({plot(cars)})),
-      code_inline = metaExpr(quote(1 + 1))
+      code_inline = metaExpr(quote(1 + 1)),
+      x = 1, y = 2
+    ))
+  )
+
+  # (End code chunk) fails
+  expect_error(
+    buildRmdBundle(template_path, output_zip_path, vars = list(
+      desc = "# Weekly report\n\nLooks like `cars` hasn't changed since last week.\n```\n",
+      code_chunk = metaExpr(quote({plot(cars)})),
+      code_inline = metaExpr(quote(1 + 1)),
+      x = 1, y = 2
+    ))
+  )
+
+  # (Inline code) fails
+  expect_error(
+    buildRmdBundle(template_path, output_zip_path, vars = list(
+      desc = "# Weekly report\n\nLooks like `cars` hasn't changed since last week.\n`r message('owned')`\n",
+      code_chunk = metaExpr(quote({plot(cars)})),
+      code_inline = metaExpr(quote(1 + 1)),
+      x = 1, y = 2
+    ))
+  )
+
+  # Begin/end of inline.code are in two different spots - fails
+  expect_error(
+    buildRmdBundle(template_path, output_zip_path, vars = list(
+      desc = "# Weekly report\n\nLooks like `cars` hasn't changed since last week.\n",
+      code_chunk = metaExpr(quote({plot(cars)})),
+      code_inline = metaExpr(quote(1 + 1)),
+      x = "`r message('owned') #", y = "`"
     ))
   )
 })
