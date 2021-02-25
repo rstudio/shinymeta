@@ -38,7 +38,8 @@ formatCode <- function(code, width = 500L, formatter = styleText, ...) {
   if (!inherits(code, "shinyMetaDeparsed")) {
     code <- deparseCode(code, width = width)
   }
-  do.call(formatter, c(list(code), list(...)))
+  code <- do.call(formatter, c(list(code), list(...)))
+  prefix_class(code, "shinyMetaFormatted")
 }
 
 #' @export
