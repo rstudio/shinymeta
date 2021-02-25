@@ -129,12 +129,28 @@ knit_expand_safe <- function(file, text = xfun::read_utf8(file), ..., delim = c(
 
   matches_before <- count_matches_by_pattern(text, patterns)
 
-  # TODO: Do not search the parent frame
-  res <- knitr::knit_expand(text = text, ..., delim = delim)
+  # Create an environment that contains nothing but the variables we want to
+  # make available for template expansion, plus .GlobalEnv.
+  eval_envir <- list2env(list(...), parent = .GlobalEnv)
+
+  # Use a knitr hook to ensure that only the ... arguments plus stuff in the
+  # global environment are available when evaluating {{/}} expressions.
+  orig_eval_inline <- knitr::knit_hooks$get("evaluate.inline")
+  knitr::knit_hooks$set(evaluate.inline = function(code, envir) {
+    # ignore envir, as it includes the parent frame of `knit_expand` which we
+    # explicitly do not want to be used for evaluation--only ... arguments to
+    # knit_expand_safe should be used.
+    orig_eval_inline(code, eval_envir)
+  })
+  on.exit(knitr::knit_hooks$set(evaluate.inline = orig_eval_inline), add = TRUE)
+
+  res <- knitr::knit_expand(text = text, delim = delim)
 
   matches_after <- count_matches_by_pattern(xfun::split_lines(res), patterns)
 
   if (!identical(matches_before, matches_after)) {
+    # The process of knit_expand-ing introduced new (or removed existing?) code
+    # chunks
     stop("Can't build report--user input values must not contain code chunk delimiters")
   }
 
