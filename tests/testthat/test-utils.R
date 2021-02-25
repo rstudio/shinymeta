@@ -6,7 +6,7 @@ test_that("knit_expand_safe ignores calling environment", {
     "foo"
   )
   expect_identical(
-    knit_expand_safe(text = "{{ foo }}", foo = foo),
+    knit_expand_safe(text = "{{ foo }}", vars = list(foo = foo)),
     "bar"
   )
 
@@ -20,12 +20,18 @@ test_that("knit_expand_safe ignores calling environment", {
   )
 
   expect_identical(
-    local({ x <- "whatever"; knit_expand_safe(text = "{{ x }}", x = x) }),
+    local({ x <- "whatever"; knit_expand_safe(text = "{{ x }}", vars = list(x = x)) }),
     "whatever"
   )
 
   expect_identical(
     knit_expand_safe(text = "{{ toupper('hello') }}"),
     "HELLO"
+  )
+
+  # Use one of knit_expand_safe's parameter names as a var
+  expect_identical(
+    knit_expand_safe(text = "{{ text }}", vars = list(text = "something")),
+    "something"
   )
 })

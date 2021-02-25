@@ -61,7 +61,7 @@ buildRmdBundle <- function(report_template, output_zip_path, vars = list(),
     progress$set(value = 0.1)
     progress$set(message = "Expanding Rmd template")
 
-    rmd_source <- do.call(knit_expand_safe, c(list(report_template), vars))
+    rmd_source <- knit_expand_safe(report_template, vars = vars)
     rmd_filename <- template_rename(report_template, "Rmd")
 
     build_bundle(rmd_source, rmd_filename, output_zip_path,

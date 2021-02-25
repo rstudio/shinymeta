@@ -116,7 +116,7 @@ is_false <- function(x) {
 # Version of knit_expand that doesn't search the parent frame, and detects when
 # expansion results in unsafe Rmd input (i.e. the evaluation of {{expr}} should
 # never introduce a chunk boundary or even a new inline chunk)
-knit_expand_safe <- function(file, text = xfun::read_utf8(file), ..., delim = c("{{", "}}")) {
+knit_expand_safe <- function(file, vars = list(), text = xfun::read_utf8(file), delim = c("{{", "}}")) {
   # The approach we take here is to detect all knitr md patterns before and
   # after expansion, and fail if anything was either added or removed. We tried
   # just testing the output of each {{expansion}} for the patterns, but, that
@@ -131,7 +131,7 @@ knit_expand_safe <- function(file, text = xfun::read_utf8(file), ..., delim = c(
 
   # Create an environment that contains nothing but the variables we want to
   # make available for template expansion, plus .GlobalEnv.
-  eval_envir <- list2env(list(...), parent = .GlobalEnv)
+  eval_envir <- list2env(vars, parent = .GlobalEnv)
 
   # Use a knitr hook to ensure that only the ... arguments plus stuff in the
   # global environment are available when evaluating {{/}} expressions.
