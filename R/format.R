@@ -39,6 +39,11 @@ formatCode <- function(code, width = 500L, formatter = styleText, ...) {
     code <- deparseCode(code, width = width)
   }
   code <- do.call(formatter, c(list(code), list(...)))
+  # Add a class that we control the print() method for. The primary
+  # motivation for this is to avoid styler:::print.vertical(), which
+  # adds syntax highlight via unicode characters, which doesn't currently
+  # work with shiny::renderPrint() (or anything else that does capture.output())
+  # https://github.com/rstudio/shinymeta/pull/93
   prefix_class(code, "shinyMetaFormatted")
 }
 
