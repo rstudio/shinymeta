@@ -1,6 +1,19 @@
 #' @export
 print.shinyMetaExpr <- function(x, ...) {
   print(formatCode(x), ...)
+  invisible(x)
+}
+
+#' @export
+print.shinyMetaDeparsed <- function(x, ...) {
+  print(formatCode(x), ...)
+  invisible(x)
+}
+
+#' @export
+print.shinyMetaFormatted <- function(x, ...) {
+  cat(x, sep = "\n")
+  invisible(x)
 }
 
 #' @export
