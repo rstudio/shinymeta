@@ -35,6 +35,7 @@ Suggests:
     dplyr,
     ggplot2,
     cranlogs,
+    xfun,
     zoo
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)

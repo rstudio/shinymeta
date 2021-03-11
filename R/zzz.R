@@ -2,15 +2,6 @@
   # Turn on this top secret feature of Shiny! Shhhhh!
   options(shiny.allowoutputreads = TRUE)
 
-  packageStartupMessage(
-    "********************************************************************\n",
-    "* Thanks for trying out shinymeta! This package is currently       *\n",
-    "* _experimental_ and the API is still evolving. Please use         *\n",
-    "* caution, especially when upgrading to a newer shinymeta          *\n",
-    "* build. https://github.com/rstudio/shinymeta/blob/master/NEWS.md  *\n",
-    "********************************************************************"
-  )
-
   registerMethods(list(
     # c(package, genname, class)
     c("knitr", "knit_print", "shinyMetaExpr")
