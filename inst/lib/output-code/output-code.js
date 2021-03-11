@@ -1,12 +1,8 @@
-$(function () {
-  $(".shinymeta-output-code").click(function() {
-    var $el = $(this);
-    var val = $el.data('val') || 0;
-    $el.data('val', val + 1);
-    var output_id = $el.find(".shiny-bound-output").attr("id");
-    var event_id = output_id + "_output_code";
-    Shiny.onInputChange(event_id, $el.data('val'));
-  });
+$(document).on("click", ".shinymeta-output-code button", function() {
+  var id = $(this).parents(".shinymeta-output-code").find(".shiny-bound-output").attr("id");
+  // Invalidate `input$id_output_code` whenever the button of
+  // shinymeta::outputCodeButton(plotOutput("id")) is pressed
+  if (id) {
+    Shiny.setInputValue(id + "_output_code", 'true', {priority: 'event'});
+  }
 });
-
-

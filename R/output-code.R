@@ -37,36 +37,30 @@ outputCodeButton <- function(outputObj, label = "Show code", icon = shiny::icon(
     stop("outputObj must be a shiny.tag or shiny.tag.list object")
   }
 
-  shiny::addResourcePath(
-    "shinymeta-output-code",
-    system.file(package = "shinymeta", "lib", "output-code")
-  )
-
   div(
-    class = "panel panel-default shinymeta-output-code",
-    tags$head(
-      tags$script(src = "shinymeta-output-code/output-code.js"),
-      tags$link(
-        rel = "stylesheet",
-        type = "text/css",
-        href = "shinymeta-output-code/output-code.css"
-      )
+    class = "shinymeta-output-code panel panel-default card",
+    htmltools::htmlDependency(
+      name = "shinymeta-output-code",
+      version = utils::packageVersion("shinymeta"),
+      src = "lib/output-code",
+      package = "shinymeta",
+      script = "output-code.js"
     ),
     div(
-      class = "panel-heading",
+      class = "panel-heading card-header",
       # Basically the same as a actionButton(), but there doesn't seem to
       # be a foolproof way to get the outputId given the outputObj, so
       # we won't know the id of this button ahead of time
       tags$button(
         style = if (!is.null(width)) paste0("width: ", shiny::validateCssUnit(width), ";"),
         type = "button",
-        class = "btn btn-default action-button",
-        list(getFromNamespace("validateIcon", "shiny")(icon), label),
+        class = "btn btn-default",
+        list(icon, label),
         ...
       )
     ),
     div(
-      class = "panel-body",
+      class = "panel-body card-body",
       outputObj
     )
   )
