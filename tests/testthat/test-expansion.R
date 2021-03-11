@@ -50,7 +50,7 @@ expect_equal_call <- function(actual, expected) {
   expect_equal(actual, expected)
 }
 
-test_that("mixed mode", isolate({
+test_that("mixed mode", {isolate({
   # A bunch of different kinds of metaReactive objects that should all
   # yield quote(1+1) in meta mode.
   srcs <- list(
@@ -103,4 +103,4 @@ test_that("mixed mode", isolate({
     mr5 <- metaRender(renderText, ..(src()))
     expect_equal_call(withMetaMode(mr5()), quote(1 + 1))
   })
-}))
+})})

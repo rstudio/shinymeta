@@ -28,6 +28,7 @@ LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,
+    stringr,
     rmarkdown,
     testthat (>= 3.0),
     shinyAce,
@@ -35,6 +36,7 @@ Suggests:
     dplyr,
     ggplot2,
     cranlogs,
+    xfun,
     zoo
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
