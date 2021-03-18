@@ -19,7 +19,7 @@ Imports:
   magrittr,
   rlang (>= 0.4.9),
   htmltools,
-  shiny (>= 1.3.2.9001),
+  shiny (>= 1.6.0),
   sourcetools,
   styler,
   utils
