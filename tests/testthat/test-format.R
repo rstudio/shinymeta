@@ -94,3 +94,14 @@ describe(
   })
 
 )
+
+describe(
+  "formatCode", isolate({
+    it("formats quosures as if they are expressions", {
+      env <- environment()
+      mr <- metaReactive({rlang::new_quosure(quote({print("foo")}), env)}, quoted = TRUE)
+
+      expect_snapshot_output(cran = TRUE, expandChain(mr()))
+    })
+  })
+)

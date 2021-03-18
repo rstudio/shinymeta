@@ -72,3 +72,8 @@
     })
     mr
 
+# formatCode: formats quosures as if they are expressions
+
+    var_1 <- print("foo")
+    var_1
+

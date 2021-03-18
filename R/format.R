@@ -64,6 +64,7 @@ deparseCode <- function(code, width = 500L) {
   code <- comment_flags_to_enclosings(code)
   # Don't include meta classes in the deparsed result
   code <- walk_ast(code, remove_meta_classes)
+  code <- walk_ast(code, quosure_to_expr)
   code_text <- deparse_flatten(code, width = width)
   code_text <- comment_remove_enclosing(code_text)
   oldClass(code_text) <- "shinyMetaDeparsed"
@@ -72,6 +73,14 @@ deparseCode <- function(code, width = 500L) {
 
 remove_meta_classes <- function(expr) {
   remove_class(expr, c("shinyMetaString", "shinyMetaExpr"))
+}
+
+quosure_to_expr <- function(expr) {
+  if (rlang::is_quosure(expr)) {
+    rlang::get_expr(expr)
+  } else {
+    expr
+  }
 }
 
 deparse_flatten <- function(expr, width = 500L) {
