@@ -74,7 +74,9 @@ metaObserveImpl <- function(expr, env, label, domain) {
     })
   }
 
-  o_normal <- shiny::observe(expr, env = env, quoted = TRUE, label = label, domain = domain)
+  o_normal <- rlang::inject(
+    shiny::observe(!!rlang::as_quosure(expr, env), label = label, domain = domain)
+  )
 
   structure(
     function() {

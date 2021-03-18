@@ -63,7 +63,10 @@ metaRender <- function(renderFunc, expr, ..., env = parent.frame(),
   expr <- wrapExpr(shinymeta::metaExpr, expr, env, quoted = FALSE,
     localize = localize, bindToReturn = bindToReturn)
 
-  metaRender2(renderFunc, expr, ..., env = env, quoted = quoted)
+
+  rlang::inject(
+    metaRender2(renderFunc, !!rlang::as_quosure(expr, env), ...)
+  )
 }
 
 #' @export
@@ -76,7 +79,10 @@ metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FA
 
   domain <- getDefaultReactiveDomain()
 
-  normal <- renderFunc(expr = expr, ..., env = env, quoted = quoted)
+  normal <- rlang::inject(
+    renderFunc(expr = !!rlang::as_quosure(expr, env), ...)
+  )
+
   meta <- function() {
     shiny::withReactiveDomain(domain, {
       rlang::eval_tidy(expr, env = env)

@@ -148,7 +148,9 @@ metaReactiveImpl <- function(expr, env, varname, domain, inline) {
   force(domain)
   force(inline)
 
-  r_normal <- shiny::reactive(expr, env = env, quoted = TRUE, label = varname, domain = domain)
+  r_normal <- rlang::inject(
+    shiny::reactive(!!rlang::as_quosure(expr, env), label = varname, domain = domain)
+  )
   r_meta <- function() {
     shiny::withReactiveDomain(domain, {
       rlang::eval_tidy(expr, NULL, env)
