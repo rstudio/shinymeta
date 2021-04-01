@@ -107,4 +107,38 @@ describe("metaRender", isolate({
     expect_true(formatCode(code) == "mr2 <- 1 + 1")
   })
 
+  it("uses correct scopes", {
+    outer_var <- 100
+
+    renderer <- metaRender(renderText, {
+      expect_identical(outer_var, 100)
+      outer_var <<- outer_var + 1
+    })
+    renderer()
+    expect_identical(outer_var, 101)
+
+    mr <- metaReactive({
+      expect_identical(outer_var, 101)
+      outer_var <<- outer_var + 1
+    })
+    mr()
+    expect_identical(outer_var, 102)
+
+    renderer <- metaRender2(renderText, {
+      expect_identical(outer_var, 102)
+      outer_var <<- outer_var + 1
+      metaExpr(outer_var <<- outer_var + 1)
+    })
+    renderer()
+    expect_identical(outer_var, 104)
+
+    mr <- metaReactive2({
+      expect_identical(outer_var, 104)
+      outer_var <<- outer_var + 1
+      metaExpr(outer_var <<- outer_var + 1)
+    })
+    mr()
+    expect_identical(outer_var, 106)
+  })
+
 }))
