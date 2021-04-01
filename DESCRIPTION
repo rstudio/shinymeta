@@ -18,27 +18,29 @@ Imports:
   fs,
   magrittr,
   rlang,
+  htmltools,
   shiny (>= 1.3.2.9001),
   sourcetools,
   styler,
   utils
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: 
     knitr,
+    stringr,
     rmarkdown,
-    testthat,
+    testthat (>= 3.0),
     shinyAce,
     clipr,
     dplyr,
     ggplot2,
     cranlogs,
+    xfun,
     zoo
-Remotes:
-    rstudio/shiny
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3
 Collate: 
     'archive.R'
     'display.R'

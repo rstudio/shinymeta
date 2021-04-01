@@ -1,5 +1,4 @@
-context("expansion")
-
+library(shiny)
 
 describe("expansion", isolate({
   one <- metaReactive({
@@ -78,8 +77,14 @@ describe("expansion", isolate({
 
 }))
 
+expect_equal_call <- function(actual, expected) {
+  if (inherits(actual, "shinyMetaExpr")) {
+    actual <- unclass(actual)
+  }
+  expect_equal(actual, expected)
+}
 
-describe("mixed mode", isolate({
+test_that("mixed mode", {isolate({
   # A bunch of different kinds of metaReactive objects that should all
   # yield quote(1+1) in meta mode.
   srcs <- list(
@@ -95,7 +100,7 @@ describe("mixed mode", isolate({
   lapply(srcs, function(src) {
 
     mr <- metaReactive(..(src()), inline = TRUE)
-    expect_equal(withMetaMode(mr()), quote(1 + 1))
+    expect_equal_call(withMetaMode(mr()), quote(1 + 1))
 
     v <- reactiveVal(0) # cache busting reactive val
     mr2 <- metaReactive2({
@@ -107,9 +112,9 @@ describe("mixed mode", isolate({
       }
       withMetaMode(src())
     })
-    expect_equal(withMetaMode(mr2()), quote(1 + 1))
+    expect_equal_call(withMetaMode(mr2()), quote(1 + 1))
     # Cached
-    expect_equal(withMetaMode(mr2()), quote(1 + 1))
+    expect_equal_call(withMetaMode(mr2()), quote(1 + 1))
 
 
     # Test nesting deeper than one level
@@ -118,18 +123,18 @@ describe("mixed mode", isolate({
     mr3 <- metaReactive({
       ..(mr2())
     })
-    expect_equal(withMetaMode(mr3()), quote(1 + 1))
+    expect_equal_call(withMetaMode(mr3()), quote(1 + 1))
 
 
     # Test observer
     v(isolate(v()) + 1) # bust cache for mr2
     mr4 <- metaObserve(..(src()))
-    expect_equal(withMetaMode(mr4()), quote(1 + 1))
+    expect_equal_call(withMetaMode(mr4()), quote(1 + 1))
     mr4$destroy()  # Otherwise throws errors on next flushReact
 
     # Test renderer
     v(isolate(v()) + 1) # bust cache for mr2
     mr5 <- metaRender(renderText, ..(src()))
-    expect_equal(withMetaMode(mr5()), quote(1 + 1))
+    expect_equal_call(withMetaMode(mr5()), quote(1 + 1))
   })
-}))
+})})

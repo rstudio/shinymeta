@@ -17,21 +17,21 @@
 buildScriptBundle <- function(code = NULL, output_zip_path, script_name = "script.R",
   include_files = list(), render = TRUE, render_args = list()) {
 
-  progress <- shiny::Progress$new()
-  progress$set(value = 0)
-  progress$set(message = "Generating code")
+  with_progress_obj(function(progress) {
+    progress$set(value = 0)
+    progress$set(message = "Generating code")
 
-  if (is.language(code)) {
-    code <- paste(formatCode(code), collapse = "\n")
-  }
+    if (is.language(code)) {
+      code <- paste(formatCode(code), collapse = "\n")
+    }
 
-  build_bundle(code, script_name, output_zip_path,
-    include_files = include_files, render = render,
-    render_args = render_args, progress = progress)
+    build_bundle(code, script_name, output_zip_path,
+      include_files = include_files, render = render,
+      render_args = render_args, progress = progress)
+  })
 }
 
 
-#' @inheritParams buildScriptBundle
 #' @param report_template Filename of an Rmd template to be expanded by [knitr::knit_expand()].
 #' @param vars A named list of variables passed along to `...` in [knitr::knit_expand()].
 #' @export
@@ -44,31 +44,30 @@ buildRmdBundle <- function(report_template, output_zip_path, vars = list(),
   force(report_template)
   force(vars)
 
-  progress <- shiny::Progress$new()
-  progress$set(value = 0)
-  progress$set(message = "Generating code")
+  with_progress_obj(function(progress) {
+    progress$set(value = 0)
+    progress$set(message = "Generating code")
 
-  if (is.list(vars)) {
-    vars <- lapply(vars, function(x) {
-      if (is.language(x)) {
-        paste(formatCode(x), collapse = "\n")
-      } else {
-        x
-      }
-    })
-  }
+    if (is.list(vars)) {
+      vars <- lapply(vars, function(x) {
+        if (is.language(x)) {
+          paste(formatCode(x), collapse = "\n")
+        } else {
+          x
+        }
+      })
+    }
 
-  progress$set(value = 0.1)
-  progress$set(message = "Expanding Rmd template")
+    progress$set(value = 0.1)
+    progress$set(message = "Expanding Rmd template")
 
-  # TODO: Replace knit_expand with a version that doesn't allow arbitrary
-  # R expressions and doesn't search the parent frame
-  rmd_source <- do.call(knitr::knit_expand, c(list(report_template), vars))
-  rmd_filename <- template_rename(report_template, "Rmd")
+    rmd_source <- knit_expand_safe(report_template, vars = vars)
+    rmd_filename <- template_rename(report_template, "Rmd")
 
-  build_bundle(rmd_source, rmd_filename, output_zip_path,
-    include_files = include_files, render = render,
-    render_args = render_args, progress = progress)
+    build_bundle(rmd_source, rmd_filename, output_zip_path,
+      include_files = include_files, render = render,
+      render_args = render_args, progress = progress)
+  })
 }
 
 build_bundle <- function(input_src, input_filename, output_zip_path,
@@ -106,8 +105,33 @@ build_bundle <- function(input_src, input_filename, output_zip_path,
   progress$set(message =  "Compressing bundle")
   archive <- build_archive(x, output_zip_path)
   progress$set(value = 1)
-  progress$close()
   archive
+}
+
+
+with_progress_obj <- function(callback) {
+  # Note that `session` may be NULL.
+  session <- shiny::getDefaultReactiveDomain()
+  if (!is.null(session$userData$shinymeta_last_progress)) {
+    # If the last progress object we created for this session is still visible,
+    # close it. This would be in the case of an error, we never auto-dismiss in
+    # that case.
+    suppressWarnings(session$userData$shinymeta_last_progress$close())
+  }
+
+  progress <- make_progress()
+  # Register our newly created progress object.
+  session$userData$shinymeta_last_progress <- progress
+
+  tryCatch(shiny::captureStackTraces({
+    callback(progress)
+    progress$close()
+    session$userData$shinymeta_last_progress <- NULL
+  }), error = function(err) {
+    progress$set(value = 1, message = "An error has occurred:",
+      detail = conditionMessage(err))
+    stop(err)
+  })
 }
 
 render_with_args <- function(input_file, render_args = list(), switch_dirs = TRUE, fork = TRUE) {
@@ -142,5 +166,25 @@ template_rename <- function(input_template, extension = "Rmd") {
     filename
   } else {
     paste0(filename, ".", extension)
+  }
+}
+
+# Create shiny::Progress if possible, otherwise a dummy progress object
+make_progress <- function(...) {
+  session <- shiny::getDefaultReactiveDomain()
+  if (!is.null(session)) {
+    shiny::Progress$new(session = session, ...)
+  } else {
+    # Return a dummy progress object
+    nothing <- function(...) {}
+    list(
+      set = nothing,
+      inc = nothing,
+      getMin = nothing,
+      getMax = nothing,
+      getValue = nothing,
+      close = nothing,
+      clone = nothing
+    )
   }
 }

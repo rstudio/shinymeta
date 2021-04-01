@@ -1,5 +1,6 @@
 library(shiny)
 library(shinymeta)
+library(magrittr)
 
 selectColumnUI <- function(id, label) {
   ns <- NS(id)

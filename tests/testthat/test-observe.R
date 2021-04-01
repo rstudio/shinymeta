@@ -1,5 +1,3 @@
-context("observe")
-
 describe("metaObserve", isolate({
   it("basically works", {
     x <- 0
@@ -9,7 +7,7 @@ describe("metaObserve", isolate({
     shiny:::flushReact()
 
     expect_identical(x, 1)
-    expect_equal(withMetaMode(mo()), quote( x <<- 1 ))
+    expect_equal(unclass(withMetaMode(mo())), quote( x <<- 1 ))
   })
 
   it("basically works 2", {
@@ -26,7 +24,7 @@ describe("metaObserve", isolate({
 
     # The value becomes 3 here because even `withMetaMode(mo())` has a side effect
     # of x <<- x + 1 (the part outside the metaExpr)
-    expect_equal(withMetaMode(mo()), quote( x <<- 3 ))
+    expect_equal(unclass(withMetaMode(mo())), quote( x <<- 3 ))
   })
 
 }))

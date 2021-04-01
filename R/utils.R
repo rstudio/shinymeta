@@ -107,3 +107,65 @@ mrexprSrcrefToLabel <- function(srcref, defaultLabel) {
 
   return(as.character(res))
 }
+
+# For R 3.3/3.4
+is_false <- function(x) {
+  is.logical(x) && length(x) == 1L && !is.na(x) && !x
+}
+
+# Version of knit_expand that doesn't search the parent frame, and detects when
+# expansion results in unsafe Rmd input (i.e. the evaluation of {{expr}} should
+# never introduce a chunk boundary or even a new inline chunk)
+knit_expand_safe <- function(file, vars = list(), text = xfun::read_utf8(file), delim = c("{{", "}}")) {
+  # The approach we take here is to detect all knitr md patterns before and
+  # after expansion, and fail if anything was either added or removed. We tried
+  # just testing the output of each {{expansion}} for the patterns, but, that
+  # doesn't catch cases where an inline.code is started in one expansion and
+  # finished in another (see test in test-report.R).
+
+  # Code chunk delimiter regexes
+  # TODO: Can we assume `md`?
+  patterns <- unname(unlist(knitr::all_patterns$md))
+
+  matches_before <- count_matches_by_pattern(text, patterns)
+
+  # Create an environment that contains nothing but the variables we want to
+  # make available for template expansion, plus .GlobalEnv.
+  eval_envir <- list2env(vars, parent = .GlobalEnv)
+
+  # Use a knitr hook to ensure that only the ... arguments plus stuff in the
+  # global environment are available when evaluating {{/}} expressions.
+  orig_eval_inline <- knitr::knit_hooks$get("evaluate.inline")
+  knitr::knit_hooks$set(evaluate.inline = function(code, envir) {
+    # ignore envir, as it includes the parent frame of `knit_expand` which we
+    # explicitly do not want to be used for evaluation--only ... arguments to
+    # knit_expand_safe should be used.
+    orig_eval_inline(code, eval_envir)
+  })
+  on.exit(knitr::knit_hooks$set(evaluate.inline = orig_eval_inline), add = TRUE)
+
+  res <- knitr::knit_expand(text = text, delim = delim)
+
+  matches_after <- count_matches_by_pattern(xfun::split_lines(res), patterns)
+
+  if (!identical(matches_before, matches_after)) {
+    # The process of knit_expand-ing introduced new (or removed existing?) code
+    # chunks
+    stop("Can't build report--user input values must not contain code chunk delimiters")
+  }
+
+  res
+}
+
+# Returns a vector of length `length(pattern)`, where each element is the total
+# number of times the corresponding pattern element was found in the character
+# vector `string`.
+#
+# > count_matches_by_pattern(c("abc12", "def34", "5"), c("[a-z]", "[0-9]"))
+# [1] c(6, 5)
+count_matches_by_pattern <- function(string, pattern) {
+  vapply(pattern, function(regex) {
+    matches <- stringr::str_locate_all(string, regex)
+    sum(vapply(matches, nrow, integer(1)))
+  }, integer(1), USE.NAMES = FALSE)
+}

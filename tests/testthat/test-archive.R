@@ -1,5 +1,3 @@
-context("archive")
-
 describe("name translation", {
   it("strips non-.Rmd extensions", {
     test_cases <- list(
@@ -28,7 +26,7 @@ describe("name translation", {
   })
 })
 
-describe("zip building", {
+test_that("zip building", {
   tmp <- tempfile(pattern = "dir")
   dir.create(file.path(tmp, "foo"), recursive = TRUE)
   file1 <- file.path(tmp, "foo", "bar")
@@ -38,19 +36,19 @@ describe("zip building", {
 
   # Copy file where dest doesn't have trailing slash
   add_items(za, baz = file1)
-  expect_equal(list_items(za), c("baz"))
+  expect_equal(list_items(za), fs::path(c("baz")))
 
   # Copy file where dest has trailing slash
   add_item(za, file1, "qux/")
-  expect_equal(list_items(za), c("baz", "qux", "qux/bar"))
+  expect_equal(list_items(za), fs::path(c("baz", "qux", "qux/bar")))
 
   # Copy dir where dest doesn't have trailing slash
   lst <- setNames(fs::path_dir(file1), list("quuz"))
   add_items(za, !!!lst)
-  expect_equal(list_items(za), c("baz", "quuz", "quuz/bar", "qux", "qux/bar"))
+  expect_equal(list_items(za), fs::path(c("baz", "quuz", "quuz/bar", "qux", "qux/bar")))
 
   # Copy dir where dest does have trailing slash (no difference)
   lst2 <- setNames(fs::path_dir(file1), list("corge/"))
   add_items(za, !!!lst2)
-  expect_equal(list_items(za), c("baz", "corge", "corge/bar", "quuz", "quuz/bar", "qux", "qux/bar"))
+  expect_equal(list_items(za), fs::path(c("baz", "corge", "corge/bar", "quuz", "quuz/bar", "qux", "qux/bar")))
 })
