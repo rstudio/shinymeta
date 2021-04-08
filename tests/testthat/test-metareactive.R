@@ -29,5 +29,22 @@ test_that("doesn't break metaprogramming with quosures", {
     expect_snapshot_output(formatCode(withMetaMode(r2())))
     expect_snapshot_output(formatCode(withMetaMode(r3())))
     expect_snapshot_output(formatCode(withMetaMode(r4())))
+
+    result1 <- NULL
+    o1 <- metaObserve(rlang::quo(result1 <<- !!outer_quo), quoted = TRUE)
+
+    result2 <- NULL
+    o2 <- rlang::inject(metaObserve({
+      result2 <<- !!outer_quo
+    }))
+
+    shiny:::flushReact()
+
+    expect_identical(result1, "ok")
+    expect_identical(result2, "ok")
+
+    expect_snapshot_output(formatCode(withMetaMode(o1())))
+    expect_snapshot_output(formatCode(withMetaMode(o2())))
+
   })
 })
