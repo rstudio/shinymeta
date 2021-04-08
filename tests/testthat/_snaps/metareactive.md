@@ -1,18 +1,26 @@
 # doesn't break metaprogramming with quosures
 
-    ~ {
-      local_x
-    }
+    # A comment in a quosure
+    local_x
 
 ---
 
-    ~ {
-      local_x
-    }
+    # A comment in a quosure
+    local_x
 
 ---
 
-    (~ {
+    {
+      # A comment in a quosure
       local_x
-    }) * -1L
+    } * -1L
+
+---
+
+    if ({
+      # A comment in a quosure
+      local_x
+    } == 123L) {
+      "ok"
+    }
 

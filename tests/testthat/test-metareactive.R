@@ -3,19 +3,31 @@ test_that("doesn't break metaprogramming with quosures", {
 
     my_quo <- local({
       local_x <- 123L
-      rlang::quo({ local_x })
+      rlang::quo({
+        "# A comment in a quosure"
+        local_x
+      })
+    })
+
+    outer_quo <- rlang::quo({
+      if (!!my_quo == 123L) {
+        "ok"
+      }
     })
 
     r1 <- metaReactive({my_quo}, quoted = TRUE, varname = "r1")
     r2 <- rlang::inject(metaReactive(!!my_quo, varname = "r2"))
     r3 <- rlang::inject(metaReactive(!!my_quo * -1L, varname = "r3"))
+    r4 <- metaReactive({outer_quo}, quoted = TRUE, varname = "r4")
 
     expect_identical(r1(), 123L)
     expect_identical(r2(), 123L)
     expect_identical(r3(), -123L)
+    expect_identical(r4(), "ok")
 
     expect_snapshot_output(formatCode(withMetaMode(r1())))
     expect_snapshot_output(formatCode(withMetaMode(r2())))
     expect_snapshot_output(formatCode(withMetaMode(r3())))
+    expect_snapshot_output(formatCode(withMetaMode(r4())))
   })
 })
