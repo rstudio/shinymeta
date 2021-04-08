@@ -61,7 +61,7 @@ styleText <- function(code, ...) {
 #' @export
 #' @rdname formatCode
 deparseCode <- function(code, width = 500L) {
-  code <- walk_ast(code, quo_to_expr)
+  code <- walk_ast(code, quo_to_expr, preorder = TRUE)
   code <- comment_flags_to_enclosings(code)
   # Don't include meta classes in the deparsed result
   code <- walk_ast(code, remove_meta_classes)
