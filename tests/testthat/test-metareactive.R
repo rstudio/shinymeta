@@ -15,6 +15,8 @@ test_that("doesn't break metaprogramming with quosures", {
       }
     })
 
+    # Reactive expressions
+
     r1 <- metaReactive({my_quo}, quoted = TRUE, varname = "r1")
     r2 <- rlang::inject(metaReactive(!!my_quo, varname = "r2"))
     r3 <- rlang::inject(metaReactive(!!my_quo * -1L, varname = "r3"))
@@ -29,6 +31,8 @@ test_that("doesn't break metaprogramming with quosures", {
     expect_snapshot_output(formatCode(withMetaMode(r2())))
     expect_snapshot_output(formatCode(withMetaMode(r3())))
     expect_snapshot_output(formatCode(withMetaMode(r4())))
+
+    # Observers
 
     result1 <- NULL
     o1 <- metaObserve(rlang::quo(result1 <<- !!outer_quo), quoted = TRUE)
@@ -45,6 +49,11 @@ test_that("doesn't break metaprogramming with quosures", {
 
     expect_snapshot_output(formatCode(withMetaMode(o1())))
     expect_snapshot_output(formatCode(withMetaMode(o2())))
+
+    # Outputs
+
+    out1 <- metaRender(shiny::renderText, outer_quo, quoted = TRUE)
+    expect_identical(out1(), "ok")
 
   })
 })
