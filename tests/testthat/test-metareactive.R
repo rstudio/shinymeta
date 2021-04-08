@@ -15,6 +15,7 @@ test_that("doesn't break metaprogramming with quosures", {
     expect_identical(r3(), -123L)
 
     expect_snapshot_output(formatCode(withMetaMode(r1())))
+    expect_snapshot_output(formatCode(withMetaMode(r2())))
     expect_snapshot_output(formatCode(withMetaMode(r3())))
   })
 })
