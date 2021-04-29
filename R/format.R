@@ -61,6 +61,7 @@ styleText <- function(code, ...) {
 #' @export
 #' @rdname formatCode
 deparseCode <- function(code, width = 500L) {
+  code <- walk_ast(code, quo_to_expr, preorder = TRUE)
   code <- comment_flags_to_enclosings(code)
   # Don't include meta classes in the deparsed result
   code <- walk_ast(code, remove_meta_classes)
@@ -68,6 +69,16 @@ deparseCode <- function(code, width = 500L) {
   code_text <- comment_remove_enclosing(code_text)
   oldClass(code_text) <- "shinyMetaDeparsed"
   code_text
+}
+
+# Quosures deparse strangely (they look like formulas). For shinymeta's
+# deparsing purposes we just want them to be exprs.
+quo_to_expr <- function(expr) {
+  if (rlang::is_quosure(expr)) {
+    rlang::quo_get_expr(expr)
+  } else {
+    expr
+  }
 }
 
 remove_meta_classes <- function(expr) {
