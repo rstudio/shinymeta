@@ -17,42 +17,31 @@ test_that("doesn't break metaprogramming with quosures", {
 
     # Reactive expressions
 
-    r1 <- metaReactive({my_quo}, quoted = TRUE, varname = "r1")
-    r2 <- rlang::inject(metaReactive(!!my_quo, varname = "r2"))
-    r3 <- rlang::inject(metaReactive(!!my_quo * -1L, varname = "r3"))
-    r4 <- metaReactive({outer_quo}, quoted = TRUE, varname = "r4")
+    r1 <- rlang::inject(metaReactive(!!my_quo, varname = "r1"))
+    r2 <- rlang::inject(metaReactive(!!my_quo * -1L, varname = "r2"))
 
     expect_identical(r1(), 123L)
-    expect_identical(r2(), 123L)
-    expect_identical(r3(), -123L)
-    expect_identical(r4(), "ok")
+    expect_identical(r2(), -123L)
 
     expect_snapshot_output(formatCode(withMetaMode(r1())))
     expect_snapshot_output(formatCode(withMetaMode(r2())))
-    expect_snapshot_output(formatCode(withMetaMode(r3())))
-    expect_snapshot_output(formatCode(withMetaMode(r4())))
 
     # Observers
 
     result1 <- NULL
-    o1 <- metaObserve(rlang::quo(result1 <<- !!outer_quo), quoted = TRUE)
-
-    result2 <- NULL
-    o2 <- rlang::inject(metaObserve({
-      result2 <<- !!outer_quo
+    o1 <- rlang::inject(metaObserve({
+      result1 <<- !!outer_quo
     }))
 
     shiny:::flushReact()
 
     expect_identical(result1, "ok")
-    expect_identical(result2, "ok")
 
     expect_snapshot_output(formatCode(withMetaMode(o1())))
-    expect_snapshot_output(formatCode(withMetaMode(o2())))
 
     # Outputs
 
-    out1 <- metaRender(shiny::renderText, outer_quo, quoted = TRUE)
+    out1 <- rlang::inject(metaRender(shiny::renderText, !!outer_quo))
     expect_identical(out1(), "ok")
 
   })

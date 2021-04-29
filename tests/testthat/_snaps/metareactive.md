@@ -5,11 +5,6 @@
 
 ---
 
-    # A comment in a quosure
-    local_x
-
----
-
     {
       # A comment in a quosure
       local_x
@@ -17,27 +12,7 @@
 
 ---
 
-    if ({
-      # A comment in a quosure
-      local_x
-    } == 123L) {
-      "ok"
-    }
-
----
-
     result1 <<- {
-      if ({
-        # A comment in a quosure
-        local_x
-      } == 123L) {
-        "ok"
-      }
-    }
-
----
-
-    result2 <<- {
       if ({
         # A comment in a quosure
         local_x
