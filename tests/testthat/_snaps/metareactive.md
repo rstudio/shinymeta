@@ -30,3 +30,8 @@
     mr <- FALSE
     y <- mr
 
+# metaAction: can contain code that uses !!
+
+    foo <- 1
+    x <- rlang::expr(!!foo)
+

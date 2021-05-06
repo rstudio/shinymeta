@@ -94,6 +94,15 @@ describe("metaAction", {
     expect_error(ma())
   })
 
+  it("can contain code that uses !!", {
+    ma <- metaAction({
+      foo <- 1
+      x <- rlang::expr(!!foo)
+    })
+    expect_identical(x, 1)
+    expect_snapshot_output(withMetaMode(ma()))
+  })
+
   it("obeys scoping rules", {
     # introduces scopes
     outer <- environment()
