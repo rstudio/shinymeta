@@ -19,8 +19,8 @@ describe("metaObserve", isolate({
     e1 <- environment()
     x <- 0
     mo <- metaObserve2({
-      e2 <- environment()
-      expect_false(identical(e1, e2))
+    e2 <- environment()
+    expect_false(identical(e1, e2))
 
       x <<- x + 1
       metaExpr({
