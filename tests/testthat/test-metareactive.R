@@ -38,9 +38,11 @@ test_that("doesn't break metaprogramming with quosures", {
     expect_identical(result1, "ok")
 
     expect_snapshot_output(withMetaMode(o1()))
+  })
 
-    # Outputs
-
+  # Outputs
+  testthat::skip_if_not_installed("shiny", "1.6.0.9000")
+  isolate({
     out1 <- rlang::inject(metaRender(shiny::renderText, !!outer_quo))
     expect_identical(out1(), "ok")
   })
