@@ -132,6 +132,8 @@ describe("metaAction", {
 
     expect_identical(i, 3)
 
+    # In meta mode, the `metaExpr()` part of the reactive is quoted and
+    # returned, not executed, so `i` only increments by 1.
     withMetaMode(mr2())
     expect_identical(i, 4)
   })
