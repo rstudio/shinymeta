@@ -102,7 +102,11 @@ describe("metaAction", {
       x <- rlang::expr(!!foo)
     })
     expect_identical(x, 1)
-    expect_snapshot_output(withMetaMode(ma()))
+    if (getRversion() < "3.5") {
+      skip("Quoted !! isn't printed properly in R3.4 and lower.")
+    } else {
+      expect_snapshot_output(withMetaMode(ma()))
+    }
   })
 
   it("obeys scoping rules", {
