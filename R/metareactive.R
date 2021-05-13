@@ -154,7 +154,7 @@ metaReactiveImpl <- function(expr, env, varname, domain, inline) {
 
   r_meta <- function() {
     shiny::withReactiveDomain(domain, {
-      eval(expr, envir = env)
+      eval(expr, envir = new.env(parent = env))
     })
   }
 
@@ -176,6 +176,76 @@ metaReactiveImpl <- function(expr, env, varname, domain, inline) {
     shinymetaInline = inline
   )
   self
+}
+
+#' Run/capture non-reactive code for side effects
+#'
+#' Most apps start out with setup code that is non-reactive, such as
+#' [`library()`][base::library()] calls, loading of static data into local
+#' variables, or [`source`][base::source()]-ing of supplemental R scripts.
+#' `metaAction` provides a convenient way to run such code for its side effects
+#' (including declaring new variables) while making it easy to export that code
+#' using [expandChain()]. Note that `metaAction` executes code directly in the
+#' `env` environment (which defaults to the caller's environment), so any local
+#' variables that are declared in the `expr` will be available outside of
+#' `metaAction` as well.
+#'
+#' @inheritParams metaExpr
+#'
+#' @param expr A code expression that will immediately be executed (before the
+#'   call to `metaAction` returns), and also stored for later retrieval (i.e.
+#'   meta mode).
+#' @return A function that, when called in meta mode (i.e. inside
+#'   [expandChain()]), will return the code in quoted form. If this function is
+#'   ever called outside of meta mode, it throws an error, as it is definitely
+#'   being called incorrectly.
+#'
+#' @examples
+#'
+#' setup <- metaAction({
+#'   library(stats)
+#'
+#'   "# Set the seed to ensure repeatable randomness"
+#'   set.seed(100)
+#'
+#'   x <- 1
+#'   y <- 2
+#' })
+#'
+#' # The action has executed
+#' print(x)
+#' print(y)
+#'
+#' # And also you can emit the code
+#' expandChain(
+#'   setup()
+#' )
+#'
+#' @export
+metaAction <- function(expr, env = parent.frame(), quoted = FALSE) {
+  force(env)
+
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
+
+  # Need to wrap expr with shinymeta:::metaExpr, but can't use rlang/!! to do
+  # so, because we want to keep any `!!` contained in expr intact (i.e. too
+  # early to perform expansion of expr here).
+  expr <- wrapExpr(shinymeta::metaExpr, expr)
+
+  eval(expr, envir = env)
+  function() {
+    metaDispatch(
+      normal = {
+        stop("Meta mode must be activated when calling the function returned by `metaAction()`: did you mean to call this function inside of `expandChain()`?")
+      },
+      meta = {
+        eval(expr, envir = env)
+      }
+    )
+  }
 }
 
 #' @export
