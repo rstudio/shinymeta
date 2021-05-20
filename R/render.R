@@ -76,9 +76,15 @@ metaRender2 <- function(renderFunc, expr, ..., env = parent.frame(), quoted = FA
 
   domain <- getDefaultReactiveDomain()
 
-  normal <- rlang::inject(
-    renderFunc(expr = !!rlang::new_quosure(expr, env = env), ...)
-  )
+  # 3rd party render functions, such as htmlwidgets::shinyRenderWidget() might
+  # be using shiny::installExprFunction() + shiny::createRenderFunction() to
+  # implement the rendering function, which won't work with the rlang::inject()
+  # approach that Shiny 1.6 release suggests. If and when installExprFunction()
+  # becomes quosure aware, which it might in
+  # https://github.com/rstudio/shiny/pull/3390, we should be able to change this
+  # line to use rlang::inject() in order to avoid the env/quoted deprecating
+  # warning
+  normal <- renderFunc(expr = expr, ..., env = env, quoted = quoted)
 
   meta <- function() {
     shiny::withReactiveDomain(domain, {
