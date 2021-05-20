@@ -8,6 +8,12 @@
 
 * New `metaAction` function, intended for executing code for its side effects while also capturing the source for code generation. This is useful for app setup code, such as `library()` calls, `source`-ing of supplemental .R files, loading static data sets, etc. ([#71](https://github.com/rstudio/shinymeta/pull/71))
 
+## Known issues
+
+* `bquote(splicing = TRUE)` can't be used inside a `metaExpr()` context since the `..()` operator is reserved for `{shinymeta}`'s quasi-quotation rules. Use `{rlang}`'s `!!!` operator for splicing instead of `bquote()`.
+
+* `metaRender()` will throw a warning about deprecated `env`/`quoted` arguments when `shiny::devmode(TRUE)`. This warning may be safely ignored and will be fixed in a future version.
+
 # 0.1.0 (unreleased)
 
 * Initial version, as presented at useR 2019.
