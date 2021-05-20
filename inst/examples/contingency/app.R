@@ -14,7 +14,8 @@ ui <- fluidPage(
           "Flying Etiquette" = "fly",
           "Happiness" = "happy",
           "Upload your own" = "custom"
-        )
+        ),
+        selected = "happy"
       ),
       conditionalPanel(
         "input.data == 'custom'",
