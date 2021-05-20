@@ -66,7 +66,7 @@ server <- function(input, output) {
     )
 
     metaExpr(
-      lm(form, data = ..(data_kept()))
+      lm(..(form), data = ..(data_kept()))
     )
   })
 
