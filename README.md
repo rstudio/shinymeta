@@ -2,8 +2,8 @@
 
 <!-- badges: start -->
 [![R build status](https://github.com/rstudio/shinymeta/workflows/R-CMD-check/badge.svg)](https://github.com/rstudio/shinymeta/actions)
-[![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/package=shinymeta)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 <!-- badges: end -->
 
 The **shinymeta** R package provides tools for capturing logic in a Shiny app and exposing it as code that can be run outside of Shiny (e.g., from an R console). It also provides tools for bundling both the code and results to the end user.
@@ -53,7 +53,7 @@ shinyApp(ui, server)
   <img src="https://i.imgur.com/5gNquPE.gif" width="67%" />
 </div>
 
-For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/code-distribution.html).
+For more details, explanation, and overview **shinymeta** features, see the article on [code generation](https://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](https://rstudio.github.io/shinymeta/articles/code-distribution.html).
 
 ## A motivating example
 

@@ -9,7 +9,7 @@ Authors@R: c(
     )
 Description: Provides functions that make it easier to construct Shiny apps
     that can dynamically construct reproducible R scripts.
-URL: https://rstudio.github.io/shinymeta, https://github.com/rstudio/shinymeta
+URL: https://rstudio.github.io/shinymeta/, https://github.com/rstudio/shinymeta
 License: GPL-3
 Imports: 
   callr,
