@@ -3,8 +3,8 @@ Type: Package
 Title: Record and Expose Shiny App Logic using Metaprogramming
 Version: 0.2.0
 Authors@R: c(
-    person("Joe", "Cheng", email = "joe@rstudio.com", role = "cre"),
-    person("Carson", "Sievert", email = "carson@rstudio.com", role = "aut", comment = c(ORCID = "0000-0002-4958-2844")),
+    person("Joe", "Cheng", email = "joe@rstudio.com", role = "aut"),
+    person("Carson", "Sievert", email = "carson@rstudio.com", role = c("cre", "aut"), comment = c(ORCID = "0000-0002-4958-2844")),
     person(family = "RStudio", role = "cph")
     )
 Description: Provides functions that make it easier to construct Shiny apps
