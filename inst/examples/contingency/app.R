@@ -172,16 +172,16 @@ server <- function(input, output, session) {
     })
   })
 
-  ec <- newExpansionContext()
-  ec$substituteMetaReactive(getData, function() {
-    metaExpr({readRDS("data.rds")})
-  })
-
   output$plot_code <- downloadHandler(
     "plot.zip",
     content = function(out) {
       saveRDS(getData(), "data.rds")
       on.exit(unlink("data.rds"), add = TRUE)
+
+      ec <- newExpansionContext()
+      ec$substituteMetaReactive(getData, function() {
+        metaExpr({readRDS("data.rds")})
+      })
 
       code <- expandChain(
         quote({
@@ -207,6 +207,11 @@ server <- function(input, output, session) {
     content = function(out) {
       saveRDS(getData(), "data.rds")
       on.exit(unlink("data.rds"), add = TRUE)
+
+      ec <- newExpansionContext()
+      ec$substituteMetaReactive(getData, function() {
+        metaExpr({readRDS("data.rds")})
+      })
 
       code <- expandChain(
         quote({
@@ -236,6 +241,11 @@ server <- function(input, output, session) {
 
       saveRDS(getData(), "data.rds")
       on.exit(unlink("data.rds"), add = TRUE)
+
+      ec <- newExpansionContext()
+      ec$substituteMetaReactive(getData, function() {
+        metaExpr({readRDS("data.rds")})
+      })
 
       code <- expandChain(
         quote({
