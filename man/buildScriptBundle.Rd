@@ -44,6 +44,9 @@ a relative or absolute path.}
 
 \item{vars}{A named list of variables passed along to \code{...} in \code{\link[knitr:knit_expand]{knitr::knit_expand()}}.}
 }
+\value{
+The path to a generated file.
+}
 \description{
 Produce a zip bundle of code and results
 }

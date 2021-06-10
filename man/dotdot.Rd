@@ -10,6 +10,9 @@
 \arguments{
 \item{expr}{A single code expression. Required.}
 }
+\value{
+\code{expr}, but annotated.
+}
 \description{
 In shinymeta, \code{..()} is designed for \emph{annotating} portions of code
 inside a \code{metaExpr} (or its higher-level friends \code{metaReactive},

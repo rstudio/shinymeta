@@ -33,6 +33,10 @@
 #'
 #' @inheritParams shiny::reactive
 #' @inheritParams metaExpr
+#' @return A function that, when called in meta mode (i.e. inside
+#'   [expandChain()]), will return the code in quoted form. When called outside
+#'   meta mode, it acts the same as a regular [shiny::reactive()] expression
+#'   call.
 #' @export
 #' @seealso [metaExpr()], [`..`][shinymeta::dotdot]
 #' @examples
@@ -336,7 +340,7 @@ metaDispatch <- function(normal, meta) {
 #'
 #' @param expr an expression.
 #' @param mode whether or not to evaluate expression in meta mode.
-#'
+#' @return The result of evaluating `expr`.
 #' @seealso [expandChain()]
 #' @export
 withMetaMode <- function(expr, mode = TRUE) {
@@ -404,6 +408,7 @@ withMetaMode <- function(expr, mode = TRUE) {
 #' @seealso [metaExpr()], [metaReactive()], [metaObserve()], [metaRender()]
 #'
 #' @param expr A single code expression. Required.
+#' @return `expr`, but annotated.
 #'
 #' @rdname dotdot
 #' @name dotdot
@@ -431,6 +436,9 @@ withMetaMode <- function(expr, mode = TRUE) {
 #' statement (i.e., return statements in anonymized functions are ignored).
 #' @param bindToReturn For non-`localize`d expressions, should an assignment
 #' of a meta expression be applied to the _last child_ of the top-level `\{` call?
+#' @return If inside meta mode, a quoted form of `expr` for use inside of
+#'   [metaReactive2()], [metaObserve2()], or [metaRender2()]. Otherwise, in
+#'   normal execution, the result of evaluating `expr`.
 #'
 #' @seealso [metaReactive2()], [metaObserve2()], [metaRender2()], [`..`][shinymeta::dotdot]
 #' @export

@@ -12,7 +12,7 @@
 #'   a relative or absolute path.
 #' @param render Whether or not to call [rmarkdown::render()] on the R script.
 #' @param render_args Arguments to provide to [rmarkdown::render()].
-#'
+#' @return The path to a generated file.
 #' @export
 buildScriptBundle <- function(code = NULL, output_zip_path, script_name = "script.R",
   include_files = list(), render = TRUE, render_args = list()) {

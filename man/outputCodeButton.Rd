@@ -25,6 +25,9 @@ see \code{\link[shiny:reexports]{validateCssUnit()}}.}
 
 \item{...}{Named attributes to be applied to the button or link.}
 }
+\value{
+the \code{outputObj} wrapped in a card-like HTML container.
+}
 \description{
 Intended for overlaying a button over a shiny output, that when clicked,
 displays code for reproducing that output. The button is
