@@ -36,7 +36,6 @@ Suggests:
     cranlogs,
     xfun,
     zoo
-VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
 Collate: 

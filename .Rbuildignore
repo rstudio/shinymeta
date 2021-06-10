@@ -10,3 +10,4 @@ examples
 ^doc$
 ^Meta$
 ^\.github$
+^vignettes$
