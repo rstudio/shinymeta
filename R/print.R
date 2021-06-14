@@ -38,6 +38,7 @@ format.shinyMetaExpr <- function(x, ...) {
 #'
 #' @param x Object to knit_print
 #' @param ... Additional knit_print arguments
+#' @return The deparsed code expression (as a string).
 #' @export
 knit_print.shinyMetaExpr <- function(x, ...) {
   deparseCode(x)

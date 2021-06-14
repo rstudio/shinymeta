@@ -26,7 +26,7 @@
 #' mo <- metaObserve({
 #'   x <<- x + 1
 #' })
-#' shiny:::flushReact()
+#' getFromNamespace("flushReact", "shiny")()
 #' print(x)
 #'
 #' # It only makes sense to invoke an meta-observer
