@@ -13,6 +13,10 @@
 #' @inheritParams shiny::observe
 #' @inheritParams metaReactive
 #' @inheritParams metaExpr
+#' @return A function that, when called in meta mode (i.e. inside
+#'   [expandChain()]), will return the code in quoted form. If this function is
+#'   ever called outside of meta mode, it throws an error, as it is definitely
+#'   being called incorrectly.
 #' @seealso [metaExpr()], [`..`][shinymeta::dotdot]
 #' @export
 #' @examples
@@ -22,7 +26,7 @@
 #' mo <- metaObserve({
 #'   x <<- x + 1
 #' })
-#' shiny:::flushReact()
+#' getFromNamespace("flushReact", "shiny")()
 #' print(x)
 #'
 #' # It only makes sense to invoke an meta-observer

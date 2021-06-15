@@ -9,6 +9,7 @@
 #'
 #' @param outputObj A shiny output container (e.g., [shiny::plotOutput], [shiny::textOutput], etc)
 #' @inheritParams shiny::actionButton
+#' @return the `outputObj` wrapped in a card-like HTML container.
 #' @export
 #' @seealso [displayCodeModal]
 #' @examples

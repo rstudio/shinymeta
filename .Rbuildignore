@@ -6,6 +6,8 @@ examples
 ^pkgdown$
 ^\.travis\.yml$
 ^tools$
+^sandbox$
 ^doc$
 ^Meta$
 ^\.github$
+^vignettes$

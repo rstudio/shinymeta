@@ -11,6 +11,9 @@ knit_print.shinyMetaExpr(x, ...)
 
 \item{...}{Additional knit_print arguments}
 }
+\value{
+The deparsed code expression (as a string).
+}
 \description{
 This S3 method allows \code{\link[=metaExpr]{metaExpr()}}s to print themselves in
 knitr/rmarkdown documents.

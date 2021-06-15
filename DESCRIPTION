@@ -1,15 +1,14 @@
 Package: shinymeta
 Type: Package
-Title: Record and Expose Shiny App Logic using Metaprogramming
+Title: Export Domain Logic from Shiny using Meta-Programming
 Version: 0.2.0
 Authors@R: c(
-    person("Joe", "Cheng", email = "joe@rstudio.com", role = "cre"),
-    person("Carson", "Sievert", email = "carson@rstudio.com", role = "aut", comment = c(ORCID = "0000-0002-4958-2844")),
+    person("Joe", "Cheng", email = "joe@rstudio.com", role = "aut"),
+    person("Carson", "Sievert", email = "carson@rstudio.com", role = c("cre", "aut"), comment = c(ORCID = "0000-0002-4958-2844")),
     person(family = "RStudio", role = "cph")
     )
-Description: Provides functions that make it easier to construct Shiny apps
-    that can dynamically construct reproducible R scripts.
-URL: https://rstudio.github.io/shinymeta, https://github.com/rstudio/shinymeta
+Description: Provides tools for capturing logic in a Shiny app and exposing it as code that can be run outside of Shiny (e.g., from an R console). It also provides tools for bundling both the code and results to the end user.
+URL: https://rstudio.github.io/shinymeta/, https://github.com/rstudio/shinymeta
 License: GPL-3
 Imports: 
   callr,
@@ -19,12 +18,11 @@ Imports:
   magrittr,
   rlang,
   htmltools,
-  shiny (>= 1.3.2.9001),
+  shiny (>= 1.6.0),
   sourcetools,
   styler,
   utils
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,
@@ -38,7 +36,6 @@ Suggests:
     cranlogs,
     xfun,
     zoo
-VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
 Collate: 

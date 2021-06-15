@@ -27,6 +27,11 @@ statement (i.e., return statements in anonymized functions are ignored).}
 \item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
 of a meta expression be applied to the \emph{last child} of the top-level \verb{\\\{} call?}
 }
+\value{
+If inside meta mode, a quoted form of \code{expr} for use inside of
+\code{\link[=metaReactive2]{metaReactive2()}}, \code{\link[=metaObserve2]{metaObserve2()}}, or \code{\link[=metaRender2]{metaRender2()}}. Otherwise, in
+normal execution, the result of evaluating \code{expr}.
+}
 \description{
 Mark an expression as a meta-expression
 }

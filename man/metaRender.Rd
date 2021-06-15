@@ -39,6 +39,11 @@ statement (i.e., return statements in anonymized functions are ignored).}
 \item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
 of a meta expression be applied to the \emph{last child} of the top-level \verb{\\\{} call?}
 }
+\value{
+An annotated render function, ready to be assigned to an output slot.
+The function may also be called in meta mode (i.e., inside \code{\link[=expandChain]{expandChain()}})
+to return the code in quoted form.
+}
 \description{
 Create a meta-reactive output that, when invoked with meta-mode activated
 (i.e. called within \code{\link[=expandChain]{expandChain()}} or \code{\link[=withMetaMode]{withMetaMode()}}), returns a

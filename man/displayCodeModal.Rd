@@ -42,6 +42,9 @@ from a call to \code{\link[shiny:showModal]{removeModal()}} on the server.}
 
 \item{...}{arguments passed along to \code{shinyAce::aceEditor()}}
 }
+\value{
+nothing. Call this function for its side effects.
+}
 \description{
 Show a \code{shinyAce::aceEditor()} in a \code{shiny::modalDialog()}.
 }

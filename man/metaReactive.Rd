@@ -52,6 +52,12 @@ statement (i.e., return statements in anonymized functions are ignored).}
 \item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
 of a meta expression be applied to the \emph{last child} of the top-level \verb{\\\{} call?}
 }
+\value{
+A function that, when called in meta mode (i.e. inside
+\code{\link[=expandChain]{expandChain()}}), will return the code in quoted form. When called outside
+meta mode, it acts the same as a regular \code{\link[shiny:reactive]{shiny::reactive()}} expression
+call.
+}
 \description{
 Create a \code{\link[=reactive]{reactive()}} that, when invoked with meta-mode activated
 (i.e. called within \code{\link[=withMetaMode]{withMetaMode()}} or \code{\link[=expandChain]{expandChain()}}), returns a

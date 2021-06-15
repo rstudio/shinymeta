@@ -20,6 +20,10 @@
 #' @param expr An expression that generates given output expected by `renderFunc`.
 #' @param ... Other arguments passed along to `renderFunc`.
 #' @inheritParams metaObserve
+#' @return An annotated render function, ready to be assigned to an output slot.
+#'   The function may also be called in meta mode (i.e., inside [expandChain()])
+#'   to return the code in quoted form.
+
 #'
 #' @seealso [metaExpr()], [`..`][shinymeta::dotdot]
 #' @export

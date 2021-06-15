@@ -45,6 +45,12 @@ statement (i.e., return statements in anonymized functions are ignored).}
 \item{bindToReturn}{For non-\code{localize}d expressions, should an assignment
 of a meta expression be applied to the \emph{last child} of the top-level \verb{\\\{} call?}
 }
+\value{
+A function that, when called in meta mode (i.e. inside
+\code{\link[=expandChain]{expandChain()}}), will return the code in quoted form. If this function is
+ever called outside of meta mode, it throws an error, as it is definitely
+being called incorrectly.
+}
 \description{
 Create a \code{\link[=observe]{observe()}}r that, when invoked with meta-mode activated
 (i.e. called within \code{\link[=withMetaMode]{withMetaMode()}} or \code{\link[=expandChain]{expandChain()}}), returns a
@@ -64,7 +70,7 @@ x <- 1
 mo <- metaObserve({
   x <<- x + 1
 })
-shiny:::flushReact()
+getFromNamespace("flushReact", "shiny")()
 print(x)
 
 # It only makes sense to invoke an meta-observer

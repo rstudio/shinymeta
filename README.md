@@ -2,8 +2,8 @@
 
 <!-- badges: start -->
 [![R build status](https://github.com/rstudio/shinymeta/workflows/R-CMD-check/badge.svg)](https://github.com/rstudio/shinymeta/actions)
-[![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/package=shinymeta)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 <!-- badges: end -->
 
 The **shinymeta** R package provides tools for capturing logic in a Shiny app and exposing it as code that can be run outside of Shiny (e.g., from an R console). It also provides tools for bundling both the code and results to the end user.
@@ -53,7 +53,7 @@ shinyApp(ui, server)
   <img src="https://i.imgur.com/5gNquPE.gif" width="67%" />
 </div>
 
-For more details, explanation, and overview **shinymeta** features, see the article on [code generation](http://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](http://rstudio.github.io/shinymeta/articles/code-distribution.html).
+For more details, explanation, and overview **shinymeta** features, see the article on [code generation](https://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](https://rstudio.github.io/shinymeta/articles/code-distribution.html).
 
 ## A motivating example
 
@@ -73,7 +73,7 @@ We hope this example helps illustrate and inspire several reasons why you might 
     
     * **Enabling**: Shiny is great for enabling others to interface with an R script you've written, but what if your users wish to explore things that your interface doesn't allow for? By exposing the core logic of your app, you make it easier for motivated users to modify and build upon your work in ways you never thought about.
     
-    * **Documentation**: This one is especially relevant for exploratory analysis apps that allow you to derive insight from a dataset. A great example is the ANOVA example app in the [case studies vignette](case-studies.html#ANOVA), where you can upload a dataset, run an ANOVA analysis, then download a report with all ANOVA results as well as the code to reproduce it.
+    * **Documentation**: This one is especially relevant for exploratory analysis apps that allow you to derive insight from a dataset. A great example is the [ANOVA example app](https://github.com/cpsievert/DIY_ANOVA), where you can upload a dataset, run an ANOVA analysis, then download a report with all ANOVA results as well as the code to reproduce it.
 
 * **Permanence**: Using a Shiny app can have an ephemeral feeling to it; what happens in the future if the server goes down, or the app's features change? With a reproducible report, your users can download a more permanent artifact that can be saved locally.
     

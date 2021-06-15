@@ -8,7 +8,7 @@
 #' @param session a shiny session object (the default should almost always be used).
 #' @inheritParams shiny::modalDialog
 #' @param ... arguments passed along to `shinyAce::aceEditor()`
-#'
+#' @return nothing. Call this function for its side effects.
 #' @export
 #' @seealso [outputCodeButton]
 #' @examples

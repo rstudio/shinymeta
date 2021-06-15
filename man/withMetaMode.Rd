@@ -11,6 +11,9 @@ withMetaMode(expr, mode = TRUE)
 
 \item{mode}{whether or not to evaluate expression in meta mode.}
 }
+\value{
+The result of evaluating \code{expr}.
+}
 \description{
 Evaluate an expression with meta mode activated
 }
