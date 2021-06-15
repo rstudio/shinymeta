@@ -1,7 +1,7 @@
 Package: shinymeta
 Type: Package
 Title: Export Domain Logic from Shiny using Meta-Programming
-Version: 0.2.0
+Version: 0.2.0.1
 Authors@R: c(
     person("Joe", "Cheng", email = "joe@rstudio.com", role = "aut"),
     person("Carson", "Sievert", email = "carson@rstudio.com", role = c("cre", "aut"), comment = c(ORCID = "0000-0002-4958-2844")),
@@ -12,10 +12,8 @@ URL: https://rstudio.github.io/shinymeta/, https://github.com/rstudio/shinymeta
 License: GPL-3
 Imports: 
   callr,
-  digest,
   fastmap,
   fs,
-  magrittr,
   rlang,
   htmltools,
   shiny (>= 1.6.0),
@@ -35,6 +33,7 @@ Suggests:
     ggplot2,
     cranlogs,
     xfun,
+    magrittr,
     zoo
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3

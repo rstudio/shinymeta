@@ -1,3 +1,7 @@
+# 0.2.0.1
+
+Small patch release to address unit test failures on Solaris.
+
 # 0.2.0
 
 ## Breaking changes
