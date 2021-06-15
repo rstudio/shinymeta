@@ -1,6 +1,11 @@
 template_path <- test_path("assets/template.Rmd")
 
 test_that("buildRmdBundle works", {
+  skip_if_not(
+    rmarkdown::pandoc_available("1.12.3"),
+    "Pandoc 1.12.3 or higher is required"
+  )
+
   output_zip_path <- tempfile("testbundle-", fileext = ".zip")
 
   buildRmdBundle(template_path, output_zip_path, vars = list(

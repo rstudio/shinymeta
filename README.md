@@ -8,13 +8,15 @@
 
 The **shinymeta** R package provides tools for capturing logic in a Shiny app and exposing it as code that can be run outside of Shiny (e.g., from an R console). It also provides tools for bundling both the code and results to the end user.
 
-## Breaking changes in shinymeta 0.2.0
-
-On August 6, 2019, we introduced a major syntax change into shinymeta, that is not compatible with the previous syntax. If you're here after watching @jcheng5's [useR2019 talk](https://www.youtube.com/watch?v=5KByRC6eqC8) or reading @zappingseb's [blog post](https://towardsdatascience.com/shinymeta-a-revolution-for-reproducibility-bfda6b329f68), please be aware that the `!!` operator has been replaced with a `..()` function. See [this page](https://github.com/rstudio/shinymeta/wiki/Syntax-changes-for-shinymeta-0.2.0) for details.
-
 ## Installation
 
-**shinymeta** is not yet on CRAN, but you can install it via the **remotes** package:
+Install the stable release of `shinymeta` on CRAN:
+
+```r
+install.packages("shinymeta")
+```
+
+Or, install the development version with:
 
 ```r
 remotes::install_github("rstudio/shinymeta")
@@ -54,6 +56,10 @@ shinyApp(ui, server)
 </div>
 
 For more details, explanation, and overview **shinymeta** features, see the article on [code generation](https://rstudio.github.io/shinymeta/articles/code-generation.html) as well as [code distribution](https://rstudio.github.io/shinymeta/articles/code-distribution.html).
+
+## Breaking changes in shinymeta 0.2.0
+
+On August 6, 2019, we introduced a major syntax change into shinymeta, that is not compatible with the previous syntax. If you're here after watching @jcheng5's [useR2019 talk](https://www.youtube.com/watch?v=5KByRC6eqC8) or reading @zappingseb's [blog post](https://towardsdatascience.com/shinymeta-a-revolution-for-reproducibility-bfda6b329f68), please be aware that the `!!` operator has been replaced with a `..()` function. See [this page](https://github.com/rstudio/shinymeta/wiki/Syntax-changes-for-shinymeta-0.2.0) for details.
 
 ## A motivating example
 
