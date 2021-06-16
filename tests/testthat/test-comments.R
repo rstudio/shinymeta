@@ -35,8 +35,8 @@ describe("metaReactive", isolate({
       "# not a comment"
     })
     expected_output <- c("1 + 1", "\"# not a comment\"")
-    actual_output <- expect_warning(
-      capturePrint(withMetaMode(mrw())),
+    expect_warning(
+      actual_output <- capturePrint(withMetaMode(mrw())),
       "comment can not appear as the last child"
     )
     expect_equal(expected_output, actual_output)
@@ -76,8 +76,8 @@ describe("metaObserve", isolate({
       "# a comment"
     })
     expected_output <- c("1 + 1", "\"# a comment\"")
-    actual_output <- expect_warning(
-      capturePrint(withMetaMode(mow())),
+    expect_warning(
+      actual_output <- capturePrint(withMetaMode(mow())),
       "comment can not appear as the last child"
     )
     expect_equal(expected_output, actual_output)
@@ -117,8 +117,8 @@ describe("metaRender", isolate({
       "# not a comment"
     })
     expected_output <- c("1 + 1", "\"# not a comment\"")
-    actual_output <- expect_warning(
-      capturePrint(withMetaMode(mrw())),
+    expect_warning(
+      actual_output <- capturePrint(withMetaMode(mrw())),
       "comment can not appear as the last child"
     )
     expect_equal(expected_output, actual_output)
@@ -184,8 +184,8 @@ describe("various edge cases", isolate({
     NULL
   })
 
-  out <- expect_warning(
-    capturePrint(withMetaMode(mr2())),
+  expect_warning(
+    out <- capturePrint(withMetaMode(mr2())),
     "comment can not appear as the last child"
   )
 
