@@ -2,7 +2,7 @@
 title: "Special topics"
 author: "Carson Sievert & Joe Cheng"
 date: "`r Sys.Date()`"
-output: 
+output:
   rmarkdown::html_vignette:
     self_contained: false
 vignette: >
@@ -25,7 +25,7 @@ options(shiny.suppressMissingContextError = TRUE)
 
 ## Meta counterparts to `observeEvent()` & `eventReactive()`
 
-**shinymeta** currently does not provide meta-counterparts for `eventReactive()` and `observeEvent()`, but it's possible to 'hand-roll' your own counterpart from existing building blocks (namely, `metaReactive2()`, `metaObserve2()`, and `metaExpr()`) Both of these functions are essentially a wrapper for a common reactive pattern where you want `isolate()` all reactive values except for one value/input. For example, if you want to 
+**shinymeta** currently does not provide meta-counterparts for `eventReactive()` and `observeEvent()`, but it's possible to 'hand-roll' your own counterpart from existing building blocks (namely, `metaReactive2()`, `metaObserve2()`, and `metaExpr()`) Both of these functions are essentially a wrapper for a common reactive pattern where you want `isolate()` all reactive values except for one value/input. For example, if you want to
 
 ```{r, eval = FALSE}
 r <- eventReactive(input$x, {
@@ -90,8 +90,8 @@ o <- metaObserve2({
 
 ## Shiny modules
 
-**shinymeta** is designed to work with Shiny modules, [here's an example](https://github.com/rstudio/shinymeta/blob/master/inst/examples/modules/app.R).
-Modifying an existing Shiny app that uses modules may be more involved than simply capturing domain logic and marking reactive reads. For example, if you have one or more `callModule()` calls which create a (namespaced) output object(s), you may want to have that module function return the output object so you can `expandChain()` various meta-outputs from different modules at the same time ([as done in the example app](https://github.com/rstudio/shinymeta/blob/master/inst/examples/modules/app.R#L32)).
+**shinymeta** is designed to work with Shiny modules, [here's an example](https://github.com/rstudio/shinymeta/blob/main/inst/examples/modules/app.R).
+Modifying an existing Shiny app that uses modules may be more involved than simply capturing domain logic and marking reactive reads. For example, if you have one or more `callModule()` calls which create a (namespaced) output object(s), you may want to have that module function return the output object so you can `expandChain()` various meta-outputs from different modules at the same time ([as done in the example app](https://github.com/rstudio/shinymeta/blob/main/inst/examples/modules/app.R#L32)).
 
 ## Shiny, tidyeval, and shinymeta
 
@@ -103,8 +103,8 @@ Most **tidyverse** functions evaluate code expressions in a special context (e.g
 library(dplyr)
 
 # compute mean miles per gallon (mpg) by cylinder (cyl)
-mtcars %>% 
-  group_by(cyl) %>% 
+mtcars %>%
+  group_by(cyl) %>%
   summarise(avg = mean(mpg))
 ```
 
@@ -113,8 +113,8 @@ This approach makes for an expressive interactive interface, but it also complic
 ```{r}
 var <- as.name("mpg")
 
-mtcars %>% 
-  group_by(cyl) %>% 
+mtcars %>%
+  group_by(cyl) %>%
   summarise(avg = mean(var))
 ```
 
@@ -127,12 +127,12 @@ rlang::expr(!!var)
 That's why this code gives us the desired result of average miles per gallon (`mpg`) per cylinder (`cyl`).
 
 ```{r}
-mtcars %>% 
-  group_by(cyl) %>% 
+mtcars %>%
+  group_by(cyl) %>%
   summarise(avg = mean(!!var))
 ```
 
-Often times in a Shiny app we wish to pass an input value to a **tidyverse** function argument (as a variable). In most cases, that requires converting a string into a symbolic name, which can be done via `as.symbol()` or `rlang::sym()`. For example, here's a Shiny app to compute the mean of different `mtcars` variables by cylinder (`cyl`). 
+Often times in a Shiny app we wish to pass an input value to a **tidyverse** function argument (as a variable). In most cases, that requires converting a string into a symbolic name, which can be done via `as.symbol()` or `rlang::sym()`. For example, here's a Shiny app to compute the mean of different `mtcars` variables by cylinder (`cyl`).
 
 ```{r, eval = FALSE}
 library(shiny)
@@ -145,7 +145,7 @@ server <- function(input, output) {
   output$out <- renderPrint({
     var_sym <- sym(input$var)
     mtcars %>%
-      group_by(cyl) %>% 
+      group_by(cyl) %>%
       summarise(mean_mpg = mean(!!var_sym))
   })
 }
@@ -159,7 +159,7 @@ server <- function(input, output) {
   output$out <- metaRender(renderPrint, {
     var_sym <- sym(..(input$var))
     mtcars %>%
-      group_by(cyl) %>% 
+      group_by(cyl) %>%
       summarise(mean_mpg = mean(!!var_sym))
   })
   observe(print(expandChain(output$out())))
@@ -193,7 +193,7 @@ ui <- fluidPage(
 server <- function(input, output) {
   output$out <- renderPrint({
     mtcars %>%
-      group_by(cyl) %>% 
+      group_by(cyl) %>%
       summarise(mean_mpg = mean(!!input$var))
   })
 }
@@ -206,7 +206,7 @@ As in the other examples, you can mark the reactive read with `..()` (before unq
 server <- function(input, output) {
   output$out <- metaRender(renderPrint, {
     mtcars %>%
-      group_by(cyl) %>% 
+      group_by(cyl) %>%
       summarise(mean_mpg = mean(!!..(input$var)))
   })
   observe(print(expandChain(output$out())))
@@ -218,7 +218,7 @@ In all the cases we've encountered thus far, the generated code is a bit differe
 
 ```{r, eval = FALSE}
 mtcars %>%
-  group_by(cyl) %>% 
+  group_by(cyl) %>%
   summarise(mean_mpg = mean(!!as.symbol("mpg")))
 ```
 
@@ -226,7 +226,7 @@ But what you'd probably want your app to generate is this:
 
 ```{r, eval = FALSE}
 mtcars %>%
-  group_by(cyl) %>% 
+  group_by(cyl) %>%
   summarise(mean_mpg = mean(mpg))
 ```
 
@@ -234,7 +234,7 @@ At least currently, there is no great workaround for this problem other than to 
 
 ```{r, eval = FALSE}
 mtcars %>%
-  group_by(cyl) %>% 
+  group_by(cyl) %>%
   summarise_at("mpg", mean)
 ```
 
@@ -248,12 +248,10 @@ ui <- fluidPage(
 server <- function(input, output) {
   output$out <- metaRender(renderPrint, {
     mtcars %>%
-      group_by(cyl) %>% 
+      group_by(cyl) %>%
       summarise_at(..(input$var), mean)
   })
   observe(print(expandChain(output$out())))
 }
 shinyApp(ui, server)
 ```
-
-
