@@ -11,6 +11,8 @@ name: Package Checks
 jobs:
   pkgdown:
     uses: rstudio/shinycoreci/.github/workflows/call-pkgdown.yaml@v1
+    with:
+      check-title: false
   rituals:
     uses: rstudio/shinycoreci/.github/workflows/call-rituals.yaml@v1
   R-CMD-check:
