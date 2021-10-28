@@ -28,11 +28,13 @@ metaObserve2(
 
 \item{env}{The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
-non-reactive expression.}
+non-reactive expression. If \code{x} is a quosure and \code{quoted} is \code{TRUE},
+then \code{env} is ignored.}
 
-\item{quoted}{Is the expression quoted? By default, this is \code{FALSE}.
-This is useful when you want to use an expression that is stored in a
-variable; to do so, it must be quoted with \code{quote()}.}
+\item{quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{x}
+will be used when \code{x} is evaluated. If \code{x} is a quosure and you
+would like to use its expression as a value for \code{x}, then you must set
+\code{quoted} to \code{TRUE}.}
 
 \item{label}{A label for the observer, useful for debugging.}
 
