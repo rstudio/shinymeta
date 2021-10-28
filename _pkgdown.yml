@@ -27,6 +27,8 @@ reference:
     - metaObserve
     - metaRender
     - metaExpr
+    - metaAction
+    - withMetaMode
 
 - title: Code generation
   description: |
