@@ -1,3 +1,4 @@
+url: https://rstudio.github.io/shinymeta
 destination: docs
 
 toc:
@@ -26,6 +27,8 @@ reference:
     - metaObserve
     - metaRender
     - metaExpr
+    - metaAction
+    - withMetaMode
 
 - title: Code generation
   description: |

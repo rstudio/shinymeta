@@ -18,3 +18,4 @@ The deparsed code expression (as a string).
 This S3 method allows \code{\link[=metaExpr]{metaExpr()}}s to print themselves in
 knitr/rmarkdown documents.
 }
+\keyword{internal}
