@@ -71,13 +71,13 @@
 
       
 
-      </header><div class="row">
+      </header><script src="special-topics_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Special topics</h1>
                         <h4 class="author">Carson Sievert &amp; Joe Cheng</h4>
             
-            <h4 class="date">2021-10-28</h4>
+            <h4 class="date">2021-10-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/master/vignettes/special-topics.Rmd"><code>vignettes/special-topics.Rmd</code></a></small>
       <div class="hidden name"><code>special-topics.Rmd</code></div>
@@ -146,49 +146,49 @@
 <p>TL;DR: The same steps in the <a href="#overview">overview</a> will work for a Shiny app that uses <a href="https://tidyeval.tidyverse.org/">tidyeval</a>, but it probably won’t produce the most readable code. To workaround that, if possible, try to avoid unquoting (i.e., <code>!!</code>/<code>!!!</code>) by using a functional interface that accepts character strings (instead of symbolic names).</p>
 </blockquote>
 <p>Most <strong>tidyverse</strong> functions evaluate code expressions in a special context (e.g., they search for names within a data frame). That’s how <strong>dplyr</strong> knows, for example, to lookup names (e.g. <code>cyl</code>) and evaluate calls (e.g., <code><a href="https://rdrr.io/r/base/mean.html">mean(mpg)</a></code>) within a context defined by <code>mtcars</code>:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">library</span>(dplyr)</a>
-<a class="sourceLine" id="cb7-2" title="2"></a>
-<a class="sourceLine" id="cb7-3" title="3"><span class="co"># compute mean miles per gallon (mpg) by cylinder (cyl)</span></a>
-<a class="sourceLine" id="cb7-4" title="4">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb7-5" title="5"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb7-6" title="6"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg =</span> <span class="kw">mean</span>(mpg))</a>
-<a class="sourceLine" id="cb7-7" title="7"><span class="co"># A tibble: 3 × 2</span></a>
-<a class="sourceLine" id="cb7-8" title="8">    cyl   avg</a>
-<a class="sourceLine" id="cb7-9" title="9">  <span class="op">&lt;</span>dbl<span class="op">&gt;</span><span class="st"> </span><span class="er">&lt;</span>dbl<span class="op">&gt;</span></a>
-<a class="sourceLine" id="cb7-10" title="10"><span class="dv">1</span>     <span class="dv">4</span>  <span class="fl">26.7</span></a>
-<a class="sourceLine" id="cb7-11" title="11"><span class="dv">2</span>     <span class="dv">6</span>  <span class="fl">19.7</span></a>
-<a class="sourceLine" id="cb7-12" title="12"><span class="dv">3</span>     <span class="dv">8</span>  <span class="fl">15.1</span></a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">library</span>(dplyr)</span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co"># compute mean miles per gallon (mpg) by cylinder (cyl)</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>mtcars <span class="op">%&gt;%</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg =</span> <span class="kw">mean</span>(mpg))</span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="co"># A tibble: 3 × 2</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a>    cyl   avg</span>
+<span id="cb7-9"><a href="#cb7-9"></a>  <span class="op">&lt;</span>dbl<span class="op">&gt;</span><span class="st"> </span><span class="er">&lt;</span>dbl<span class="op">&gt;</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="dv">1</span>     <span class="dv">4</span>  <span class="fl">26.7</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="dv">2</span>     <span class="dv">6</span>  <span class="fl">19.7</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="dv">3</span>     <span class="dv">8</span>  <span class="fl">15.1</span></span></code></pre></div>
 <p>This approach makes for an expressive interactive interface, but it also complicates things if we wish to pass variables into (i.e., program around) these functions (because they quote their arguments). For example, if you had a variable, named <code>var</code>, that represented another name with the column name of interest, <strong>dplyr</strong> thinks you’re looking for a column named <code>var</code>, not <code>mpg</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1">var &lt;-<span class="st"> </span><span class="kw">as.name</span>(<span class="st">"mpg"</span>)</a>
-<a class="sourceLine" id="cb8-2" title="2"></a>
-<a class="sourceLine" id="cb8-3" title="3">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb8-4" title="4"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb8-5" title="5"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg =</span> <span class="kw">mean</span>(var))</a>
-<a class="sourceLine" id="cb8-6" title="6">Warning <span class="cf">in</span> <span class="kw">mean.default</span>(var)<span class="op">:</span><span class="st"> </span>argument is not numeric or logical<span class="op">:</span><span class="st"> </span>returning <span class="ot">NA</span></a>
-<a class="sourceLine" id="cb8-7" title="7"></a>
-<a class="sourceLine" id="cb8-8" title="8">Warning <span class="cf">in</span> <span class="kw">mean.default</span>(var)<span class="op">:</span><span class="st"> </span>argument is not numeric or logical<span class="op">:</span><span class="st"> </span>returning <span class="ot">NA</span></a>
-<a class="sourceLine" id="cb8-9" title="9"></a>
-<a class="sourceLine" id="cb8-10" title="10">Warning <span class="cf">in</span> <span class="kw">mean.default</span>(var)<span class="op">:</span><span class="st"> </span>argument is not numeric or logical<span class="op">:</span><span class="st"> </span>returning <span class="ot">NA</span></a>
-<a class="sourceLine" id="cb8-11" title="11"><span class="co"># A tibble: 3 × 2</span></a>
-<a class="sourceLine" id="cb8-12" title="12">    cyl   avg</a>
-<a class="sourceLine" id="cb8-13" title="13">  <span class="op">&lt;</span>dbl<span class="op">&gt;</span><span class="st"> </span><span class="er">&lt;</span>dbl<span class="op">&gt;</span></a>
-<a class="sourceLine" id="cb8-14" title="14"><span class="dv">1</span>     <span class="dv">4</span>    <span class="ot">NA</span></a>
-<a class="sourceLine" id="cb8-15" title="15"><span class="dv">2</span>     <span class="dv">6</span>    <span class="ot">NA</span></a>
-<a class="sourceLine" id="cb8-16" title="16"><span class="dv">3</span>     <span class="dv">8</span>    <span class="ot">NA</span></a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>var &lt;-<span class="st"> </span><span class="kw">as.name</span>(<span class="st">"mpg"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a>mtcars <span class="op">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg =</span> <span class="kw">mean</span>(var))</span>
+<span id="cb8-6"><a href="#cb8-6"></a>Warning <span class="cf">in</span> <span class="kw">mean.default</span>(var)<span class="op">:</span><span class="st"> </span>argument is not numeric or logical<span class="op">:</span><span class="st"> </span>returning <span class="ot">NA</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a></span>
+<span id="cb8-8"><a href="#cb8-8"></a>Warning <span class="cf">in</span> <span class="kw">mean.default</span>(var)<span class="op">:</span><span class="st"> </span>argument is not numeric or logical<span class="op">:</span><span class="st"> </span>returning <span class="ot">NA</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a></span>
+<span id="cb8-10"><a href="#cb8-10"></a>Warning <span class="cf">in</span> <span class="kw">mean.default</span>(var)<span class="op">:</span><span class="st"> </span>argument is not numeric or logical<span class="op">:</span><span class="st"> </span>returning <span class="ot">NA</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="co"># A tibble: 3 × 2</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a>    cyl   avg</span>
+<span id="cb8-13"><a href="#cb8-13"></a>  <span class="op">&lt;</span>dbl<span class="op">&gt;</span><span class="st"> </span><span class="er">&lt;</span>dbl<span class="op">&gt;</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a><span class="dv">1</span>     <span class="dv">4</span>    <span class="ot">NA</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="dv">2</span>     <span class="dv">6</span>    <span class="ot">NA</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a><span class="dv">3</span>     <span class="dv">8</span>    <span class="ot">NA</span></span></code></pre></div>
 <p>To workaround this problem, <strong>tidyverse</strong> functions allow you to unquote (i.e., replace a name with it’s value) via the <code>!!</code> operator. Just to demonstrate, if we unquote <code>var</code>, we’d get back the name (i.e., symbol) <code>mpg</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/nse-defuse.html">expr</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">var</span><span class="op">)</span>
 <span class="va">mpg</span></code></pre></div>
 <p>That’s why this code gives us the desired result of average miles per gallon (<code>mpg</code>) per cylinder (<code>cyl</code>).</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb10-2" title="2"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb10-3" title="3"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg =</span> <span class="kw">mean</span>(<span class="op">!!</span>var))</a>
-<a class="sourceLine" id="cb10-4" title="4"><span class="co"># A tibble: 3 × 2</span></a>
-<a class="sourceLine" id="cb10-5" title="5">    cyl   avg</a>
-<a class="sourceLine" id="cb10-6" title="6">  <span class="op">&lt;</span>dbl<span class="op">&gt;</span><span class="st"> </span><span class="er">&lt;</span>dbl<span class="op">&gt;</span></a>
-<a class="sourceLine" id="cb10-7" title="7"><span class="dv">1</span>     <span class="dv">4</span>  <span class="fl">26.7</span></a>
-<a class="sourceLine" id="cb10-8" title="8"><span class="dv">2</span>     <span class="dv">6</span>  <span class="fl">19.7</span></a>
-<a class="sourceLine" id="cb10-9" title="9"><span class="dv">3</span>     <span class="dv">8</span>  <span class="fl">15.1</span></a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>mtcars <span class="op">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg =</span> <span class="kw">mean</span>(<span class="op">!!</span>var))</span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="co"># A tibble: 3 × 2</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a>    cyl   avg</span>
+<span id="cb10-6"><a href="#cb10-6"></a>  <span class="op">&lt;</span>dbl<span class="op">&gt;</span><span class="st"> </span><span class="er">&lt;</span>dbl<span class="op">&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="dv">1</span>     <span class="dv">4</span>  <span class="fl">26.7</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="dv">2</span>     <span class="dv">6</span>  <span class="fl">19.7</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="dv">3</span>     <span class="dv">8</span>  <span class="fl">15.1</span></span></code></pre></div>
 <p>Often times in a Shiny app we wish to pass an input value to a <strong>tidyverse</strong> function argument (as a variable). In most cases, that requires converting a string into a symbolic name, which can be done via <code><a href="https://rdrr.io/r/base/name.html">as.symbol()</a></code> or <code><a href="https://rlang.r-lib.org/reference/sym.html">rlang::sym()</a></code>. For example, here’s a Shiny app to compute the mean of different <code>mtcars</code> variables by cylinder (<code>cyl</code>).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/">shiny</a></span><span class="op">)</span>

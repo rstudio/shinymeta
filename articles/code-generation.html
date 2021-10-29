@@ -71,13 +71,13 @@
 
       
 
-      </header><div class="row">
+      </header><script src="code-generation_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Code generation</h1>
                         <h4 class="author">Carson Sievert &amp; Joe Cheng</h4>
             
-            <h4 class="date">2021-10-28</h4>
+            <h4 class="date">2021-10-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/master/vignettes/code-generation.Rmd"><code>vignettes/code-generation.Rmd</code></a></small>
       <div class="hidden name"><code>code-generation.Rmd</code></div>
@@ -303,22 +303,22 @@ pre.R {
 <a href="#execution" class="anchor"></a>The execution model</h2>
 <p>For most existing Shiny applications, you should be able to follow the steps outlined above in the <a href="#overview">Overview</a> section, and the code generation should “just work”. In some scenarios, however, you may have to tweak or debug your Shiny app logic, and in doing so, it’ll be helpful to understand <strong>shinymeta</strong>’s model for execution.</p>
 <p>Meta-reactives (e.g., <code><a href="../reference/metaReactive.html">metaReactive()</a></code>, <code><a href="../reference/metaRender.html">metaRender()</a></code>, etc) can be invoked in two different modes: meta or normal (the default). In normal mode, the behavior of a meta-reactive is essentially the same as the non-meta version (e.g., <code>downloads()</code> still evaluates and caches results just like a normal <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html">reactive()</a></code> does). The only subtle difference is that, in normal execution, meta-reactives know to (silently) ignore <code><a href="../reference/dotdot.html">..()</a></code>:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">downloads &lt;-<span class="st"> </span><span class="kw">metaReactive</span>({</a>
-<a class="sourceLine" id="cb14-2" title="2">  cranlogs<span class="op">::</span><span class="kw">cran_downloads</span>(</a>
-<a class="sourceLine" id="cb14-3" title="3">    <span class="kw">..</span>(input<span class="op">$</span>package), </a>
-<a class="sourceLine" id="cb14-4" title="4">    <span class="dt">from =</span> <span class="kw">Sys.Date</span>() <span class="op">-</span><span class="st"> </span><span class="dv">365</span>, </a>
-<a class="sourceLine" id="cb14-5" title="5">    <span class="dt">to =</span> <span class="kw">Sys.Date</span>()</a>
-<a class="sourceLine" id="cb14-6" title="6">  )</a>
-<a class="sourceLine" id="cb14-7" title="7">})</a>
-<a class="sourceLine" id="cb14-8" title="8"><span class="kw">downloads</span>()</a>
-<a class="sourceLine" id="cb14-9" title="9">        date count package</a>
-<a class="sourceLine" id="cb14-10" title="10"><span class="dv">1</span> <span class="dv">2020-10-28</span> <span class="dv">59190</span> ggplot2</a>
-<a class="sourceLine" id="cb14-11" title="11"><span class="dv">2</span> <span class="dv">2020-10-29</span> <span class="dv">58982</span> ggplot2</a>
-<a class="sourceLine" id="cb14-12" title="12"><span class="dv">3</span> <span class="dv">2020-10-30</span> <span class="dv">55383</span> ggplot2</a>
-<a class="sourceLine" id="cb14-13" title="13"><span class="dv">4</span> <span class="dv">2020-10-31</span> <span class="dv">40497</span> ggplot2</a>
-<a class="sourceLine" id="cb14-14" title="14"><span class="dv">5</span> <span class="dv">2020-11-01</span> <span class="dv">41434</span> ggplot2</a>
-<a class="sourceLine" id="cb14-15" title="15"><span class="dv">6</span> <span class="dv">2020-11-02</span> <span class="dv">58532</span> ggplot2</a>
-<a class="sourceLine" id="cb14-16" title="16">[...plus <span class="dv">360</span> more rows...]</a></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>downloads &lt;-<span class="st"> </span><span class="kw">metaReactive</span>({</span>
+<span id="cb14-2"><a href="#cb14-2"></a>  cranlogs<span class="op">::</span><span class="kw">cran_downloads</span>(</span>
+<span id="cb14-3"><a href="#cb14-3"></a>    <span class="kw">..</span>(input<span class="op">$</span>package), </span>
+<span id="cb14-4"><a href="#cb14-4"></a>    <span class="dt">from =</span> <span class="kw">Sys.Date</span>() <span class="op">-</span><span class="st"> </span><span class="dv">365</span>, </span>
+<span id="cb14-5"><a href="#cb14-5"></a>    <span class="dt">to =</span> <span class="kw">Sys.Date</span>()</span>
+<span id="cb14-6"><a href="#cb14-6"></a>  )</span>
+<span id="cb14-7"><a href="#cb14-7"></a>})</span>
+<span id="cb14-8"><a href="#cb14-8"></a><span class="kw">downloads</span>()</span>
+<span id="cb14-9"><a href="#cb14-9"></a>        date count package</span>
+<span id="cb14-10"><a href="#cb14-10"></a><span class="dv">1</span> <span class="dv">2020-10-29</span> <span class="dv">58982</span> ggplot2</span>
+<span id="cb14-11"><a href="#cb14-11"></a><span class="dv">2</span> <span class="dv">2020-10-30</span> <span class="dv">55383</span> ggplot2</span>
+<span id="cb14-12"><a href="#cb14-12"></a><span class="dv">3</span> <span class="dv">2020-10-31</span> <span class="dv">40497</span> ggplot2</span>
+<span id="cb14-13"><a href="#cb14-13"></a><span class="dv">4</span> <span class="dv">2020-11-01</span> <span class="dv">41434</span> ggplot2</span>
+<span id="cb14-14"><a href="#cb14-14"></a><span class="dv">5</span> <span class="dv">2020-11-02</span> <span class="dv">58532</span> ggplot2</span>
+<span id="cb14-15"><a href="#cb14-15"></a><span class="dv">6</span> <span class="dv">2020-11-03</span> <span class="dv">61838</span> ggplot2</span>
+<span id="cb14-16"><a href="#cb14-16"></a>[...plus <span class="dv">360</span> more rows...]</span></code></pre></div>
 <p>When invoked in meta mode, meta-counterparts return a code expression instead of fully evaluating the expression. <strong>shinymeta</strong> currently provides two ways to invoke meta-reactives in meta mode: <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> and <code><a href="../reference/expandChain.html">expandChain()</a></code>. In practice, you’ll almost always want to use <code><a href="../reference/expandChain.html">expandChain()</a></code> over <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code>: the former has a special understanding of marked reactive reads, whereas the latter is a less intelligent <a href="https://adv-r.hadley.nz/quasiquotation.html">quasi-quotation</a> interface. More specifically, <code><a href="../reference/expandChain.html">expandChain()</a></code> intelligently substitutes marked reactive reads with suitable value(s) or name(s) (and reuses those names to avoid redundant computation), whereas <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> does nothing more than evaluate what appears in <code><a href="../reference/dotdot.html">..()</a></code>.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/withMetaMode.html">withMetaMode</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -349,7 +349,7 @@ pre.R {
 <div class="footnotes">
 <hr>
 <ol>
-<li id="fn1"><p>Name inference depends on a <code>srcref</code> of the <code>expr</code> argument being available. There are at least a couple different ways name inference can fail: (1) The <code>keep.source</code> option is <code>FALSE</code> (2) <code>expr</code> <a href="https://github.com/rstudio/shinymeta/issues/61">does not appear as the first argument</a>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>Name inference depends on a <code>srcref</code> of the <code>expr</code> argument being available. There are at least a couple different ways name inference can fail: (1) The <code>keep.source</code> option is <code>FALSE</code> (2) <code>expr</code> <a href="https://github.com/rstudio/shinymeta/issues/61">does not appear as the first argument</a>.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
   </div>
