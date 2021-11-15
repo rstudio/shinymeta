@@ -1,6 +1,6 @@
 # 0.2.0.3
 
-Small patch release to accomodate for changes made to `base::deparse()` in the next upcoming R release. (#107)
+Small patch release to accommodate for changes made to `base::deparse()` in the next upcoming R release. (#107)
 
 # 0.2.0.2
 
