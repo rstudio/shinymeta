@@ -1,5 +1,8 @@
 # 0.2.0.9000
 
+# 0.2.0.2
+
+Small patch release to accommodate for changes made in testthat 3.1.0 
 
 # 0.2.0.1
 
