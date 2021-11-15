@@ -77,7 +77,7 @@
       <h1 data-toc-skip>Special topics</h1>
                         <h4 class="author">Carson Sievert &amp; Joe Cheng</h4>
             
-            <h4 class="date">2021-10-29</h4>
+            <h4 class="date">2021-11-15</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/master/vignettes/special-topics.Rmd"><code>vignettes/special-topics.Rmd</code></a></small>
       <div class="hidden name"><code>special-topics.Rmd</code></div>
@@ -145,7 +145,7 @@
 <blockquote>
 <p>TL;DR: The same steps in the <a href="#overview">overview</a> will work for a Shiny app that uses <a href="https://tidyeval.tidyverse.org/">tidyeval</a>, but it probably won’t produce the most readable code. To workaround that, if possible, try to avoid unquoting (i.e., <code>!!</code>/<code>!!!</code>) by using a functional interface that accepts character strings (instead of symbolic names).</p>
 </blockquote>
-<p>Most <strong>tidyverse</strong> functions evaluate code expressions in a special context (e.g., they search for names within a data frame). That’s how <strong>dplyr</strong> knows, for example, to lookup names (e.g. <code>cyl</code>) and evaluate calls (e.g., <code><a href="https://rdrr.io/r/base/mean.html">mean(mpg)</a></code>) within a context defined by <code>mtcars</code>:</p>
+<p>Most <strong>tidyverse</strong> functions evaluate code expressions in a special context (e.g., they search for names within a data frame). That’s how <strong>dplyr</strong> knows, for example, to lookup names (e.g. <code>cyl</code>) and evaluate calls (e.g., <code>mean(mpg)</code>) within a context defined by <code>mtcars</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">library</span>(dplyr)</span>
 <span id="cb7-2"><a href="#cb7-2"></a></span>
 <span id="cb7-3"><a href="#cb7-3"></a><span class="co"># compute mean miles per gallon (mpg) by cylinder (cyl)</span></span>
@@ -192,7 +192,7 @@
 <p>Often times in a Shiny app we wish to pass an input value to a <strong>tidyverse</strong> function argument (as a variable). In most cases, that requires converting a string into a symbolic name, which can be done via <code><a href="https://rdrr.io/r/base/name.html">as.symbol()</a></code> or <code><a href="https://rlang.r-lib.org/reference/sym.html">rlang::sym()</a></code>. For example, here’s a Shiny app to compute the mean of different <code>mtcars</code> variables by cylinder (<code>cyl</code>).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/">shiny</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">tidyverse</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
 <span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html">fluidPage</a></span><span class="op">(</span>
   <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/selectInput.html">selectInput</a></span><span class="op">(</span><span class="st">"var"</span>, <span class="st">"Select a variable"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span><span class="op">)</span>,
   <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"out"</span><span class="op">)</span>
@@ -200,8 +200,8 @@
 <span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">output</span><span class="op">$</span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span>
     <span class="va">var_sym</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/tidyeval.html">sym</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">var</span><span class="op">)</span>
-    <span class="va">mtcars</span> <span class="op">%&gt;%</span>
-      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="va">mtcars</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
       <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span>mean_mpg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">var_sym</span><span class="op">)</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span>
@@ -211,8 +211,8 @@
 <code class="sourceCode R"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">output</span><span class="op">$</span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaRender.html">metaRender</a></span><span class="op">(</span><span class="va">renderPrint</span>, <span class="op">{</span>
     <span class="va">var_sym</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/tidyeval.html">sym</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">var</span><span class="op">)</span><span class="op">)</span>
-    <span class="va">mtcars</span> <span class="op">%&gt;%</span>
-      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="va">mtcars</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
       <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span>mean_mpg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">var_sym</span><span class="op">)</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observe.html">observe</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">out</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
@@ -239,18 +239,18 @@
 <span class="op">)</span>
 <span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">output</span><span class="op">$</span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="va">mtcars</span> <span class="op">%&gt;%</span>
-      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="va">mtcars</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
       <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span>mean_mpg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">input</span><span class="op">$</span><span class="va">var</span><span class="op">)</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span>
 <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></code></pre></div>
-<p>As in the other examples, you can mark the reactive read with <code><a href="../reference/dotdot.html">..()</a></code> (before unquoting with <code>!!</code>) and the code generation should “just work”. Technically speaking, this works because, when <code><a href="../reference/dotdot.html">..()</a></code> encounters a symbolic name that it doesn’t recognize, it returns the code <em>to generate</em> the symbol instead of the bare symbol (i.e., it returns <code><a href="https://rdrr.io/r/base/name.html">as.symbol("mpg")</a></code> instead of <code>mpg</code> which makes the <code>!!</code> work in both normal and meta execution).</p>
+<p>As in the other examples, you can mark the reactive read with <code><a href="../reference/dotdot.html">..()</a></code> (before unquoting with <code>!!</code>) and the code generation should “just work”. Technically speaking, this works because, when <code><a href="../reference/dotdot.html">..()</a></code> encounters a symbolic name that it doesn’t recognize, it returns the code <em>to generate</em> the symbol instead of the bare symbol (i.e., it returns <code>as.symbol("mpg")</code> instead of <code>mpg</code> which makes the <code>!!</code> work in both normal and meta execution).</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">output</span><span class="op">$</span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaRender.html">metaRender</a></span><span class="op">(</span><span class="va">renderPrint</span>, <span class="op">{</span>
-    <span class="va">mtcars</span> <span class="op">%&gt;%</span>
-      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="va">mtcars</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
       <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span>mean_mpg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">var</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observe.html">observe</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">out</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
@@ -258,18 +258,18 @@
 <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></code></pre></div>
 <p>In all the cases we’ve encountered thus far, the generated code is a bit different from how a human would write it. This last example produces code that looks like this:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">mtcars</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">mtcars</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span>mean_mpg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/name.html">as.symbol</a></span><span class="op">(</span><span class="st">"mpg"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>But what you’d probably want your app to generate is this:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">mtcars</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">mtcars</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span>mean_mpg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">mpg</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>At least currently, there is no great workaround for this problem other than to use alternative <strong>tidyverse</strong> functions that allow you to avoid unquoting by using character strings instead of symbolic names. Most <strong>dplyr</strong> functions provide this alternative through <code>_at()</code> variants. These variants allow you to write code like:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">mtcars</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">mtcars</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise_all.html">summarise_at</a></span><span class="op">(</span><span class="st">"mpg"</span>, <span class="va">mean</span><span class="op">)</span></code></pre></div>
 <p>In this case, the implementation of the app is a lot simpler because we don’t have to worry about unquoting; plus, the code that the app generates looks a lot more like code a human would write:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
@@ -279,8 +279,8 @@
 <span class="op">)</span>
 <span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">output</span><span class="op">$</span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaRender.html">metaRender</a></span><span class="op">(</span><span class="va">renderPrint</span>, <span class="op">{</span>
-    <span class="va">mtcars</span> <span class="op">%&gt;%</span>
-      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="va">mtcars</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
       <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise_all.html">summarise_at</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">var</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observe.html">observe</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">out</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>

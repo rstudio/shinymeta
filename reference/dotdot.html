@@ -158,7 +158,7 @@ The actual behavior of <code>..()</code> depends on the current
 <a href='https://rstudio.github.io/shinymeta/articles/code-generation.html#execution'>mode of execution</a>:</p><ul>
 <li><p><strong>Normal execution</strong>: the <code>..()</code> call is stripped from the expression before evaluation.
 For example, <code>..(dataset())</code> becomes <code>dataset()</code>, and <code>..(format(Sys.Date()))</code> becomes
-<code><a href='https://rdrr.io/r/base/format.html'>format(Sys.Date())</a></code>.</p></li>
+<code>format(Sys.Date())</code>.</p></li>
 <li><p><strong>Meta execution</strong> (as in <code><a href='expandChain.html'>expandChain()</a></code>): reactive reads are replaced with a suitable
 name or value (i.e. <code>..(dataset())</code> becomes <code>dataset</code> or similar) and other code is
 replaced with its result (<code>..(format(Sys.Date()))</code> becomes e.g. <code>"2019-08-06"</code>).</p></li>
@@ -186,7 +186,7 @@ you can wrap a <code>metaExpr</code> with <code><a href='expandChain.html'>expan
 non-<code>metaExpr</code> portions of <code>-2</code> variants always use normal execution and are completely
 ignored at code generation time, so <code>..()</code> isn't needed in this context.</p></li>
 <li><p>Crafted a bit of code that uses <code>..()</code> in a way that was too clever for
-shinymeta to understand. For example, <code><a href='https://rdrr.io/r/base/lapply.html'>lapply(1:5, ..)</a></code> is syntactically valid R code,
+shinymeta to understand. For example, <code>lapply(1:5, ..)</code> is syntactically valid R code,
 but it's nonsense from a shinymeta perspective.</p></li>
 </ol>
 

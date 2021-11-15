@@ -171,28 +171,31 @@ The default <code>formatter</code>, <code>styleText()</code>, uses <code><a href
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/base/options.html'>options</a></span><span class='op'>(</span>shiny.suppressMissingContextError <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-
-<span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span><span class='op'>(</span><span class='op'>{</span>
-  <span class='st'>"# Here's a comment"</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fl'>5</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='op'>)</span>
-<span class='op'>}</span><span class='op'>)</span>
-
-<span class='va'>code</span> <span class='op'>&lt;-</span> <span class='fu'><a href='expandChain.html'>expandChain</a></span><span class='op'>(</span><span class='fu'>x</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='fu'>deparseCode</span><span class='op'>(</span><span class='va'>code</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; # Here's a comment
-#&gt; x &lt;- sample(5) %&gt;%
-#&gt;   sum()
-#&gt; x</div><div class='input'><span class='fu'>formatCode</span><span class='op'>(</span><span class='va'>code</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; # Here's a comment
-#&gt; x &lt;- sample(5) %&gt;%
-#&gt;   sum()
-#&gt; x</div><div class='input'><span class='fu'>formatCode</span><span class='op'>(</span><span class='va'>code</span>, formatter <span class='op'>=</span> <span class='fu'>styler</span><span class='fu'>::</span><span class='va'><a href='https://styler.r-lib.org/reference/style_text.html'>style_text</a></span><span class='op'>)</span>
-</div><div class='output co'>#&gt; # Here's a comment
-#&gt; x &lt;- sample(5) %&gt;% sum()
-#&gt; x</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/options.html'>options</a></span><span class='op'>(</span>shiny.suppressMissingContextError <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>x</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span><span class='op'>(</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='st'>"# Here's a comment"</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fl'>5</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>code</span> <span class='op'>&lt;-</span> <span class='fu'><a href='expandChain.html'>expandChain</a></span><span class='op'>(</span><span class='fu'>x</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'>deparseCode</span><span class='op'>(</span><span class='va'>code</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> # Here's a comment</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x &lt;- sample(5) %&gt;%</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   sum()</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x</span>
+<span class='r-in'><span class='fu'>formatCode</span><span class='op'>(</span><span class='va'>code</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> # Here's a comment</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x &lt;- sample(5) %&gt;%</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   sum()</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x</span>
+<span class='r-in'><span class='fu'>formatCode</span><span class='op'>(</span><span class='va'>code</span>, formatter <span class='op'>=</span> <span class='fu'>styler</span><span class='fu'>::</span><span class='va'><a href='https://styler.r-lib.org/reference/style_text.html'>style_text</a></span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> # Here's a comment</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x &lt;- sample(5) %&gt;% sum()</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x</span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

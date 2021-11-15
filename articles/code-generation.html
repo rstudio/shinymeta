@@ -77,7 +77,7 @@
       <h1 data-toc-skip>Code generation</h1>
                         <h4 class="author">Carson Sievert &amp; Joe Cheng</h4>
             
-            <h4 class="date">2021-10-29</h4>
+            <h4 class="date">2021-11-15</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/master/vignettes/code-generation.Rmd"><code>vignettes/code-generation.Rmd</code></a></small>
       <div class="hidden name"><code>code-generation.Rmd</code></div>
@@ -116,7 +116,7 @@ pre.R {
 <p>Below is a reduced version of the <a href="https://github.com/cpsievert/cranview">cranview</a> Shiny app that allows you to enter an R package name to generate a plot of its <a href="https://cran.r-project.org/">CRAN</a> downloads over the past year. This app provides a nice example of how to modify an existing Shiny app so that it can generate code to reproduce what a user sees in the app:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/">shiny</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">tidyverse</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
 
 <span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html">fluidPage</a></span><span class="op">(</span>
   <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textInput.html">textInput</a></span><span class="op">(</span><span class="st">"package"</span>, <span class="st">"Package name"</span>, value <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span>,
@@ -145,7 +145,7 @@ pre.R {
 <p>Below is a modified version of the app that generates code to reproduce <code>output$plot</code> outside of the shiny session (via <strong>shinymeta</strong>). In the screencast of the app below, note how both <code>output$plot</code> and <code>output$code</code> update dynamically in response to user input. To keep the focus on code generation, we’ve presented the <code>output$code</code> as simple as possible here (by using <code><a href="https://rdrr.io/pkg/shiny/man/textOutput.html">verbatimTextOutput()</a></code> and <code><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html">renderPrint()</a></code>), but the <a href="code-distribution.html">next article</a> outlines the various options distributing code to users.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/">shiny</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">tidyverse</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/shinymeta/">shinymeta</a></span><span class="op">)</span>
 
 <span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html">fluidPage</a></span><span class="op">(</span>
@@ -175,7 +175,7 @@ pre.R {
   
   <span class="va">output</span><span class="op">$</span><span class="va">code</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span>
     <span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span>
-      <span class="fu"><a href="https://rdrr.io/r/base/substitute.html">quote</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">tidyverse</span><span class="op">)</span><span class="op">)</span>, 
+      <span class="fu"><a href="https://rdrr.io/r/base/substitute.html">quote</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span><span class="op">)</span>, 
       <span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span>
     <span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
@@ -312,12 +312,12 @@ pre.R {
 <span id="cb14-7"><a href="#cb14-7"></a>})</span>
 <span id="cb14-8"><a href="#cb14-8"></a><span class="kw">downloads</span>()</span>
 <span id="cb14-9"><a href="#cb14-9"></a>        date count package</span>
-<span id="cb14-10"><a href="#cb14-10"></a><span class="dv">1</span> <span class="dv">2020-10-29</span> <span class="dv">58982</span> ggplot2</span>
-<span id="cb14-11"><a href="#cb14-11"></a><span class="dv">2</span> <span class="dv">2020-10-30</span> <span class="dv">55383</span> ggplot2</span>
-<span id="cb14-12"><a href="#cb14-12"></a><span class="dv">3</span> <span class="dv">2020-10-31</span> <span class="dv">40497</span> ggplot2</span>
-<span id="cb14-13"><a href="#cb14-13"></a><span class="dv">4</span> <span class="dv">2020-11-01</span> <span class="dv">41434</span> ggplot2</span>
-<span id="cb14-14"><a href="#cb14-14"></a><span class="dv">5</span> <span class="dv">2020-11-02</span> <span class="dv">58532</span> ggplot2</span>
-<span id="cb14-15"><a href="#cb14-15"></a><span class="dv">6</span> <span class="dv">2020-11-03</span> <span class="dv">61838</span> ggplot2</span>
+<span id="cb14-10"><a href="#cb14-10"></a><span class="dv">1</span> <span class="dv">2020-11-15</span> <span class="dv">54136</span> ggplot2</span>
+<span id="cb14-11"><a href="#cb14-11"></a><span class="dv">2</span> <span class="dv">2020-11-16</span> <span class="dv">69719</span> ggplot2</span>
+<span id="cb14-12"><a href="#cb14-12"></a><span class="dv">3</span> <span class="dv">2020-11-17</span> <span class="dv">74014</span> ggplot2</span>
+<span id="cb14-13"><a href="#cb14-13"></a><span class="dv">4</span> <span class="dv">2020-11-18</span> <span class="dv">71236</span> ggplot2</span>
+<span id="cb14-14"><a href="#cb14-14"></a><span class="dv">5</span> <span class="dv">2020-11-19</span> <span class="dv">70541</span> ggplot2</span>
+<span id="cb14-15"><a href="#cb14-15"></a><span class="dv">6</span> <span class="dv">2020-11-20</span> <span class="dv">66101</span> ggplot2</span>
 <span id="cb14-16"><a href="#cb14-16"></a>[...plus <span class="dv">360</span> more rows...]</span></code></pre></div>
 <p>When invoked in meta mode, meta-counterparts return a code expression instead of fully evaluating the expression. <strong>shinymeta</strong> currently provides two ways to invoke meta-reactives in meta mode: <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> and <code><a href="../reference/expandChain.html">expandChain()</a></code>. In practice, you’ll almost always want to use <code><a href="../reference/expandChain.html">expandChain()</a></code> over <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code>: the former has a special understanding of marked reactive reads, whereas the latter is a less intelligent <a href="https://adv-r.hadley.nz/quasiquotation.html">quasi-quotation</a> interface. More specifically, <code><a href="../reference/expandChain.html">expandChain()</a></code> intelligently substitutes marked reactive reads with suitable value(s) or name(s) (and reuses those names to avoid redundant computation), whereas <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> does nothing more than evaluate what appears in <code><a href="../reference/dotdot.html">..()</a></code>.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -339,7 +339,7 @@ pre.R {
   <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html">validate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html">need</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">count</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="st">"Input a valid package name"</span><span class="op">)</span><span class="op">)</span>
   
   <span class="fu"><a href="../reference/metaExpr.html">metaExpr</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
       <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>count <span class="op">=</span> <span class="fu">zoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/rollapply.html">rollapply</a></span><span class="op">(</span><span class="va">count</span>, <span class="fl">7</span>, <span class="va">mean</span>, fill <span class="op">=</span> <span class="st">"extend"</span><span class="op">)</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span>

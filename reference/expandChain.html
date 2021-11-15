@@ -140,7 +140,7 @@ only its own code to be written, but that of its dependencies as well.</p>
       <th>...</th>
       <td><p>All arguments must be unnamed, and must be one of: 1) calls to
 meta-reactive objects, 2) comment string (e.g. <code>"# A comment"</code>), 3)
-language object (e.g. <code><a href='https://rdrr.io/r/base/substitute.html'>quote(print(1 + 1))</a></code>), or 4) <code>NULL</code> (which will be
+language object (e.g. <code>quote(print(1 + 1))</code>), or 4) <code>NULL</code> (which will be
 ignored). Calls to meta-reactive objects can optionally be <code><a href='https://rdrr.io/r/base/invisible.html'>invisible()</a></code>,
 see Details.</p></td>
     </tr>
@@ -164,7 +164,7 @@ passed to multiple <code>expandChain()</code> calls.</p>
 
     <p>There are two ways to extract code from meta objects (i.e. <code><a href='metaReactive.html'>metaReactive()</a></code>,
 <code><a href='metaObserve.html'>metaObserve()</a></code>, and <code><a href='metaRender.html'>metaRender()</a></code>): <code><a href='withMetaMode.html'>withMetaMode()</a></code> and <code>expandChain()</code>.
-The simplest is <code><a href='withMetaMode.html'>withMetaMode(obj())</a></code>, which crawls the tree of meta-reactive
+The simplest is <code>withMetaMode(obj())</code>, which crawls the tree of meta-reactive
 dependencies and expands each <code><a href='dotdot.html'>..()</a></code> in place.</p>
 <p>For example, consider these meta objects:</p><pre>    <span class='va'>nums</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span><span class='op'>(</span><span class='op'>{</span> <span class='fu'><a href='https://rdrr.io/r/stats/Uniform.html'>runif</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span> <span class='op'>}</span><span class='op'>)</span>
     <span class='va'>obs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaObserve.html'>metaObserve</a></span><span class='op'>(</span><span class='op'>{</span>
@@ -180,12 +180,12 @@ dependencies and expands each <code><a href='dotdot.html'>..()</a></code> in pla
     <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/Uniform.html'>runif</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span>
 </pre>
 
-<p>Notice how <code><a href='https://rdrr.io/r/stats/Uniform.html'>runif(100)</a></code> is inlined wherever <code><a href='dotdot.html'>..(nums())</a></code>
+<p>Notice how <code>runif(100)</code> is inlined wherever <code>..(nums())</code>
 appears, which is not desirable if we wish to reuse the same
 values for <code><a href='https://rdrr.io/r/base/summary.html'>summary()</a></code> and <code><a href='https://rdrr.io/r/graphics/plot.default.html'>plot()</a></code>.</p>
 <p>The <code>expandChain</code> function helps us workaround this issue
 by assigning return values of <code><a href='metaReactive.html'>metaReactive()</a></code> expressions to
-a name, then replaces relevant expansion (e.g., <code><a href='dotdot.html'>..(nums())</a></code>)
+a name, then replaces relevant expansion (e.g., <code>..(nums())</code>)
 with the appropriate name (e.g. <code>nums</code>).</p><pre>    <span class='fu'>expandChain</span><span class='op'>(</span><span class='fu'>obs</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </pre>
 
@@ -211,7 +211,7 @@ with the appropriate name (e.g. <code>nums</code>).</p><pre>    <span class='fu'
 </pre>
 
 <p>You can suppress the printing of the <code>nums</code> vector in the previous example by
-wrapping the <code>nums()</code> argument to <code>expandChain()</code> with <code><a href='https://rdrr.io/r/base/invisible.html'>invisible(nums())</a></code>.</p>
+wrapping the <code>nums()</code> argument to <code>expandChain()</code> with <code>invisible(nums())</code>.</p>
     <h2 class="hasAnchor" id="preserving-dependencies-between-expandchain-calls"><a class="anchor" href="#preserving-dependencies-between-expandchain-calls"></a>Preserving dependencies between <code>expandChain()</code> calls</h2>
 
     
@@ -285,62 +285,88 @@ with <code>inline = TRUE</code>, then every time it is encountered).</p>
     <p><a href='https://rstudio.github.io/shinymeta/articles/code-generation.html'>https://rstudio.github.io/shinymeta/articles/code-generation.html</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='va'>input</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>dataset <span class='op'>=</span> <span class='st'>"cars"</span><span class='op'>)</span>
-
-<span class='co'># varname is only required if srcref aren't supported</span>
-<span class='co'># (R CMD check disables them for some reason?)</span>
-<span class='va'>mr</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span><span class='op'>(</span><span class='op'>{</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/get.html'>get</a></span><span class='op'>(</span><span class='fu'><a href='dotdot.html'>..</a></span><span class='op'>(</span><span class='va'>input</span><span class='op'>$</span><span class='va'>dataset</span><span class='op'>)</span>, <span class='st'>"package:datasets"</span><span class='op'>)</span>
-<span class='op'>}</span><span class='op'>)</span>
-
-<span class='va'>top</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span><span class='op'>(</span><span class='op'>{</span>
-  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='dotdot.html'>..</a></span><span class='op'>(</span><span class='fu'>mr</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-<span class='op'>}</span><span class='op'>)</span>
-
-<span class='va'>bottom</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span><span class='op'>(</span><span class='op'>{</span>
-  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>tail</a></span><span class='op'>(</span><span class='fu'><a href='dotdot.html'>..</a></span><span class='op'>(</span><span class='fu'>mr</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-<span class='op'>}</span><span class='op'>)</span>
-
-<span class='va'>obs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaObserve.html'>metaObserve</a></span><span class='op'>(</span><span class='op'>{</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span><span class='st'>"Top:"</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='fu'><a href='dotdot.html'>..</a></span><span class='op'>(</span><span class='fu'>top</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span><span class='st'>"Bottom:"</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='fu'><a href='dotdot.html'>..</a></span><span class='op'>(</span><span class='fu'>bottom</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-<span class='op'>}</span><span class='op'>)</span>
-
-<span class='co'># Simple case</span>
-<span class='fu'>expandChain</span><span class='op'>(</span><span class='fu'>obs</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; mr &lt;- get("cars", "package:datasets")
-#&gt; top &lt;- head(mr)
-#&gt; bottom &lt;- tail(mr)
-#&gt; message("Top:")
-#&gt; summary(top)
-#&gt; message("Bottom:")
-#&gt; summary(bottom)</div><div class='input'>
-<span class='co'># Explicitly print top</span>
-<span class='fu'>expandChain</span><span class='op'>(</span><span class='fu'>top</span><span class='op'>(</span><span class='op'>)</span>, <span class='fu'>obs</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; mr &lt;- get("cars", "package:datasets")
-#&gt; top &lt;- head(mr)
-#&gt; top
-#&gt; bottom &lt;- tail(mr)
-#&gt; message("Top:")
-#&gt; summary(top)
-#&gt; message("Bottom:")
-#&gt; summary(bottom)</div><div class='input'>
-<span class='co'># Separate into two code chunks</span>
-<span class='va'>exp_ctx</span> <span class='op'>&lt;-</span> <span class='fu'>newExpansionContext</span><span class='op'>(</span><span class='op'>)</span>
-<span class='fu'>expandChain</span><span class='op'>(</span>.expansionContext <span class='op'>=</span> <span class='va'>exp_ctx</span>,
-  <span class='fu'><a href='https://rdrr.io/r/base/invisible.html'>invisible</a></span><span class='op'>(</span><span class='fu'>top</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>,
-  <span class='fu'><a href='https://rdrr.io/r/base/invisible.html'>invisible</a></span><span class='op'>(</span><span class='fu'>bottom</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `text`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `text`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `text`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `text`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `text`.</span></div><div class='output co'>#&gt; mr &lt;- get("cars", "package:datasets")
-#&gt; top &lt;- head(mr)
-#&gt; bottom &lt;- tail(mr)</div><div class='input'><span class='fu'>expandChain</span><span class='op'>(</span>.expansionContext <span class='op'>=</span> <span class='va'>exp_ctx</span>,
-  <span class='fu'>obs</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `text`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `text`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `text`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `text`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `token`.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Unknown or uninitialised column: `text`.</span></div><div class='output co'>#&gt; message("Top:")
-#&gt; summary(top)
-#&gt; message("Bottom:")
-#&gt; summary(bottom)</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='va'>input</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>dataset <span class='op'>=</span> <span class='st'>"cars"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># varname is only required if srcref aren't supported</span></span>
+<span class='r-in'><span class='co'># (R CMD check disables them for some reason?)</span></span>
+<span class='r-in'><span class='va'>mr</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span><span class='op'>(</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/get.html'>get</a></span><span class='op'>(</span><span class='fu'><a href='dotdot.html'>..</a></span><span class='op'>(</span><span class='va'>input</span><span class='op'>$</span><span class='va'>dataset</span><span class='op'>)</span>, <span class='st'>"package:datasets"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>top</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span><span class='op'>(</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='dotdot.html'>..</a></span><span class='op'>(</span><span class='fu'>mr</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>bottom</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaReactive.html'>metaReactive</a></span><span class='op'>(</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>tail</a></span><span class='op'>(</span><span class='fu'><a href='dotdot.html'>..</a></span><span class='op'>(</span><span class='fu'>mr</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>obs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='metaObserve.html'>metaObserve</a></span><span class='op'>(</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span><span class='st'>"Top:"</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='fu'><a href='dotdot.html'>..</a></span><span class='op'>(</span><span class='fu'>top</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span><span class='st'>"Bottom:"</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='fu'><a href='dotdot.html'>..</a></span><span class='op'>(</span><span class='fu'>bottom</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Simple case</span></span>
+<span class='r-in'><span class='fu'>expandChain</span><span class='op'>(</span><span class='fu'>obs</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> mr &lt;- get("cars", "package:datasets")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> top &lt;- head(mr)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> bottom &lt;- tail(mr)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> message("Top:")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> summary(top)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> message("Bottom:")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> summary(bottom)</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Explicitly print top</span></span>
+<span class='r-in'><span class='fu'>expandChain</span><span class='op'>(</span><span class='fu'>top</span><span class='op'>(</span><span class='op'>)</span>, <span class='fu'>obs</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> mr &lt;- get("cars", "package:datasets")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> top &lt;- head(mr)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> top</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> bottom &lt;- tail(mr)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> message("Top:")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> summary(top)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> message("Bottom:")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> summary(bottom)</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Separate into two code chunks</span></span>
+<span class='r-in'><span class='va'>exp_ctx</span> <span class='op'>&lt;-</span> <span class='fu'>newExpansionContext</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>expandChain</span><span class='op'>(</span>.expansionContext <span class='op'>=</span> <span class='va'>exp_ctx</span>,</span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/invisible.html'>invisible</a></span><span class='op'>(</span><span class='fu'>top</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>,</span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/invisible.html'>invisible</a></span><span class='op'>(</span><span class='fu'>bottom</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `text`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `text`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `text`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `text`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `text`.</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> mr &lt;- get("cars", "package:datasets")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> top &lt;- head(mr)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> bottom &lt;- tail(mr)</span>
+<span class='r-in'><span class='fu'>expandChain</span><span class='op'>(</span>.expansionContext <span class='op'>=</span> <span class='va'>exp_ctx</span>,</span>
+<span class='r-in'>  <span class='fu'>obs</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `text`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `text`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `text`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `text`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `token`.</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Unknown or uninitialised column: `text`.</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> message("Top:")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> summary(top)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> message("Bottom:")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> summary(bottom)</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
