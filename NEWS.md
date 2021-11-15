@@ -1,12 +1,14 @@
-# 0.2.0.9000
+# 0.2.0.3
+
+Small patch release to accomodate for changes made to `base::deparse()` in the next upcoming R release. (#107)
 
 # 0.2.0.2
 
-Small patch release to accommodate for changes made in testthat 3.1.0 
+Small patch release to accommodate for changes made in testthat 3.1.0. (#102) 
 
 # 0.2.0.1
 
-Small patch release to address unit test failures on Solaris.
+Small patch release to address unit test failures on Solaris. (#101)
 
 # 0.2.0
 
