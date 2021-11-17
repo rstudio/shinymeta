@@ -1,7 +1,7 @@
 Package: shinymeta
 Type: Package
 Title: Export Domain Logic from Shiny using Meta-Programming
-Version: 0.2.0.9000
+Version: 0.2.0.3
 Authors@R: c(
     person("Joe", "Cheng", email = "joe@rstudio.com", role = "aut"),
     person("Carson", "Sievert", email = "carson@rstudio.com", role = c("cre", "aut"), comment = c(ORCID = "0000-0002-4958-2844")),

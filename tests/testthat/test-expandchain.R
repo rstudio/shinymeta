@@ -88,7 +88,7 @@ describe("expansion context", {
       })
     })
     ec$substituteMetaReactive(mr3, function() {
-      metaExpr({1000 + 2000})
+      metaExpr({(1000 + 2000)})
     })
 
     x <- capture.output(print(expandChain(.expansionContext = ec,

@@ -22,7 +22,7 @@ test_that("buildRmdBundle works", {
   unzip(output_zip_path, exdir = working_dir)
   expect_true(file.exists(file.path(working_dir, "template.html")))
 
-  expect_snapshot_file(file.path(working_dir, "template.Rmd"))
+  expect_snapshot_file(file.path(working_dir, "template.Rmd"), compare = compare_file_text)
 })
 
 test_that("buildRmdBundle rejects unsafe knit_expand results", {
