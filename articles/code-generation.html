@@ -77,7 +77,7 @@
       <h1 data-toc-skip>Code generation</h1>
                         <h4 class="author">Carson Sievert &amp; Joe Cheng</h4>
             
-            <h4 class="date">2021-11-15</h4>
+            <h4 class="date">2021-11-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/master/vignettes/code-generation.Rmd"><code>vignettes/code-generation.Rmd</code></a></small>
       <div class="hidden name"><code>code-generation.Rmd</code></div>
@@ -312,12 +312,12 @@ pre.R {
 <span id="cb14-7"><a href="#cb14-7"></a>})</span>
 <span id="cb14-8"><a href="#cb14-8"></a><span class="kw">downloads</span>()</span>
 <span id="cb14-9"><a href="#cb14-9"></a>        date count package</span>
-<span id="cb14-10"><a href="#cb14-10"></a><span class="dv">1</span> <span class="dv">2020-11-15</span> <span class="dv">54136</span> ggplot2</span>
-<span id="cb14-11"><a href="#cb14-11"></a><span class="dv">2</span> <span class="dv">2020-11-16</span> <span class="dv">69719</span> ggplot2</span>
-<span id="cb14-12"><a href="#cb14-12"></a><span class="dv">3</span> <span class="dv">2020-11-17</span> <span class="dv">74014</span> ggplot2</span>
-<span id="cb14-13"><a href="#cb14-13"></a><span class="dv">4</span> <span class="dv">2020-11-18</span> <span class="dv">71236</span> ggplot2</span>
-<span id="cb14-14"><a href="#cb14-14"></a><span class="dv">5</span> <span class="dv">2020-11-19</span> <span class="dv">70541</span> ggplot2</span>
-<span id="cb14-15"><a href="#cb14-15"></a><span class="dv">6</span> <span class="dv">2020-11-20</span> <span class="dv">66101</span> ggplot2</span>
+<span id="cb14-10"><a href="#cb14-10"></a><span class="dv">1</span> <span class="dv">2020-11-17</span> <span class="dv">74014</span> ggplot2</span>
+<span id="cb14-11"><a href="#cb14-11"></a><span class="dv">2</span> <span class="dv">2020-11-18</span> <span class="dv">71236</span> ggplot2</span>
+<span id="cb14-12"><a href="#cb14-12"></a><span class="dv">3</span> <span class="dv">2020-11-19</span> <span class="dv">70541</span> ggplot2</span>
+<span id="cb14-13"><a href="#cb14-13"></a><span class="dv">4</span> <span class="dv">2020-11-20</span> <span class="dv">66101</span> ggplot2</span>
+<span id="cb14-14"><a href="#cb14-14"></a><span class="dv">5</span> <span class="dv">2020-11-21</span> <span class="dv">53323</span> ggplot2</span>
+<span id="cb14-15"><a href="#cb14-15"></a><span class="dv">6</span> <span class="dv">2020-11-22</span> <span class="dv">51742</span> ggplot2</span>
 <span id="cb14-16"><a href="#cb14-16"></a>[...plus <span class="dv">360</span> more rows...]</span></code></pre></div>
 <p>When invoked in meta mode, meta-counterparts return a code expression instead of fully evaluating the expression. <strong>shinymeta</strong> currently provides two ways to invoke meta-reactives in meta mode: <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> and <code><a href="../reference/expandChain.html">expandChain()</a></code>. In practice, you’ll almost always want to use <code><a href="../reference/expandChain.html">expandChain()</a></code> over <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code>: the former has a special understanding of marked reactive reads, whereas the latter is a less intelligent <a href="https://adv-r.hadley.nz/quasiquotation.html">quasi-quotation</a> interface. More specifically, <code><a href="../reference/expandChain.html">expandChain()</a></code> intelligently substitutes marked reactive reads with suitable value(s) or name(s) (and reuses those names to avoid redundant computation), whereas <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> does nothing more than evaluate what appears in <code><a href="../reference/dotdot.html">..()</a></code>.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
