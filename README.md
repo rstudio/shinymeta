@@ -1,7 +1,7 @@
 # shinymeta
 
 <!-- badges: start -->
-[![R build status](https://github.com/rstudio/shinymeta/workflows/R-CMD-check/badge.svg)](https://github.com/rstudio/shinymeta/actions)
+[![R build status](https://github.com/rstudio/shinymeta/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rstudio/shinymeta/actions)
 [![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 <!-- badges: end -->
@@ -74,15 +74,15 @@ We hope this example helps illustrate and inspire several reasons why you might 
 * **Transparency**: By generating code that exposes the core logic of your **shiny** app, you make things more transparent for yourself and others, which has numerous benefits:
 
     * **Reassurance**: In the domain of data analysis, it's usually enough hard to know exactly how a result is derived, and be confident that it's 100% correct. Unfortunately, wrapping your analysis code in a user interface like Shiny make the situation even worse: the analysis code is now embedded inside a larger system making the overall logic even more error prone and difficult to fully understand. Export the core logic of your analysis can help reassure others (and yourself!) that your work is correct.
-    
+
     * **Education**: For example, in the classroom, a student might use a Shiny app interactively to gain intuitive understanding of a statistical concept, then use the code to learn how to use the corresponding function from their own R scripts.
-    
+
     * **Enabling**: Shiny is great for enabling others to interface with an R script you've written, but what if your users wish to explore things that your interface doesn't allow for? By exposing the core logic of your app, you make it easier for motivated users to modify and build upon your work in ways you never thought about.
-    
+
     * **Documentation**: This one is especially relevant for exploratory analysis apps that allow you to derive insight from a dataset. A great example is the [ANOVA example app](https://github.com/cpsievert/DIY_ANOVA), where you can upload a dataset, run an ANOVA analysis, then download a report with all ANOVA results as well as the code to reproduce it.
 
 * **Permanence**: Using a Shiny app can have an ephemeral feeling to it; what happens in the future if the server goes down, or the app's features change? With a reproducible report, your users can download a more permanent artifact that can be saved locally.
-    
+
 
 ## Acknowledgements
 
