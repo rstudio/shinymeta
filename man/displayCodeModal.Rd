@@ -33,7 +33,7 @@ or \code{"l"} for large.}
 clicking outside the dialog box, or be pressing the Escape key. If
 \code{FALSE} (the default), the modal dialog can't be dismissed in those
 ways; instead it must be dismissed by clicking on a \code{modalButton()}, or
-from a call to \code{\link[shiny:showModal]{removeModal()}} on the server.}
+from a call to \code{\link[shiny:removeModal]{removeModal()}} on the server.}
 
 \item{fade}{If \code{FALSE}, the modal dialog will have no fade-in animation
 (it will simply appear rather than fade in to view).}
