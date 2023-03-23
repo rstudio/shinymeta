@@ -2,7 +2,7 @@
 
 <!-- badges: start -->
 [![R build status](https://github.com/rstudio/shinymeta/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rstudio/shinymeta/actions)
-[![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/)
+[![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/package=shinymeta)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 <!-- badges: end -->
 
