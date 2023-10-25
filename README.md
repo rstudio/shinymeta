@@ -2,8 +2,7 @@
 
 <!-- badges: start -->
 [![R build status](https://github.com/rstudio/shinymeta/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rstudio/shinymeta/actions)
-[![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![CRAN status](https://www.r-pkg.org/badges/version/shinymeta)](https://cran.r-project.org/package=shinymeta)
 <!-- badges: end -->
 
 The **shinymeta** R package provides tools for capturing logic in a Shiny app and exposing it as code that can be run outside of Shiny (e.g., from an R console). It also provides tools for bundling both the code and results to the end user.
