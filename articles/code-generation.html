@@ -20,6 +20,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -32,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shinymeta</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.3</span>
       </span>
     </div>
 
@@ -56,7 +58,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/rstudio/shinymeta/">
+  <a href="https://github.com/rstudio/shinymeta/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -71,15 +73,16 @@
 
       
 
-      </header><script src="code-generation_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Code generation</h1>
-                        <h4 class="author">Carson Sievert &amp; Joe Cheng</h4>
+                        <h4 data-toc-skip class="author">Carson Sievert
+&amp; Joe Cheng</h4>
             
-            <h4 class="date">2021-11-19</h4>
+            <h4 data-toc-skip class="date">2023-10-25</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/master/vignettes/code-generation.Rmd"><code>vignettes/code-generation.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/HEAD/vignettes/code-generation.Rmd" class="external-link"><code>vignettes/code-generation.Rmd</code></a></small>
       <div class="hidden name"><code>code-generation.Rmd</code></div>
 
     </div>
@@ -110,246 +113,360 @@ pre.R {
   margin-top: -1em;
 }
 </style>
-<div id="motivating-example" class="section level2">
-<h2 class="hasAnchor">
-<a href="#motivating-example" class="anchor"></a>Motivating example</h2>
-<p>Below is a reduced version of the <a href="https://github.com/cpsievert/cranview">cranview</a> Shiny app that allows you to enter an R package name to generate a plot of its <a href="https://cran.r-project.org/">CRAN</a> downloads over the past year. This app provides a nice example of how to modify an existing Shiny app so that it can generate code to reproduce what a user sees in the app:</p>
+<div class="section level2">
+<h2 id="motivating-example">Motivating example<a class="anchor" aria-label="anchor" href="#motivating-example"></a>
+</h2>
+<p>Below is a reduced version of the <a href="https://github.com/cpsievert/cranview" class="external-link">cranview</a> Shiny app that
+allows you to enter an R package name to generate a plot of its <a href="https://cran.r-project.org/" class="external-link">CRAN</a> downloads over the past
+year. This app provides a nice example of how to modify an existing
+Shiny app so that it can generate code to reproduce what a user sees in
+the app:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/">shiny</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
-
-<span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html">fluidPage</a></span><span class="op">(</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textInput.html">textInput</a></span><span class="op">(</span><span class="st">"package"</span>, <span class="st">"Package name"</span>, value <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span>,
-  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span>
-  
-  <span class="va">downloads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu">cranlogs</span><span class="fu">::</span><span class="fu"><a href="https://r-hub.github.io/cranlogs/reference/cran_downloads.html">cran_downloads</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">package</span>, from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">365</span>, to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-  
-  <span class="va">downloads_rolling</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html">validate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html">need</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">count</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="st">"Input a valid package name"</span><span class="op">)</span><span class="op">)</span>
-    
-    <span class="fu">downloads</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-      <span class="fu">mutate</span><span class="op">(</span>count <span class="op">=</span> <span class="fu">zoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/rollapply.html">rollapply</a></span><span class="op">(</span><span class="va">count</span>, <span class="fl">7</span>, <span class="va">mean</span>, fill <span class="op">=</span> <span class="st">"extend"</span><span class="op">)</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-  
-  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu">downloads_rolling</span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">count</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-<span class="op">}</span>
-
-<span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></code></pre></div>
-<p>Below is a modified version of the app that generates code to reproduce <code>output$plot</code> outside of the shiny session (via <strong>shinymeta</strong>). In the screencast of the app below, note how both <code>output$plot</code> and <code>output$code</code> update dynamically in response to user input. To keep the focus on code generation, we’ve presented the <code>output$code</code> as simple as possible here (by using <code><a href="https://rdrr.io/pkg/shiny/man/textOutput.html">verbatimTextOutput()</a></code> and <code><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html">renderPrint()</a></code>), but the <a href="code-distribution.html">next article</a> outlines the various options distributing code to users.</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textInput.html" class="external-link">textInput</a></span><span class="op">(</span><span class="st">"package"</span>, <span class="st">"Package name"</span>, value <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  </span>
+<span>  <span class="va">downloads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu">cranlogs</span><span class="fu">::</span><span class="fu"><a href="https://r-hub.github.io/cranlogs/reference/cran_downloads.html" class="external-link">cran_downloads</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">package</span>, from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">365</span>, to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">downloads_rolling</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">validate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">need</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">count</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="st">"Input a valid package name"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="fu">downloads</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>      <span class="fu">mutate</span><span class="op">(</span>count <span class="op">=</span> <span class="fu">zoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/rollapply.html" class="external-link">rollapply</a></span><span class="op">(</span><span class="va">count</span>, <span class="fl">7</span>, <span class="va">mean</span>, fill <span class="op">=</span> <span class="st">"extend"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu">downloads_rolling</span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">count</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
+<p>Below is a modified version of the app that generates code to
+reproduce <code>output$plot</code> outside of the shiny session (via
+<strong>shinymeta</strong>). In the screencast of the app below, note
+how both <code>output$plot</code> and <code>output$code</code> update
+dynamically in response to user input. To keep the focus on code
+generation, we’ve presented the <code>output$code</code> as simple as
+possible here (by using <code><a href="https://rdrr.io/pkg/shiny/man/textOutput.html" class="external-link">verbatimTextOutput()</a></code> and
+<code><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html" class="external-link">renderPrint()</a></code>), but the <a href="code-distribution.html">next article</a> outlines the various
+options distributing code to users.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/">shiny</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/shinymeta/">shinymeta</a></span><span class="op">)</span>
-
-<span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html">fluidPage</a></span><span class="op">(</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textInput.html">textInput</a></span><span class="op">(</span><span class="st">"package"</span>, <span class="st">"Package name"</span>, value <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span>,
-  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"code"</span><span class="op">)</span>,
-  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span>
-  
-  <span class="va">downloads</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu">cranlogs</span><span class="fu">::</span><span class="fu"><a href="https://r-hub.github.io/cranlogs/reference/cran_downloads.html">cran_downloads</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">package</span><span class="op">)</span>, from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">365</span>, to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-  
-  <span class="va">downloads_rolling</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive2</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html">validate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html">need</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">count</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="st">"Input a valid package name"</span><span class="op">)</span><span class="op">)</span>
-    
-    <span class="fu"><a href="../reference/metaExpr.html">metaExpr</a></span><span class="op">(</span><span class="op">{</span>
-      <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-        <span class="fu">mutate</span><span class="op">(</span>count <span class="op">=</span> <span class="fu">zoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/rollapply.html">rollapply</a></span><span class="op">(</span><span class="va">count</span>, <span class="fl">7</span>, <span class="va">mean</span>, fill <span class="op">=</span> <span class="st">"extend"</span><span class="op">)</span><span class="op">)</span>
-    <span class="op">}</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-  
-  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaRender.html">metaRender</a></span><span class="op">(</span><span class="va">renderPlot</span>, <span class="op">{</span>
-    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads_rolling</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">count</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-  
-  <span class="va">output</span><span class="op">$</span><span class="va">code</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span>
-      <span class="fu"><a href="https://rdrr.io/r/base/substitute.html">quote</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span><span class="op">)</span>, 
-      <span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span>
-    <span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-<span class="op">}</span>
-
-<span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/shinymeta/">shinymeta</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textInput.html" class="external-link">textInput</a></span><span class="op">(</span><span class="st">"package"</span>, <span class="st">"Package name"</span>, value <span class="op">=</span> <span class="st">"ggplot2"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textOutput.html" class="external-link">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"code"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  </span>
+<span>  <span class="va">downloads</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu">cranlogs</span><span class="fu">::</span><span class="fu"><a href="https://r-hub.github.io/cranlogs/reference/cran_downloads.html" class="external-link">cran_downloads</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">package</span><span class="op">)</span>, from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">365</span>, to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">downloads_rolling</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive2</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">validate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">need</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">count</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="st">"Input a valid package name"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="fu"><a href="../reference/metaExpr.html">metaExpr</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>      <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>        <span class="fu">mutate</span><span class="op">(</span>count <span class="op">=</span> <span class="fu">zoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/rollapply.html" class="external-link">rollapply</a></span><span class="op">(</span><span class="va">count</span>, <span class="fl">7</span>, <span class="va">mean</span>, fill <span class="op">=</span> <span class="st">"extend"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">}</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaRender.html">metaRender</a></span><span class="op">(</span><span class="va">renderPlot</span>, <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads_rolling</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">count</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">output</span><span class="op">$</span><span class="va">code</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html" class="external-link">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span><span class="op">)</span>, </span>
+<span>      <span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
 <iframe src="https://player.vimeo.com/video/351494877?title=0&amp;byline=0&amp;portrait=0" width="100%" height="400" frameborder="0" seamless="seamless" webkitallowfullscreen="NA" mozallowfullscreen="NA" allowfullscreen="NA">
 </iframe>
 </div>
-<div id="overview" class="section level2">
-<h2 class="hasAnchor">
-<a href="#overview" class="anchor"></a>Overview</h2>
-<p>There are roughly 3 main steps required to get an existing Shiny app generating reproducible code via <strong>shinymeta</strong> (well, 4 steps if you want to generate ‘readable’ code). Those steps are illustrated in the video below:</p>
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
+<p>There are roughly 3 main steps required to get an existing Shiny app
+generating reproducible code via <strong>shinymeta</strong> (well, 4
+steps if you want to generate ‘readable’ code). Those steps are
+illustrated in the video below:</p>
 <iframe src="https://player.vimeo.com/video/352069472?title=0&amp;byline=0&amp;portrait=0" width="100%" height="400" frameborder="0" seamless="seamless" webkitallowfullscreen="NA" mozallowfullscreen="NA" allowfullscreen="NA">
 </iframe>
-<div id="step-1-identify-and-capture-domain-logic" class="section level3">
-<h3 class="hasAnchor">
-<a href="#step-1-identify-and-capture-domain-logic" class="anchor"></a>Step 1: Identify and capture domain logic</h3>
-<p>Each reactive building block that contains domain logic must be replaced by a suitable meta-counterpart (i.e., <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html">reactive()</a></code> -&gt; <code><a href="../reference/metaReactive.html">metaReactive()</a></code>, <code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html">renderPlot()</a></code> -&gt; <code><a href="../reference/metaRender.html">metaRender()</a></code>, <code><a href="https://rdrr.io/pkg/shiny/man/observe.html">observe()</a></code> -&gt; <code><a href="../reference/metaObserve.html">metaObserve()</a></code>, etc). In situations where a reactive building block contains non-domain logic that you don’t want to capture (e.g., Shiny specific code, like <code><a href="https://rdrr.io/pkg/shiny/man/validate.html">validate()</a></code>), <strong>shinymeta</strong> provides a second version (e.g. <code><a href="../reference/metaReactive.html">metaReactive2()</a></code>, <code><a href="../reference/metaRender.html">metaRender2()</a></code>, <code><a href="../reference/metaObserve.html">metaObserve2()</a></code>, etc) that allows you to ignore code (by wrapping only the code that you care about in <code><a href="../reference/metaExpr.html">metaExpr()</a></code>). When using these <code>-2</code> variants, make sure the return value of the expression is a <code><a href="../reference/metaExpr.html">metaExpr()</a></code> object (In practice, the code you want to capture might depend on other input value(s). In that case, you can use control flow <a href="https://github.com/cpsievert/cranview/blob/f4989a9/app.R#L71-L89">similar to this</a>, just make sure to return a <code><a href="../reference/metaExpr.html">metaExpr()</a></code>!).</p>
-</div>
-<div id="step-2-identify-and-mark-reactive-reads" class="section level3">
-<h3 class="hasAnchor">
-<a href="#step-2-identify-and-mark-reactive-reads" class="anchor"></a>Step 2: Identify and mark reactive reads</h3>
-<p>To substitute reactive reads (e.g., <code>input$package</code>, <code>downloads()</code>) with a suitable value or name (e.g., <code>"ggplot2"</code>, <code>downloads</code>), mark them with <code><a href="../reference/dotdot.html">..()</a></code>. When <code><a href="../reference/dotdot.html">..()</a></code> is applied to something other than a reactive read, it’s treated as an unquoting operator, which is discussed more in <a href="#execution">The execution model</a>.</p>
-</div>
-<div id="step-3-generate-code-with-expandchain" class="section level3">
-<h3 class="hasAnchor">
-<a href="#step-3-generate-code-with-expandchain" class="anchor"></a>Step 3: Generate code with <code>expandChain()</code>
+<div class="section level3">
+<h3 id="step-1-identify-and-capture-domain-logic">Step 1: Identify and capture domain logic<a class="anchor" aria-label="anchor" href="#step-1-identify-and-capture-domain-logic"></a>
 </h3>
-<p>The <code><a href="../reference/expandChain.html">expandChain()</a></code> function generates code from any combination of meta-counterparts (i.e., <code><a href="../reference/metaReactive.html">metaReactive()</a></code>, <code><a href="../reference/metaRender.html">metaRender()</a></code>, etc) and other quoted code. Supplying quoted code is primarily useful for supplying setup code that the user needs but isn’t captured by meta-reactives (e.g., loading of libraries).</p>
+<p>Each reactive building block that contains domain logic must be
+replaced by a suitable meta-counterpart (i.e., <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive()</a></code>
+-&gt; <code><a href="../reference/metaReactive.html">metaReactive()</a></code>, <code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code> -&gt;
+<code><a href="../reference/metaRender.html">metaRender()</a></code>, <code><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe()</a></code> -&gt;
+<code><a href="../reference/metaObserve.html">metaObserve()</a></code>, etc). In situations where a reactive
+building block contains non-domain logic that you don’t want to capture
+(e.g., Shiny specific code, like <code><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">validate()</a></code>),
+<strong>shinymeta</strong> provides a second version
+(e.g. <code><a href="../reference/metaReactive.html">metaReactive2()</a></code>, <code><a href="../reference/metaRender.html">metaRender2()</a></code>,
+<code><a href="../reference/metaObserve.html">metaObserve2()</a></code>, etc) that allows you to ignore code (by
+wrapping only the code that you care about in <code><a href="../reference/metaExpr.html">metaExpr()</a></code>).
+When using these <code>-2</code> variants, make sure the return value of
+the expression is a <code><a href="../reference/metaExpr.html">metaExpr()</a></code> object (In practice, the
+code you want to capture might depend on other input value(s). In that
+case, you can use control flow <a href="https://github.com/cpsievert/cranview/blob/f4989a9/app.R#L71-L89" class="external-link">similar
+to this</a>, just make sure to return a <code><a href="../reference/metaExpr.html">metaExpr()</a></code>!).</p>
+</div>
+<div class="section level3">
+<h3 id="step-2-identify-and-mark-reactive-reads">Step 2: Identify and mark reactive reads<a class="anchor" aria-label="anchor" href="#step-2-identify-and-mark-reactive-reads"></a>
+</h3>
+<p>To substitute reactive reads (e.g., <code>input$package</code>,
+<code>downloads()</code>) with a suitable value or name (e.g.,
+<code>"ggplot2"</code>, <code>downloads</code>), mark them with
+<code><a href="../reference/dotdot.html">..()</a></code>. When <code><a href="../reference/dotdot.html">..()</a></code> is applied to something other
+than a reactive read, it’s treated as an unquoting operator, which is
+discussed more in <a href="#execution">The execution model</a>.</p>
+</div>
+<div class="section level3">
+<h3 id="step-3-generate-code-with-expandchain">Step 3: Generate code with <code>expandChain()</code><a class="anchor" aria-label="anchor" href="#step-3-generate-code-with-expandchain"></a>
+</h3>
+<p>The <code><a href="../reference/expandChain.html">expandChain()</a></code> function generates code from any
+combination of meta-counterparts (i.e., <code><a href="../reference/metaReactive.html">metaReactive()</a></code>,
+<code><a href="../reference/metaRender.html">metaRender()</a></code>, etc) and other quoted code. Supplying quoted
+code is primarily useful for supplying setup code that the user needs
+but isn’t captured by meta-reactives (e.g., loading of libraries).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Imagine we've added this output to our example</span>
-<span class="va">output</span><span class="op">$</span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaRender.html">metaRender</a></span><span class="op">(</span><span class="va">renderPrint</span>, <span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">count</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span>
-
-<span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/substitute.html">quote</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
-    <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>,
-  <span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">output</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
-<p>If we expand these outputs separately, <code><a href="../reference/expandChain.html">expandChain()</a></code> won’t automatically know to avoid duplicating code for dependencies that they share. In this case, both of these outputs depend on <code>downloads</code>, so if we expand them in subsequent calls to <code><a href="../reference/expandChain.html">expandChain()</a></code>, we’ll be producing code that calls <code><a href="https://r-hub.github.io/cranlogs/reference/cran_downloads.html">cranlogs::cran_downloads()</a></code> twice:</p>
+<code class="sourceCode R"><span><span class="co"># Imagine we've added this output to our example</span></span>
+<span><span class="va">output</span><span class="op">$</span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaRender.html">metaRender</a></span><span class="op">(</span><span class="va">renderPrint</span>, <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">count</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span>,</span>
+<span>  <span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">output</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>If we expand these outputs separately, <code><a href="../reference/expandChain.html">expandChain()</a></code>
+won’t automatically know to avoid duplicating code for dependencies that
+they share. In this case, both of these outputs depend on
+<code>downloads</code>, so if we expand them in subsequent calls to
+<code><a href="../reference/expandChain.html">expandChain()</a></code>, we’ll be producing code that calls
+<code><a href="https://r-hub.github.io/cranlogs/reference/cran_downloads.html" class="external-link">cranlogs::cran_downloads()</a></code> twice:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>Fortunately, there is a way to avoid this redundant code caused by shared dependencies by sharing an ‘expansion context’ between subsequent calls to <code><a href="../reference/expandChain.html">expandChain()</a></code>. This is especially useful for <a href="#generating-reports">generating reports</a> where you might want to spit code out into separate <strong>knitr</strong> chunks.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Fortunately, there is a way to avoid this redundant code caused by
+shared dependencies by sharing an ‘expansion context’ between subsequent
+calls to <code><a href="../reference/expandChain.html">expandChain()</a></code>. This is especially useful for <a href="#generating-reports">generating reports</a> where you might want
+to spit code out into separate <strong>knitr</strong> chunks.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expandChain.html">newExpansionContext</a></span><span class="op">(</span><span class="op">)</span>
-<span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span>, .expansionContext <span class="op">=</span> <span class="va">ec</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expandChain.html">newExpansionContext</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span>, .expansionContext <span class="op">=</span> <span class="va">ec</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span>, .expansionContext <span class="op">=</span> <span class="va">ec</span><span class="op">)</span></code></pre></div>
-<p>Expansion contexts are also useful for cases where you need to redefine a meta-reactive’s logic. This is useful in at least two scenarios:</p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span>, .expansionContext <span class="op">=</span> <span class="va">ec</span><span class="op">)</span></span></code></pre></div>
+<p>Expansion contexts are also useful for cases where you need to
+redefine a meta-reactive’s logic. This is useful in at least two
+scenarios:</p>
 <ol style="list-style-type: decimal">
-<li>For efficiency or privacy reasons, you may not want to provide the “rawest” form of the data in your app to users. Instead, you might want to only provide a transformed and/or summarized version of the data. For example, instead of providing the user with <code>downloads</code>, we could provide <code>downloads_rolling</code> as file to be <a href="code-distribution.html#including-other-files">included as part of a download bundle</a>.</li>
+<li>For efficiency or privacy reasons, you may not want to provide the
+“rawest” form of the data in your app to users. Instead, you might want
+to only provide a transformed and/or summarized version of the data. For
+example, instead of providing the user with <code>downloads</code>, we
+could provide <code>downloads_rolling</code> as file to be <a href="code-distribution.html#including-other-files">included as part of
+a download bundle</a>.</li>
 </ol>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="fu">downloads_rolling</span><span class="op">(</span><span class="op">)</span>, <span class="st">"d.rds"</span><span class="op">)</span>
-<span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expandChain.html">newExpansionContext</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">ec</span><span class="op">$</span><span class="fu">substituteMetaReactive</span><span class="op">(</span><span class="va">downloads_rolling</span>, <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span>
-  <span class="fu"><a href="../reference/metaExpr.html">metaExpr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"d.rds"</span><span class="op">)</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span>
-
-<span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/substitute.html">quote</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span><span class="op">)</span>,
-  <span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span>,
-  .expansionContext <span class="op">=</span> <span class="va">ec</span>
-<span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="fu">downloads_rolling</span><span class="op">(</span><span class="op">)</span>, <span class="st">"d.rds"</span><span class="op">)</span></span>
+<span><span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expandChain.html">newExpansionContext</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">ec</span><span class="op">$</span><span class="fu">substituteMetaReactive</span><span class="op">(</span><span class="va">downloads_rolling</span>, <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/metaExpr.html">metaExpr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"d.rds"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="va">output</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  .expansionContext <span class="op">=</span> <span class="va">ec</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li>Apps that allow users to upload a file: the location of the file on the server won’t be available to users, so it may be easier just to substitute the reactive that reads the uploaded file. For an example, see <a href="code-distribution.html#including-other-files">this example</a> in the next vignette.</li>
+<li>Apps that allow users to upload a file: the location of the file on
+the server won’t be available to users, so it may be easier just to
+substitute the reactive that reads the uploaded file. For an example,
+see <a href="code-distribution.html#including-other-files">this
+example</a> in the next vignette.</li>
 </ol>
 </div>
-<div id="step-4-improving-the-readability-of-generated-code" class="section level3">
-<h3 class="hasAnchor">
-<a href="#step-4-improving-the-readability-of-generated-code" class="anchor"></a>Step 4: Improving the readability of generated code</h3>
-<p>There’s a few different techniques you can leverage to improve the quality of the generated code, including:</p>
+<div class="section level3">
+<h3 id="step-4-improving-the-readability-of-generated-code">Step 4: Improving the readability of generated code<a class="anchor" aria-label="anchor" href="#step-4-improving-the-readability-of-generated-code"></a>
+</h3>
+<p>There’s a few different techniques you can leverage to improve the
+quality of the generated code, including:</p>
 <ul>
 <li>
-<strong>Comment preservation</strong>: Surround comments in quotes to ensure they appear in the generated code. This works with any meta-reactive as well as <code><a href="../reference/expandChain.html">expandChain()</a></code>:</li>
+<strong>Comment preservation</strong>: Surround comments in quotes
+to ensure they appear in the generated code. This works with any
+meta-reactive as well as <code><a href="../reference/expandChain.html">expandChain()</a></code>:</li>
 </ul>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">mr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span>
-  <span class="st">"# comment"</span>
-  <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span>
-<span class="op">}</span><span class="op">)</span>
-<span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="st">"# another comment"</span>, <span class="fu">mr</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">mr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="st">"# comment"</span></span>
+<span>  <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="st">"# another comment"</span>, <span class="fu">mr</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <ul>
 <li>
-<strong>Controlling names</strong>: In some cases, meta-reactive name inference fails<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> and/or isn’t quite the name you want to appear in the generated code. In those cases, you can specify the name via the <code>varname</code> argument.</li>
+<strong>Controlling names</strong>: In some cases, meta-reactive
+name inference fails<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> and/or isn’t quite the name you want to
+appear in the generated code. In those cases, you can specify the name
+via the <code>varname</code> argument.</li>
 </ul>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">mr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span>, varname <span class="op">=</span> <span class="st">"two"</span><span class="op">)</span>
-<span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">mr</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">mr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span>, varname <span class="op">=</span> <span class="st">"two"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">mr</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <ul>
 <li>
-<strong>Controlling scope</strong>: Meta-reactive expressions that use intermediate variable names may generate code that introduces those names into the global scope. For example, the code generated from this <code>three</code> meta-reactive introduces <code>two</code> into the global scope:</li>
+<strong>Controlling scope</strong>: Meta-reactive expressions that
+use intermediate variable names may generate code that introduces those
+names into the global scope. For example, the code generated from this
+<code>three</code> meta-reactive introduces <code>two</code> into the
+global scope:</li>
 </ul>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">three</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span>
-  <span class="va">two</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span>
-  <span class="va">two</span> <span class="op">+</span> <span class="fl">1</span>
-<span class="op">}</span><span class="op">)</span>
-<span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">three</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>If you want to be careful not to unnecessarily introduce names into the users namespace, you can force the generated code expressions to be wrapped in <code><a href="https://rdrr.io/r/base/eval.html">local()</a></code> which ensures intermediate variables aren’t bound to the global environment:</p>
+<code class="sourceCode R"><span><span class="va">three</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">two</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span>  <span class="va">two</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">three</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>If you want to be careful not to unnecessarily introduce names into
+the users namespace, you can force the generated code expressions to be
+wrapped in <code><a href="https://rdrr.io/r/base/eval.html" class="external-link">local()</a></code> which ensures intermediate variables
+aren’t bound to the global environment:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">three</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span>
-  <span class="va">two</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span>
-  <span class="va">two</span> <span class="op">+</span> <span class="fl">1</span>
-<span class="op">}</span>, localize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">three</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>Another option is to bind the meta-reactive’s name to the last call of the meta-expression expression. This option has the benefit of generating the most readable code, but also has the downside of introducing intermediate variables into the global namespace.</p>
+<code class="sourceCode R"><span><span class="va">three</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">two</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span>  <span class="va">two</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span><span class="op">}</span>, localize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">three</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Another option is to bind the meta-reactive’s name to the last call
+of the meta-expression expression. This option has the benefit of
+generating the most readable code, but also has the downside of
+introducing intermediate variables into the global namespace.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">three</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span>
-  <span class="va">two</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span>
-  <span class="va">two</span> <span class="op">+</span> <span class="fl">1</span>
-<span class="op">}</span>, bindToReturn <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">three</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">three</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">two</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span>  <span class="va">two</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span><span class="op">}</span>, bindToReturn <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">three</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-<div id="execution" class="section level2">
-<h2 class="hasAnchor">
-<a href="#execution" class="anchor"></a>The execution model</h2>
-<p>For most existing Shiny applications, you should be able to follow the steps outlined above in the <a href="#overview">Overview</a> section, and the code generation should “just work”. In some scenarios, however, you may have to tweak or debug your Shiny app logic, and in doing so, it’ll be helpful to understand <strong>shinymeta</strong>’s model for execution.</p>
-<p>Meta-reactives (e.g., <code><a href="../reference/metaReactive.html">metaReactive()</a></code>, <code><a href="../reference/metaRender.html">metaRender()</a></code>, etc) can be invoked in two different modes: meta or normal (the default). In normal mode, the behavior of a meta-reactive is essentially the same as the non-meta version (e.g., <code>downloads()</code> still evaluates and caches results just like a normal <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html">reactive()</a></code> does). The only subtle difference is that, in normal execution, meta-reactives know to (silently) ignore <code><a href="../reference/dotdot.html">..()</a></code>:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>downloads &lt;-<span class="st"> </span><span class="kw">metaReactive</span>({</span>
-<span id="cb14-2"><a href="#cb14-2"></a>  cranlogs<span class="op">::</span><span class="kw">cran_downloads</span>(</span>
-<span id="cb14-3"><a href="#cb14-3"></a>    <span class="kw">..</span>(input<span class="op">$</span>package), </span>
-<span id="cb14-4"><a href="#cb14-4"></a>    <span class="dt">from =</span> <span class="kw">Sys.Date</span>() <span class="op">-</span><span class="st"> </span><span class="dv">365</span>, </span>
-<span id="cb14-5"><a href="#cb14-5"></a>    <span class="dt">to =</span> <span class="kw">Sys.Date</span>()</span>
-<span id="cb14-6"><a href="#cb14-6"></a>  )</span>
-<span id="cb14-7"><a href="#cb14-7"></a>})</span>
-<span id="cb14-8"><a href="#cb14-8"></a><span class="kw">downloads</span>()</span>
-<span id="cb14-9"><a href="#cb14-9"></a>        date count package</span>
-<span id="cb14-10"><a href="#cb14-10"></a><span class="dv">1</span> <span class="dv">2020-11-19</span> <span class="dv">70541</span> ggplot2</span>
-<span id="cb14-11"><a href="#cb14-11"></a><span class="dv">2</span> <span class="dv">2020-11-20</span> <span class="dv">66101</span> ggplot2</span>
-<span id="cb14-12"><a href="#cb14-12"></a><span class="dv">3</span> <span class="dv">2020-11-21</span> <span class="dv">53323</span> ggplot2</span>
-<span id="cb14-13"><a href="#cb14-13"></a><span class="dv">4</span> <span class="dv">2020-11-22</span> <span class="dv">51742</span> ggplot2</span>
-<span id="cb14-14"><a href="#cb14-14"></a><span class="dv">5</span> <span class="dv">2020-11-23</span> <span class="dv">67641</span> ggplot2</span>
-<span id="cb14-15"><a href="#cb14-15"></a><span class="dv">6</span> <span class="dv">2020-11-24</span> <span class="dv">65529</span> ggplot2</span>
-<span id="cb14-16"><a href="#cb14-16"></a>[...plus <span class="dv">360</span> more rows...]</span></code></pre></div>
-<p>When invoked in meta mode, meta-counterparts return a code expression instead of fully evaluating the expression. <strong>shinymeta</strong> currently provides two ways to invoke meta-reactives in meta mode: <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> and <code><a href="../reference/expandChain.html">expandChain()</a></code>. In practice, you’ll almost always want to use <code><a href="../reference/expandChain.html">expandChain()</a></code> over <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code>: the former has a special understanding of marked reactive reads, whereas the latter is a less intelligent <a href="https://adv-r.hadley.nz/quasiquotation.html">quasi-quotation</a> interface. More specifically, <code><a href="../reference/expandChain.html">expandChain()</a></code> intelligently substitutes marked reactive reads with suitable value(s) or name(s) (and reuses those names to avoid redundant computation), whereas <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> does nothing more than evaluate what appears in <code><a href="../reference/dotdot.html">..()</a></code>.</p>
+<div class="section level2">
+<h2 id="execution">The execution model<a class="anchor" aria-label="anchor" href="#execution"></a>
+</h2>
+<p>For most existing Shiny applications, you should be able to follow
+the steps outlined above in the <a href="#overview">Overview</a>
+section, and the code generation should “just work”. In some scenarios,
+however, you may have to tweak or debug your Shiny app logic, and in
+doing so, it’ll be helpful to understand <strong>shinymeta</strong>’s
+model for execution.</p>
+<p>Meta-reactives (e.g., <code><a href="../reference/metaReactive.html">metaReactive()</a></code>,
+<code><a href="../reference/metaRender.html">metaRender()</a></code>, etc) can be invoked in two different modes:
+meta or normal (the default). In normal mode, the behavior of a
+meta-reactive is essentially the same as the non-meta version (e.g.,
+<code>downloads()</code> still evaluates and caches results just like a
+normal <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive()</a></code> does). The only subtle difference is
+that, in normal execution, meta-reactives know to (silently) ignore
+<code><a href="../reference/dotdot.html">..()</a></code>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>downloads <span class="ot">&lt;-</span> <span class="fu">metaReactive</span>({</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  cranlogs<span class="sc">::</span><span class="fu">cran_downloads</span>(</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>    <span class="fu">..</span>(input<span class="sc">$</span>package), </span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>    <span class="at">from =</span> <span class="fu">Sys.Date</span>() <span class="sc">-</span> <span class="dv">365</span>, </span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>    <span class="at">to =</span> <span class="fu">Sys.Date</span>()</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  )</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>})</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="fu">downloads</span>()</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>        date  count package</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="dv">1</span> <span class="dv">2022-10-25</span> <span class="dv">105339</span> ggplot2</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="dv">2</span> <span class="dv">2022-10-26</span> <span class="dv">102089</span> ggplot2</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="dv">3</span> <span class="dv">2022-10-27</span> <span class="dv">100275</span> ggplot2</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="dv">4</span> <span class="dv">2022-10-28</span>  <span class="dv">96155</span> ggplot2</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="dv">5</span> <span class="dv">2022-10-29</span>  <span class="dv">70721</span> ggplot2</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="dv">6</span> <span class="dv">2022-10-30</span>  <span class="dv">72019</span> ggplot2</span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>[...plus <span class="dv">360</span> more rows...]</span></code></pre></div>
+<p>When invoked in meta mode, meta-counterparts return a code expression
+instead of fully evaluating the expression. <strong>shinymeta</strong>
+currently provides two ways to invoke meta-reactives in meta mode:
+<code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> and <code><a href="../reference/expandChain.html">expandChain()</a></code>. In practice,
+you’ll almost always want to use <code><a href="../reference/expandChain.html">expandChain()</a></code> over
+<code><a href="../reference/withMetaMode.html">withMetaMode()</a></code>: the former has a special understanding of
+marked reactive reads, whereas the latter is a less intelligent <a href="https://adv-r.hadley.nz/quasiquotation.html" class="external-link">quasi-quotation</a>
+interface. More specifically, <code><a href="../reference/expandChain.html">expandChain()</a></code> intelligently
+substitutes marked reactive reads with suitable value(s) or name(s) (and
+reuses those names to avoid redundant computation), whereas
+<code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> does nothing more than evaluate what appears
+in <code><a href="../reference/dotdot.html">..()</a></code>.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/withMetaMode.html">withMetaMode</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>When applied to arbitrary code expression, <code><a href="../reference/dotdot.html">..()</a></code> works like an unquoting operator (similar to <strong>rlang</strong>’s <code>!!</code> operator), regardless of whether <code><a href="../reference/expandChain.html">expandChain()</a></code> or <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> is used. That is, it evaluates the code that appears in <code><a href="../reference/dotdot.html">..()</a></code> and inlines the result in the generated code. This makes it possible, for instance, to ‘hard-code’ a dynamic result (e.g., use the date the code was generated instead of when the generated code is actually evaluated).</p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/withMetaMode.html">withMetaMode</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>When applied to arbitrary code expression, <code><a href="../reference/dotdot.html">..()</a></code> works
+like an unquoting operator (similar to <strong>rlang</strong>’s
+<code>!!</code> operator), regardless of whether
+<code><a href="../reference/expandChain.html">expandChain()</a></code> or <code><a href="../reference/withMetaMode.html">withMetaMode()</a></code> is used. That
+is, it evaluates the code that appears in <code><a href="../reference/dotdot.html">..()</a></code> and inlines
+the result in the generated code. This makes it possible, for instance,
+to ‘hard-code’ a dynamic result (e.g., use the date the code was
+generated instead of when the generated code is actually evaluated).</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">downloads</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span>
-  <span class="fu">cranlogs</span><span class="fu">::</span><span class="fu"><a href="https://r-hub.github.io/cranlogs/reference/cran_downloads.html">cran_downloads</a></span><span class="op">(</span>
-    <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">package</span><span class="op">)</span>, 
-    from <span class="op">=</span> <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">365</span><span class="op">)</span><span class="op">)</span>, 
-    to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.Date</a></span><span class="op">(</span><span class="op">)</span>
-  <span class="op">)</span>
-<span class="op">}</span><span class="op">)</span>
-<span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>When it comes to <code>-2</code> variants (e.g. <code><a href="../reference/metaReactive.html">metaReactive2()</a></code>, <code><a href="../reference/metaRender.html">metaRender2()</a></code>, etc), only the code that appears inside <code><a href="../reference/metaExpr.html">metaExpr()</a></code> can execute in meta mode. That means, among other things, that the read of <code>downloads()</code> that appears outside of <code><a href="../reference/metaExpr.html">metaExpr()</a></code> always returns a data frame (the <code><a href="https://rdrr.io/pkg/shiny/man/validate.html">validate()</a></code> wouldn’t make sense if <code>downloads()</code> returned code!). It also means that <code><a href="../reference/dotdot.html">..()</a></code> isn’t defined outside of <code><a href="../reference/metaExpr.html">metaExpr()</a></code>.</p>
+<code class="sourceCode R"><span><span class="va">downloads</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu">cranlogs</span><span class="fu">::</span><span class="fu"><a href="https://r-hub.github.io/cranlogs/reference/cran_downloads.html" class="external-link">cran_downloads</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">package</span><span class="op">)</span>, </span>
+<span>    from <span class="op">=</span> <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">365</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>    to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>When it comes to <code>-2</code> variants
+(e.g. <code><a href="../reference/metaReactive.html">metaReactive2()</a></code>, <code><a href="../reference/metaRender.html">metaRender2()</a></code>, etc),
+only the code that appears inside <code><a href="../reference/metaExpr.html">metaExpr()</a></code> can execute in
+meta mode. That means, among other things, that the read of
+<code>downloads()</code> that appears outside of <code><a href="../reference/metaExpr.html">metaExpr()</a></code>
+always returns a data frame (the <code><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">validate()</a></code> wouldn’t make
+sense if <code>downloads()</code> returned code!). It also means that
+<code><a href="../reference/dotdot.html">..()</a></code> isn’t defined outside of <code><a href="../reference/metaExpr.html">metaExpr()</a></code>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">downloads_rolling</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive2</a></span><span class="op">(</span><span class="op">{</span>
-  <span class="co"># Using ..() here would produce an error</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html">validate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html">need</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">count</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="st">"Input a valid package name"</span><span class="op">)</span><span class="op">)</span>
-  
-  <span class="fu"><a href="../reference/metaExpr.html">metaExpr</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
-      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>count <span class="op">=</span> <span class="fu">zoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/rollapply.html">rollapply</a></span><span class="op">(</span><span class="va">count</span>, <span class="fl">7</span>, <span class="va">mean</span>, fill <span class="op">=</span> <span class="st">"extend"</span><span class="op">)</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span>
-
-<span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">downloads_rolling</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">downloads_rolling</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive2</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="co"># Using ..() here would produce an error</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">validate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">need</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">count</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="st">"Input a valid package name"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="../reference/metaExpr.html">metaExpr</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>count <span class="op">=</span> <span class="fu">zoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/rollapply.html" class="external-link">rollapply</a></span><span class="op">(</span><span class="va">count</span>, <span class="fl">7</span>, <span class="va">mean</span>, fill <span class="op">=</span> <span class="st">"extend"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">downloads_rolling</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="footnotes">
+<div class="footnotes footnotes-end-of-document">
 <hr>
 <ol>
-<li id="fn1"><p>Name inference depends on a <code>srcref</code> of the <code>expr</code> argument being available. There are at least a couple different ways name inference can fail: (1) The <code>keep.source</code> option is <code>FALSE</code> (2) <code>expr</code> <a href="https://github.com/rstudio/shinymeta/issues/61">does not appear as the first argument</a>.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p>Name inference depends on a <code>srcref</code> of the
+<code>expr</code> argument being available. There are at least a couple
+different ways name inference can fail: (1) The <code>keep.source</code>
+option is <code>FALSE</code> (2) <code>expr</code> <a href="https://github.com/rstudio/shinymeta/issues/61" class="external-link">does not appear as
+the first argument</a>.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
   </div>
@@ -365,11 +482,13 @@ pre.R {
 
 
       <footer><div class="copyright">
-  <p>Developed by Joe Cheng, Carson Sievert.</p>
+  <p></p>
+<p>Developed by Joe Cheng, Carson Sievert.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
@@ -377,6 +496,8 @@ pre.R {
 
   
 
+
+  
 
   </body>
 </html>
