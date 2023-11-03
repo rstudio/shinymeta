@@ -8,7 +8,7 @@
 \usage{
 formatCode(code, width = 500L, formatter = styleText, ...)
 
-styleText(code, ...)
+styleText(code, formatR = TRUE, ...)
 
 deparseCode(code, width = 500L)
 }
@@ -21,6 +21,8 @@ deparseCode(code, width = 500L)
 as the first argument.}
 
 \item{...}{arguments passed along to the \code{formatter} function.}
+
+\item{formatR}{whether to run \code{formatR::tidy_source()} on \code{code}.}
 }
 \value{
 Single-element character vector with formatted code
