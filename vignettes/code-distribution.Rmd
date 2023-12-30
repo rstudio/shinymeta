@@ -163,7 +163,7 @@ knitr::include_graphics("https://i.imgur.com/IV0gfZJ.gif")
 ```
 
 
-## Showing code {#showicode}
+## Showing code {#show-code}
 
 ### For an output 
 
