@@ -19,7 +19,7 @@ only its own code to be written, but that of its dependencies as well."><!-- mat
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shinymeta</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -106,43 +106,43 @@ passed to multiple <code>expandChain()</code> calls.</p>
 <code><a href="metaObserve.html">metaObserve()</a></code>, and <code><a href="metaRender.html">metaRender()</a></code>): <code><a href="withMetaMode.html">withMetaMode()</a></code> and <code>expandChain()</code>.
 The simplest is <code>withMetaMode(obj())</code>, which crawls the tree of meta-reactive
 dependencies and expands each <code><a href="dotdot.html">..()</a></code> in place.</p>
-<p>For example, consider these meta objects:</p><div class="sourceCode"><pre><code><span>    <span class="va">nums</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
-<span>    <span class="va">obs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaObserve.html">metaObserve</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">nums</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">nums</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
-
-<p>When code is extracted using <code>withMetaMode</code>:</p><div class="sourceCode"><pre><code><span>    <span class="fu"><a href="../reference/withMetaMode.html">withMetaMode</a></span><span class="op">(</span><span class="fu">obs</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-
-<p>The result looks like this:</p><div class="sourceCode"><pre><code><span>    <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-
+<p>For example, consider these meta objects:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    nums <span class="ot">&lt;-</span> <span class="fu">metaReactive</span>({ <span class="fu">runif</span>(<span class="dv">100</span>) })</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    obs <span class="ot">&lt;-</span> <span class="fu">metaObserve</span>({</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="fu">..</span>(<span class="fu">nums</span>()))</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>      <span class="fu">hist</span>(<span class="fu">..</span>(<span class="fu">nums</span>()))</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    })</span></code></pre><p></p></div>
+<p>When code is extracted using <code>withMetaMode</code>:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    <span class="fu">withMetaMode</span>(<span class="fu">obs</span>())</span></code></pre><p></p></div>
+<p>The result looks like this:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    <span class="fu">summary</span>(<span class="fu">runif</span>(<span class="dv">100</span>))</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="fu">plot</span>(<span class="fu">runif</span>(<span class="dv">100</span>))</span></code></pre><p></p></div>
 <p>Notice how <code>runif(100)</code> is inlined wherever <code>..(nums())</code>
 appears, which is not desirable if we wish to reuse the same
 values for <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
 <p>The <code>expandChain</code> function helps us workaround this issue
 by assigning return values of <code><a href="metaReactive.html">metaReactive()</a></code> expressions to
 a name, then replaces relevant expansion (e.g., <code>..(nums())</code>)
-with the appropriate name (e.g. <code>nums</code>).</p><div class="sourceCode"><pre><code><span>    <span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">obs</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-
-<p>The result looks like this:</p><div class="sourceCode"><pre><code><span>    <span class="va">nums</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">nums</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">nums</span><span class="op">)</span></span></code></pre></div>
-
-<p>You can pass multiple meta objects and/or comments to <code>expandChain</code>.</p><div class="sourceCode"><pre><code><span>    <span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span></span>
-<span>      <span class="st">"# Generate values"</span>,</span>
-<span>      <span class="fu">nums</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>      <span class="st">"# Summarize and plot"</span>,</span>
-<span>      <span class="fu">obs</span><span class="op">(</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
-
-<p>Output:</p><div class="sourceCode"><pre><code><span>    <span class="co"># Load data</span></span>
-<span>    <span class="va">nums</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
-<span>    <span class="va">nums</span></span>
-<span>    <span class="co"># Inspect data</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">nums</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">nums</span><span class="op">)</span></span></code></pre></div>
-
+with the appropriate name (e.g. <code>nums</code>).</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    <span class="fu">expandChain</span>(<span class="fu">obs</span>())</span></code></pre><p></p></div>
+<p>The result looks like this:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    nums <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">100</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="fu">summary</span>(nums)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="fu">plot</span>(nums)</span></code></pre><p></p></div>
+<p>You can pass multiple meta objects and/or comments to <code>expandChain</code>.</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    <span class="fu">expandChain</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>      <span class="st">"# Generate values"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>      <span class="fu">nums</span>(),</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>      <span class="st">"# Summarize and plot"</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>      <span class="fu">obs</span>()</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    )</span></code></pre><p></p></div>
+<p>Output:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    <span class="co"># Load data</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    nums <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">100</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    nums</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="co"># Inspect data</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="fu">summary</span>(nums)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    <span class="fu">plot</span>(nums)</span></code></pre><p></p></div>
 <p>You can suppress the printing of the <code>nums</code> vector in the previous example by
 wrapping the <code>nums()</code> argument to <code>expandChain()</code> with <code>invisible(nums())</code>.</p>
     </div>
@@ -162,14 +162,14 @@ up with duplicated code. To remove this duplication, we need the second
 <code>expandChain</code> call to know what code was emitted in the first <code>expandChain</code>
 call.</p>
 <p>We can achieve this by creating an "expansion context" and sharing it between
-the two calls.</p><div class="sourceCode"><pre><code><span>    <span class="va">exp_ctx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expandChain.html">newExpansionContext</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>    <span class="va">chunk1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span>.expansionContext <span class="op">=</span> <span class="va">exp_ctx</span>,</span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu">nums</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
-<span>    <span class="va">chunk2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span>.expansionContext <span class="op">=</span> <span class="va">exp_ctx</span>,</span>
-<span>      <span class="fu">obs</span><span class="op">(</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
-
+the two calls.</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    exp_ctx <span class="ot">&lt;-</span> <span class="fu">newExpansionContext</span>()</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    chunk1 <span class="ot">&lt;-</span> <span class="fu">expandChain</span>(<span class="at">.expansionContext =</span> exp_ctx,</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>      <span class="fu">invisible</span>(<span class="fu">nums</span>())</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    )</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    chunk2 <span class="ot">&lt;-</span> <span class="fu">expandChain</span>(<span class="at">.expansionContext =</span> exp_ctx,</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>      <span class="fu">obs</span>()</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    )</span></code></pre><p></p></div>
 <p>After this code is run, <code>chunk1</code> contains only the definition of <code>nums</code> and
 <code>chunk2</code> contains only the code for <code>obs</code>.</p>
     </div>
@@ -180,28 +180,28 @@ the two calls.</p><div class="sourceCode"><pre><code><span>    <span class="va">
 
 <p>Sometimes, when generating code, we want to completely replace the
 implementation of a <code>metaReactive</code>. For example, our Shiny app might contain
-this logic, using <code><a href="https://rdrr.io/pkg/shiny/man/fileInput.html" class="external-link">shiny::fileInput()</a></code>:</p><div class="sourceCode"><pre><code><span>    <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive2</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">file_upload</span><span class="op">)</span></span>
-<span>      <span class="fu"><a href="../reference/metaExpr.html">metaExpr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">file_upload</span><span class="op">$</span><span class="va">datapath</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span>
-<span>    <span class="va">obs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaObserve.html">metaObserve</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
-
+this logic, using <code><a href="https://rdrr.io/pkg/shiny/man/fileInput.html" class="external-link">shiny::fileInput()</a></code>:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    data <span class="ot">&lt;-</span> <span class="fu">metaReactive2</span>({</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>      <span class="fu">req</span>(input<span class="sc">$</span>file_upload)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>      <span class="fu">metaExpr</span>(<span class="fu">read.csv</span>(<span class="fu">..</span>(input<span class="sc">$</span>file_upload<span class="sc">$</span>datapath)))</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    })</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    obs <span class="ot">&lt;-</span> <span class="fu">metaObserve</span>({</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="fu">..</span>(<span class="fu">data</span>()))</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    })</span></code></pre><p></p></div>
 <p>Shiny's file input works by saving uploading files to a temp directory. The
 file referred to by <code>input$file_upload$datapath</code> won't be available when
 another user tries to run the generated code.</p>
 <p>You can use the expansion context object to swap out the implementation of
-<code>data</code>, or any other <code>metaReactive</code>:</p><div class="sourceCode"><pre><code><span>    <span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expandChain.html">newExpansionContext</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>    <span class="va">ec</span><span class="op">$</span><span class="fu">substituteMetaReactive</span><span class="op">(</span><span class="va">data</span>, <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span>      <span class="fu"><a href="../reference/metaExpr.html">metaExpr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"data.csv"</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span>
-<span></span>
-<span>    <span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span>.expansionContext <span class="op">=</span> <span class="va">ec</span>, <span class="fu">obs</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-
-<p>Result:</p><div class="sourceCode"><pre><code><span>    <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"data.csv"</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
-
+<code>data</code>, or any other <code>metaReactive</code>:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    ec <span class="ot">&lt;-</span> <span class="fu">newExpansionContext</span>()</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    ec<span class="sc">$</span><span class="fu">substituteMetaReactive</span>(data, <span class="cf">function</span>() {</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>      <span class="fu">metaExpr</span>(<span class="fu">read.csv</span>(<span class="st">"data.csv"</span>))</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    })</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    <span class="fu">expandChain</span>(<span class="at">.expansionContext =</span> ec, <span class="fu">obs</span>())</span></code></pre><p></p></div>
+<p>Result:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>    data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data.csv"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="fu">summary</span>(data)</span></code></pre><p></p></div>
 <p>Just make sure this code ends up in a script or Rmd bundle that includes the
 uploaded file as <code>data.csv</code>, and the user will be able to reproduce your
 analysis.</p>

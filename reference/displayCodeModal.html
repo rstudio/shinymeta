@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shinymeta</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -96,7 +96,10 @@ If you wish to not have an icon, specify <code>clip = NULL</code>.</p></dd>
 
 <dt>size</dt>
 <dd><p>One of <code>"s"</code> for small, <code>"m"</code> (the default) for medium,
-or <code>"l"</code> for large.</p></dd>
+<code>"l"</code> for large, or <code>"xl"</code> for extra large. Note that <code>"xl"</code> only
+works with Bootstrap 4 and above (to opt-in to Bootstrap 4+,
+pass <code><a href="https://rdrr.io/pkg/bslib/man/bs_theme.html" class="external-link">bslib::bs_theme()</a></code> to the <code>theme</code> argument of a page container
+like <code><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage()</a></code>).</p></dd>
 
 
 <dt>easyClose</dt>
