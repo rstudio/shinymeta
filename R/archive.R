@@ -26,6 +26,7 @@ archive_basedir <- function(x) {
   x[["basedir"]]
 }
 
+#' @export
 print.pending_zip_archive <- function(x, ...) {
   stopifnot(is_zip_archive(x))
 

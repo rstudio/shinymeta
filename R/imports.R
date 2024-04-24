@@ -1,4 +1,3 @@
-#' @importFrom styler style_text
 #' @importFrom sourcetools tokenize_string
 #' @importFrom shiny reactive getDefaultReactiveDomain isolate tags div
 #' @importFrom utils head zip getFromNamespace
