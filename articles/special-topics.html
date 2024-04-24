@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Special topics • shinymeta</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -80,7 +80,7 @@
                         <h4 data-toc-skip class="author">Carson Sievert
 &amp; Joe Cheng</h4>
             
-            <h4 data-toc-skip class="date">2023-10-25</h4>
+            <h4 data-toc-skip class="date">2024-04-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/HEAD/vignettes/special-topics.Rmd" class="external-link"><code>vignettes/special-topics.Rmd</code></a></small>
       <div class="hidden name"><code>special-topics.Rmd</code></div>
@@ -187,12 +187,12 @@ That’s how <strong>dplyr</strong> knows, for example, to lookup names
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>mtcars <span class="sc">%&gt;%</span></span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="fu">group_by</span>(cyl) <span class="sc">%&gt;%</span></span>
 <span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">avg =</span> <span class="fu">mean</span>(mpg))</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;246m<span class="co"># A tibble: 3 × 2 [39m</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 3 × 2 [39m</span></span>
 <span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>    cyl   avg</span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>   [3m [<span class="dv">38</span>;<span class="dv">5</span>;246m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [39m [23m  [3m [<span class="dv">38</span>;<span class="dv">5</span>;246m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [39m [23m</span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;250m1 [39m     <span class="dv">4</span>  <span class="fl">26.7</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;250m2 [39m     <span class="dv">6</span>  <span class="fl">19.7</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;250m3 [39m     <span class="dv">8</span>  <span class="fl">15.1</span></span></code></pre></div>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>   [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m  [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m1 [<span class="dv">39</span>m     <span class="dv">4</span>  <span class="fl">26.7</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m2 [<span class="dv">39</span>m     <span class="dv">6</span>  <span class="fl">19.7</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m3 [<span class="dv">39</span>m     <span class="dv">8</span>  <span class="fl">15.1</span></span></code></pre></div>
 <p>This approach makes for an expressive interactive interface, but it
 also complicates things if we wish to pass variables into (i.e., program
 around) these functions (because they quote their arguments). For
@@ -205,19 +205,19 @@ thinks you’re looking for a column named <code>var</code>, not
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>mtcars <span class="sc">%&gt;%</span></span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">group_by</span>(cyl) <span class="sc">%&gt;%</span></span>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">avg =</span> <span class="fu">mean</span>(var))</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>Warning<span class="sc">:</span>  [1m [22mThere were <span class="dv">3</span> warnings <span class="cf">in</span> <span class="st">`</span><span class="at">summarise()</span><span class="st">`</span>.</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>Warning<span class="sc">:</span>  [<span class="dv">1</span>m [<span class="dv">22</span>mThere were <span class="dv">3</span> warnings <span class="cf">in</span> <span class="st">`</span><span class="at">summarise()</span><span class="st">`</span>.</span>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>The first warning was<span class="sc">:</span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a> [1m [22m [36mℹ [39m In argument<span class="sc">:</span> <span class="st">`</span><span class="at">avg = mean(var)</span><span class="st">`</span>.</span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a> [36mℹ [39m In group <span class="dv">1</span><span class="sc">:</span> <span class="st">`</span><span class="at">cyl = 4</span><span class="st">`</span>.</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a> [<span class="dv">1</span>m [<span class="dv">22</span>m [<span class="dv">36</span>mℹ [<span class="dv">39</span>m In argument<span class="sc">:</span> <span class="st">`</span><span class="at">avg = mean(var)</span><span class="st">`</span>.</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a> [<span class="dv">36</span>mℹ [<span class="dv">39</span>m In group <span class="dv">1</span><span class="sc">:</span> <span class="st">`</span><span class="at">cyl = 4</span><span class="st">`</span>.</span>
 <span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>Caused by warning <span class="cf">in</span> <span class="st">`</span><span class="at">mean.default()</span><span class="st">`</span><span class="sc">:</span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a> [33m<span class="sc">!</span> [39m argument is not numeric or logical<span class="sc">:</span> returning <span class="cn">NA</span></span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a> [1m [22m [36mℹ [39m Run <span class="st">`</span><span class="at">dplyr::last_dplyr_warnings()</span><span class="st">`</span> to see the <span class="dv">2</span> remaining warnings.</span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;246m<span class="co"># A tibble: 3 × 2 [39m</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a> [<span class="dv">33</span>m<span class="sc">!</span> [<span class="dv">39</span>m argument is not numeric or logical<span class="sc">:</span> returning <span class="cn">NA</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a> [<span class="dv">1</span>m [<span class="dv">22</span>m [<span class="dv">36</span>mℹ [<span class="dv">39</span>m Run <span class="st">`</span><span class="at">dplyr::last_dplyr_warnings()</span><span class="st">`</span> to see the <span class="dv">2</span> remaining warnings.</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 3 × 2 [39m</span></span>
 <span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>    cyl   avg</span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>   [3m [<span class="dv">38</span>;<span class="dv">5</span>;246m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [39m [23m  [3m [<span class="dv">38</span>;<span class="dv">5</span>;246m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [39m [23m</span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;250m1 [39m     <span class="dv">4</span>     [31mNA [39m</span>
-<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;250m2 [39m     <span class="dv">6</span>     [31mNA [39m</span>
-<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;250m3 [39m     <span class="dv">8</span>     [31mNA [39m</span></code></pre></div>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>   [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m  [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m1 [<span class="dv">39</span>m     <span class="dv">4</span>     [<span class="dv">31</span>mNA [<span class="dv">39</span>m</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m2 [<span class="dv">39</span>m     <span class="dv">6</span>     [<span class="dv">31</span>mNA [<span class="dv">39</span>m</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m3 [<span class="dv">39</span>m     <span class="dv">8</span>     [<span class="dv">31</span>mNA [<span class="dv">39</span>m</span></code></pre></div>
 <p>To workaround this problem, <strong>tidyverse</strong> functions
 allow you to unquote (i.e., replace a name with it’s value) via the
 <code>!!</code> operator. Just to demonstrate, if we unquote
@@ -231,12 +231,12 @@ gallon (<code>mpg</code>) per cylinder (<code>cyl</code>).</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>mtcars <span class="sc">%&gt;%</span></span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="fu">group_by</span>(cyl) <span class="sc">%&gt;%</span></span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">avg =</span> <span class="fu">mean</span>(<span class="sc">!!</span>var))</span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;246m<span class="co"># A tibble: 3 × 2 [39m</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 3 × 2 [39m</span></span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>    cyl   avg</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>   [3m [<span class="dv">38</span>;<span class="dv">5</span>;246m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [39m [23m  [3m [<span class="dv">38</span>;<span class="dv">5</span>;246m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [39m [23m</span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;250m1 [39m     <span class="dv">4</span>  <span class="fl">26.7</span></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;250m2 [39m     <span class="dv">6</span>  <span class="fl">19.7</span></span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;250m3 [39m     <span class="dv">8</span>  <span class="fl">15.1</span></span></code></pre></div>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>   [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m  [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>dbl<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m1 [<span class="dv">39</span>m     <span class="dv">4</span>  <span class="fl">26.7</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m2 [<span class="dv">39</span>m     <span class="dv">6</span>  <span class="fl">19.7</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m3 [<span class="dv">39</span>m     <span class="dv">8</span>  <span class="fl">15.1</span></span></code></pre></div>
 <p>Often times in a Shiny app we wish to pass an input value to a
 <strong>tidyverse</strong> function argument (as a variable). In most
 cases, that requires converting a string into a symbolic name, which can
@@ -385,7 +385,7 @@ generates looks a lot more like code a human would write:</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
       </footer>
