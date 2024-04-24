@@ -1,6 +1,10 @@
 # 0.2.1
 
-Small patch release to avoid revdepcheck errors for styler. (#119)
+## Bug fixes
+
+* Tweak imports to avoid revdepcheck errors for styler. (#119)
+
+* Add `"reactive"` class to `metaReactive` objects, so `shiny::is.reactive()` returns `TRUE` for them. (#120)
 
 # 0.2.0.3
 

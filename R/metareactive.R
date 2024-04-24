@@ -173,7 +173,7 @@ metaReactiveImpl <- function(expr, env, varname, domain, inline) {
         }
       )
     },
-    class = c("shinymeta_reactive", "shinymeta_object", "function"),
+    class = c("shinymeta_reactive", "shinymeta_object", "reactive", "function"),
     shinymetaVarname = varname,
     shinymetaUID = getFromNamespace("createUniqueId", "shiny")(8),
     shinymetaDomain = domain,
