@@ -1,3 +1,7 @@
+# 0.2.1
+
+Small patch release to avoid revdepcheck errors for styler. (#119)
+
 # 0.2.0.3
 
 Small patch release to accommodate for changes made to `base::deparse()` in the next upcoming R release. (#107)

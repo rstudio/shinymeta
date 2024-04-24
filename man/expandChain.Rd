@@ -40,19 +40,25 @@ There are two ways to extract code from meta objects (i.e. \code{\link[=metaReac
 The simplest is \code{withMetaMode(obj())}, which crawls the tree of meta-reactive
 dependencies and expands each \code{..()} in place.
 
-For example, consider these meta objects:\preformatted{    nums <- metaReactive(\{ runif(100) \})
+For example, consider these meta objects:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    nums <- metaReactive(\{ runif(100) \})
     obs <- metaObserve(\{
       summary(..(nums()))
       hist(..(nums()))
     \})
-}
+}\if{html}{\out{</div>}}
 
-When code is extracted using \code{withMetaMode}:\preformatted{    withMetaMode(obs())
-}
+When code is extracted using \code{withMetaMode}:
 
-The result looks like this:\preformatted{    summary(runif(100))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    withMetaMode(obs())
+}\if{html}{\out{</div>}}
+
+The result looks like this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    summary(runif(100))
     plot(runif(100))
-}
+}\if{html}{\out{</div>}}
 
 Notice how \code{runif(100)} is inlined wherever \code{..(nums())}
 appears, which is not desirable if we wish to reuse the same
@@ -61,29 +67,37 @@ values for \code{summary()} and \code{plot()}.
 The \code{expandChain} function helps us workaround this issue
 by assigning return values of \code{metaReactive()} expressions to
 a name, then replaces relevant expansion (e.g., \code{..(nums())})
-with the appropriate name (e.g. \code{nums}).\preformatted{    expandChain(obs())
-}
+with the appropriate name (e.g. \code{nums}).
 
-The result looks like this:\preformatted{    nums <- runif(100)
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    expandChain(obs())
+}\if{html}{\out{</div>}}
+
+The result looks like this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    nums <- runif(100)
     summary(nums)
     plot(nums)
-}
+}\if{html}{\out{</div>}}
 
-You can pass multiple meta objects and/or comments to \code{expandChain}.\preformatted{    expandChain(
+You can pass multiple meta objects and/or comments to \code{expandChain}.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    expandChain(
       "# Generate values",
       nums(),
       "# Summarize and plot",
       obs()
     )
-}
+}\if{html}{\out{</div>}}
 
-Output:\preformatted{    # Load data
+Output:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    # Load data
     nums <- runif(100)
     nums
     # Inspect data
     summary(nums)
     plot(nums)
-}
+}\if{html}{\out{</div>}}
 
 You can suppress the printing of the \code{nums} vector in the previous example by
 wrapping the \code{nums()} argument to \code{expandChain()} with \code{invisible(nums())}.
@@ -104,14 +118,16 @@ up with duplicated code. To remove this duplication, we need the second
 call.
 
 We can achieve this by creating an "expansion context" and sharing it between
-the two calls.\preformatted{    exp_ctx <- newExpansionContext()
+the two calls.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    exp_ctx <- newExpansionContext()
     chunk1 <- expandChain(.expansionContext = exp_ctx,
       invisible(nums())
     )
     chunk2 <- expandChain(.expansionContext = exp_ctx,
       obs()
     )
-}
+}\if{html}{\out{</div>}}
 
 After this code is run, \code{chunk1} contains only the definition of \code{nums} and
 \code{chunk2} contains only the code for \code{obs}.
@@ -122,31 +138,37 @@ After this code is run, \code{chunk1} contains only the definition of \code{nums
 
 Sometimes, when generating code, we want to completely replace the
 implementation of a \code{metaReactive}. For example, our Shiny app might contain
-this logic, using \code{\link[shiny:fileInput]{shiny::fileInput()}}:\preformatted{    data <- metaReactive2(\{
+this logic, using \code{\link[shiny:fileInput]{shiny::fileInput()}}:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    data <- metaReactive2(\{
       req(input$file_upload)
       metaExpr(read.csv(..(input$file_upload$datapath)))
     \})
     obs <- metaObserve(\{
       summary(..(data()))
     \})
-}
+}\if{html}{\out{</div>}}
 
 Shiny's file input works by saving uploading files to a temp directory. The
 file referred to by \code{input$file_upload$datapath} won't be available when
 another user tries to run the generated code.
 
 You can use the expansion context object to swap out the implementation of
-\code{data}, or any other \code{metaReactive}:\preformatted{    ec <- newExpansionContext()
+\code{data}, or any other \code{metaReactive}:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    ec <- newExpansionContext()
     ec$substituteMetaReactive(data, function() \{
       metaExpr(read.csv("data.csv"))
     \})
 
     expandChain(.expansionContext = ec, obs())
-}
+}\if{html}{\out{</div>}}
 
-Result:\preformatted{    data <- read.csv("data.csv")
+Result:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    data <- read.csv("data.csv")
     summary(data)
-}
+}\if{html}{\out{</div>}}
 
 Just make sure this code ends up in a script or Rmd bundle that includes the
 uploaded file as \code{data.csv}, and the user will be able to reproduce your

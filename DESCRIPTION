@@ -1,7 +1,7 @@
 Package: shinymeta
 Type: Package
 Title: Export Domain Logic from Shiny using Meta-Programming
-Version: 0.2.0.3
+Version: 0.2.1
 Authors@R: c(
     person("Joe", "Cheng", email = "joe@rstudio.com", role = "aut"),
     person("Carson", "Sievert", email = "carson@rstudio.com", role = c("cre", "aut"), comment = c(ORCID = "0000-0002-4958-2844")),
@@ -21,7 +21,7 @@ Imports:
   styler,
   utils
 Encoding: UTF-8
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.1
 Suggests: 
     knitr,
     stringr,
