@@ -13,6 +13,7 @@ License: GPL-3
 Imports: 
   callr,
   fastmap,
+  formatR,
   fs,
   rlang,
   htmltools,
