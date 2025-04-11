@@ -1,12 +1,11 @@
 pandoc: 3.1.11
-pkgdown: 2.0.9
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   code-distribution: code-distribution.html
   code-generation: code-generation.html
   special-topics: special-topics.html
-last_built: 2024-04-24T22:53Z
+last_built: 2025-04-11T18:28Z
 urls:
   reference: https://rstudio.github.io/shinymeta/reference
   article: https://rstudio.github.io/shinymeta/articles
-

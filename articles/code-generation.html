@@ -13,14 +13,13 @@
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Code generation">
-<meta property="og:description" content="shinymeta">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -60,7 +59,7 @@
 <li>
   <a href="https://github.com/rstudio/shinymeta/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -71,7 +70,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -80,9 +79,9 @@
                         <h4 data-toc-skip class="author">Carson Sievert
 &amp; Joe Cheng</h4>
             
-            <h4 data-toc-skip class="date">2024-04-24</h4>
+            <h4 data-toc-skip class="date">2025-04-11</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/HEAD/vignettes/code-generation.Rmd" class="external-link"><code>vignettes/code-generation.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/main/vignettes/code-generation.Rmd" class="external-link"><code>vignettes/code-generation.Rmd</code></a></small>
       <div class="hidden name"><code>code-generation.Rmd</code></div>
 
     </div>
@@ -322,12 +321,14 @@ quality of the generated code, including:</p>
 to ensure they appear in the generated code. This works with any
 meta-reactive as well as <code><a href="../reference/expandChain.html">expandChain()</a></code>:</li>
 </ul>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="st">"# comment"</span></span>
-<span>  <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="st">"# another comment"</span>, <span class="fu">mr</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>mr <span class="ot">&lt;-</span> <span class="fu">metaReactive</span>({</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="st">"# comment"</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>})</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>Warning<span class="sc">:</span> Unable to infer variable name <span class="cf">for</span> metaReactive when the option</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>keep.source is FALSE. Either set <span class="st">`</span><span class="at">options(keep.source = TRUE)</span><span class="st">`</span> or specify</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="st">`</span><span class="at">varname</span><span class="st">`</span> <span class="cf">in</span> metaReactive</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="fu">expandChain</span>(<span class="st">"# another comment"</span>, <span class="fu">mr</span>())</span></code></pre></div>
 <ul>
 <li>
 <strong>Controlling names</strong>: In some cases, meta-reactive
@@ -346,32 +347,38 @@ names into the global scope. For example, the code generated from this
 <code>three</code> meta-reactive introduces <code>two</code> into the
 global scope:</li>
 </ul>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">three</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="va">two</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span>  <span class="va">two</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">three</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>three <span class="ot">&lt;-</span> <span class="fu">metaReactive</span>({</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  two <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  two <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>})</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>Warning<span class="sc">:</span> Unable to infer variable name <span class="cf">for</span> metaReactive when the option</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>keep.source is FALSE. Either set <span class="st">`</span><span class="at">options(keep.source = TRUE)</span><span class="st">`</span> or specify</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="st">`</span><span class="at">varname</span><span class="st">`</span> <span class="cf">in</span> metaReactive</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="fu">expandChain</span>(<span class="fu">three</span>())</span></code></pre></div>
 <p>If you want to be careful not to unnecessarily introduce names into
 the users namespace, you can force the generated code expressions to be
 wrapped in <code><a href="https://rdrr.io/r/base/eval.html" class="external-link">local()</a></code> which ensures intermediate variables
 aren’t bound to the global environment:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">three</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="va">two</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span>  <span class="va">two</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span><span class="op">}</span>, localize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">three</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>three <span class="ot">&lt;-</span> <span class="fu">metaReactive</span>({</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  two <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  two <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>}, <span class="at">localize =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>Warning<span class="sc">:</span> Unable to infer variable name <span class="cf">for</span> metaReactive when the option</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>keep.source is FALSE. Either set <span class="st">`</span><span class="at">options(keep.source = TRUE)</span><span class="st">`</span> or specify</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="st">`</span><span class="at">varname</span><span class="st">`</span> <span class="cf">in</span> metaReactive</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="fu">expandChain</span>(<span class="fu">three</span>())</span></code></pre></div>
 <p>Another option is to bind the meta-reactive’s name to the last call
 of the meta-expression expression. This option has the benefit of
 generating the most readable code, but also has the downside of
 introducing intermediate variables into the global namespace.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">three</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="va">two</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span>  <span class="va">two</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span><span class="op">}</span>, bindToReturn <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">three</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>three <span class="ot">&lt;-</span> <span class="fu">metaReactive</span>({</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  two <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  two <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>}, <span class="at">bindToReturn =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>Warning<span class="sc">:</span> Unable to infer variable name <span class="cf">for</span> metaReactive when the option</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>keep.source is FALSE. Either set <span class="st">`</span><span class="at">options(keep.source = TRUE)</span><span class="st">`</span> or specify</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="st">`</span><span class="at">varname</span><span class="st">`</span> <span class="cf">in</span> metaReactive</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="fu">expandChain</span>(<span class="fu">three</span>())</span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -398,15 +405,18 @@ that, in normal execution, meta-reactives know to (silently) ignore
 <span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>    <span class="at">to =</span> <span class="fu">Sys.Date</span>()</span>
 <span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  )</span>
 <span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>})</span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="fu">downloads</span>()</span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>        date count package</span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="dv">1</span> <span class="dv">2023-04-25</span> <span class="dv">76504</span> ggplot2</span>
-<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="dv">2</span> <span class="dv">2023-04-26</span> <span class="dv">76715</span> ggplot2</span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="dv">3</span> <span class="dv">2023-04-27</span> <span class="dv">70703</span> ggplot2</span>
-<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="dv">4</span> <span class="dv">2023-04-28</span> <span class="dv">60726</span> ggplot2</span>
-<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="dv">5</span> <span class="dv">2023-04-29</span> <span class="dv">41004</span> ggplot2</span>
-<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="dv">6</span> <span class="dv">2023-04-30</span> <span class="dv">40074</span> ggplot2</span>
-<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>[...plus <span class="dv">360</span> more rows...]</span></code></pre></div>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>Warning<span class="sc">:</span> Unable to infer variable name <span class="cf">for</span> metaReactive when the option</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>keep.source is FALSE. Either set <span class="st">`</span><span class="at">options(keep.source = TRUE)</span><span class="st">`</span> or specify</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="st">`</span><span class="at">varname</span><span class="st">`</span> <span class="cf">in</span> metaReactive</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="fu">downloads</span>()</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>        date count package</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="dv">1</span> <span class="dv">2024-04-11</span> <span class="dv">69648</span> ggplot2</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="dv">2</span> <span class="dv">2024-04-12</span> <span class="dv">66208</span> ggplot2</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="dv">3</span> <span class="dv">2024-04-13</span> <span class="dv">33867</span> ggplot2</span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="dv">4</span> <span class="dv">2024-04-14</span> <span class="dv">33282</span> ggplot2</span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="dv">5</span> <span class="dv">2024-04-15</span> <span class="dv">61411</span> ggplot2</span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="dv">6</span> <span class="dv">2024-04-16</span> <span class="dv">66024</span> ggplot2</span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>[...plus <span class="dv">360</span> more rows...]</span></code></pre></div>
 <p>When invoked in meta mode, meta-counterparts return a code expression
 instead of fully evaluating the expression. <strong>shinymeta</strong>
 currently provides two ways to invoke meta-reactives in meta mode:
@@ -429,15 +439,17 @@ is, it evaluates the code that appears in <code><a href="../reference/dotdot.htm
 the result in the generated code. This makes it possible, for instance,
 to ‘hard-code’ a dynamic result (e.g., use the date the code was
 generated instead of when the generated code is actually evaluated).</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">downloads</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="fu">cranlogs</span><span class="fu">::</span><span class="fu"><a href="https://r-hub.github.io/cranlogs/reference/cran_downloads.html" class="external-link">cran_downloads</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">package</span><span class="op">)</span>, </span>
-<span>    from <span class="op">=</span> <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">365</span><span class="op">)</span><span class="op">)</span>, </span>
-<span>    to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>downloads <span class="ot">&lt;-</span> <span class="fu">metaReactive</span>({</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>  cranlogs<span class="sc">::</span><span class="fu">cran_downloads</span>(</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>    <span class="fu">..</span>(input<span class="sc">$</span>package), </span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>    <span class="at">from =</span> <span class="fu">..</span>(<span class="fu">format</span>(<span class="fu">Sys.Date</span>() <span class="sc">-</span> <span class="dv">365</span>)), </span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>    <span class="at">to =</span> <span class="fu">Sys.Date</span>()</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>  )</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>})</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>Warning<span class="sc">:</span> Unable to infer variable name <span class="cf">for</span> metaReactive when the option</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>keep.source is FALSE. Either set <span class="st">`</span><span class="at">options(keep.source = TRUE)</span><span class="st">`</span> or specify</span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="st">`</span><span class="at">varname</span><span class="st">`</span> <span class="cf">in</span> metaReactive</span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="fu">expandChain</span>(<span class="fu">downloads</span>())</span></code></pre></div>
 <p>When it comes to <code>-2</code> variants
 (e.g. <code><a href="../reference/metaReactive.html">metaReactive2()</a></code>, <code><a href="../reference/metaRender.html">metaRender2()</a></code>, etc),
 only the code that appears inside <code><a href="../reference/metaExpr.html">metaExpr()</a></code> can execute in
@@ -446,18 +458,20 @@ meta mode. That means, among other things, that the read of
 always returns a data frame (the <code><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">validate()</a></code> wouldn’t make
 sense if <code>downloads()</code> returned code!). It also means that
 <code><a href="../reference/dotdot.html">..()</a></code> isn’t defined outside of <code><a href="../reference/metaExpr.html">metaExpr()</a></code>.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">downloads_rolling</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metaReactive.html">metaReactive2</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="co"># Using ..() here would produce an error</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">validate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/validate.html" class="external-link">need</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">count</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="st">"Input a valid package name"</span><span class="op">)</span><span class="op">)</span></span>
-<span>  </span>
-<span>  <span class="fu"><a href="../reference/metaExpr.html">metaExpr</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu"><a href="../reference/dotdot.html">..</a></span><span class="op">(</span><span class="fu">downloads</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>count <span class="op">=</span> <span class="fu">zoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/rollapply.html" class="external-link">rollapply</a></span><span class="op">(</span><span class="va">count</span>, <span class="fl">7</span>, <span class="va">mean</span>, fill <span class="op">=</span> <span class="st">"extend"</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">}</span><span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">downloads_rolling</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>downloads_rolling <span class="ot">&lt;-</span> <span class="fu">metaReactive2</span>({</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  <span class="co"># Using ..() here would produce an error</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="fu">validate</span>(<span class="fu">need</span>(<span class="fu">sum</span>(<span class="fu">downloads</span>()<span class="sc">$</span>count) <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="st">"Input a valid package name"</span>))</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  </span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="fu">metaExpr</span>({</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>    <span class="fu">..</span>(<span class="fu">downloads</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">count =</span> zoo<span class="sc">::</span><span class="fu">rollapply</span>(count, <span class="dv">7</span>, mean, <span class="at">fill =</span> <span class="st">"extend"</span>))</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>  })</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>})</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>Warning<span class="sc">:</span> Unable to infer variable name <span class="cf">for</span> metaReactive2 when the option</span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>keep.source is FALSE. Either set <span class="st">`</span><span class="at">options(keep.source = TRUE)</span><span class="st">`</span> or specify</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="st">`</span><span class="at">varname</span><span class="st">`</span> <span class="cf">in</span> metaReactive2</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="fu">expandChain</span>(<span class="fu">downloads_rolling</span>())</span></code></pre></div>
 </div>
 <div class="footnotes footnotes-end-of-document">
 <hr>
@@ -473,9 +487,7 @@ the first argument</a>.<a href="#fnref1" class="footnote-back">↩︎</a></p></l
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 
@@ -488,16 +500,16 @@ the first argument</a>.<a href="#fnref1" class="footnote-back">↩︎</a></p></l
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>

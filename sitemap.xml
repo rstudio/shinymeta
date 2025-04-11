@@ -1,69 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/404.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/articles/code-distribution.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/articles/code-generation.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/articles/special-topics.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/index.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/buildScriptBundle.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/displayCodeModal.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/dotdot.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/expandChain.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/formatCode.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/knit_print.shinyMetaExpr.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/metaAction.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/metaExpr.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/metaObserve.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/metaReactive.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/metaRender.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/outputCodeButton.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/shinymeta/reference/withMetaMode.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://rstudio.github.io/shinymeta/404.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/articles/code-distribution.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/articles/code-generation.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/articles/index.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/articles/special-topics.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/authors.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/index.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/news/index.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/buildScriptBundle.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/displayCodeModal.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/dotdot.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/expandChain.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/formatCode.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/index.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/knit_print.shinyMetaExpr.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/metaAction.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/metaExpr.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/metaObserve.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/metaReactive.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/metaRender.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/outputCodeButton.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/reference/withMetaMode.html</loc></url>
 </urlset>
+

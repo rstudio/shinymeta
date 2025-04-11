@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -40,20 +40,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/rstudio/shinymeta/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Display a shinyAce code editor via shiny modal</h1>
-    <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/HEAD/R/display.R" class="external-link"><code>R/display.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/main/R/display.R" class="external-link"><code>R/display.R</code></a></small>
     <div class="hidden name"><code>displayCodeModal.Rd</code></div>
     </div>
 
@@ -77,32 +77,34 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>code</dt>
+
+
+<dl><dt id="arg-code">code<a class="anchor" aria-label="anchor" href="#arg-code"></a></dt>
 <dd><p>Either a language object or a character string.</p></dd>
 
 
-<dt>title</dt>
+<dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>
 <dd><p>An optional title for the dialog.</p></dd>
 
 
-<dt>clip</dt>
-<dd><p>An <code><a href="https://rdrr.io/pkg/shiny/man/icon.html" class="external-link">icon()</a></code> <code>name</code> that a user can press to copy <code>code</code> to the clipboard.
-If you wish to not have an icon, specify <code>clip = NULL</code>.</p></dd>
+<dt id="arg-clip">clip<a class="anchor" aria-label="anchor" href="#arg-clip"></a></dt>
+<dd><p>An <code><a href="https://rdrr.io/pkg/shiny/man/icon.html" class="external-link">shiny::icon()</a></code> <code>name</code> that a user can press to copy <code>code</code> to
+the clipboard. If you wish to not have an icon, specify <code>clip = NULL</code>.</p></dd>
 
 
-<dt>footer</dt>
+<dt id="arg-footer">footer<a class="anchor" aria-label="anchor" href="#arg-footer"></a></dt>
 <dd><p>UI for footer. Use <code>NULL</code> for no footer.</p></dd>
 
 
-<dt>size</dt>
+<dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
 <dd><p>One of <code>"s"</code> for small, <code>"m"</code> (the default) for medium,
 <code>"l"</code> for large, or <code>"xl"</code> for extra large. Note that <code>"xl"</code> only
 works with Bootstrap 4 and above (to opt-in to Bootstrap 4+,
-pass <code><a href="https://rdrr.io/pkg/bslib/man/bs_theme.html" class="external-link">bslib::bs_theme()</a></code> to the <code>theme</code> argument of a page container
+pass <code><a href="https://rstudio.github.io/bslib/reference/bs_theme.html" class="external-link">bslib::bs_theme()</a></code> to the <code>theme</code> argument of a page container
 like <code><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage()</a></code>).</p></dd>
 
 
-<dt>easyClose</dt>
+<dt id="arg-easyclose">easyClose<a class="anchor" aria-label="anchor" href="#arg-easyclose"></a></dt>
 <dd><p>If <code>TRUE</code>, the modal dialog can be dismissed by
 clicking outside the dialog box, or be pressing the Escape key. If
 <code>FALSE</code> (the default), the modal dialog can't be dismissed in those
@@ -110,24 +112,22 @@ ways; instead it must be dismissed by clicking on a <code><a href="https://rdrr.
 from a call to <code><a href="https://rdrr.io/pkg/shiny/man/showModal.html" class="external-link">removeModal()</a></code> on the server.</p></dd>
 
 
-<dt>fade</dt>
+<dt id="arg-fade">fade<a class="anchor" aria-label="anchor" href="#arg-fade"></a></dt>
 <dd><p>If <code>FALSE</code>, the modal dialog will have no fade-in animation
 (it will simply appear rather than fade in to view).</p></dd>
 
 
-<dt>session</dt>
+<dt id="arg-session">session<a class="anchor" aria-label="anchor" href="#arg-session"></a></dt>
 <dd><p>a shiny session object (the default should almost always be used).</p></dd>
 
 
-<dt>...</dt>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>arguments passed along to <code><a href="https://rdrr.io/pkg/shinyAce/man/aceEditor.html" class="external-link">shinyAce::aceEditor()</a></code></p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>nothing. Call this function for its side effects.</p>
+    <p>nothing. Call this function for its side effects.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -170,15 +170,15 @@ from a call to <code><a href="https://rdrr.io/pkg/shiny/man/showModal.html" clas
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

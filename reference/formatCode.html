@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -40,20 +40,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/rstudio/shinymeta/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Deparse and format shinymeta expressions</h1>
-    <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/HEAD/R/format.R" class="external-link"><code>R/format.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/main/R/format.R" class="external-link"><code>R/format.R</code></a></small>
     <div class="hidden name"><code>formatCode.Rd</code></div>
     </div>
 
@@ -71,28 +71,28 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>code</dt>
+
+
+<dl><dt id="arg-code">code<a class="anchor" aria-label="anchor" href="#arg-code"></a></dt>
 <dd><p>Either an unevaluated expression or a deparsed code string.</p></dd>
 
 
-<dt>width</dt>
+<dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
 <dd><p>The <code>width.cutoff</code> to use when <code><a href="https://rdrr.io/r/base/deparse.html" class="external-link">deparse()</a></code>-ing the <code>code</code> expression.</p></dd>
 
 
-<dt>formatter</dt>
+<dt id="arg-formatter">formatter<a class="anchor" aria-label="anchor" href="#arg-formatter"></a></dt>
 <dd><p>a function that accepts deparsed code (a character string)
 as the first argument.</p></dd>
 
 
-<dt>...</dt>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>arguments passed along to the <code>formatter</code> function.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>Single-element character vector with formatted code</p>
+    <p>Single-element character vector with formatted code</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -115,23 +115,24 @@ The default <code>formatter</code>, <code>styleText()</code>, uses <code><a href
 <span class="r-in"><span>  <span class="st">"# Here's a comment"</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Unable to infer variable name for metaReactive when the option keep.source is FALSE. Either set `options(keep.source = TRUE)` or specify `varname` in metaReactive</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">code</span> <span class="op">&lt;-</span> <span class="fu"><a href="expandChain.html">expandChain</a></span><span class="op">(</span><span class="fu">x</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">deparseCode</span><span class="op">(</span><span class="va">code</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Here's a comment</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> x &lt;- sample(5) %&gt;%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> var_1 &lt;- sample(5) %&gt;%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   sum()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> x</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> var_1</span>
 <span class="r-in"><span><span class="fu">formatCode</span><span class="op">(</span><span class="va">code</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Here's a comment</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> x &lt;- sample(5) %&gt;%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> var_1 &lt;- sample(5) %&gt;%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   sum()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> x</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> var_1</span>
 <span class="r-in"><span><span class="fu">formatCode</span><span class="op">(</span><span class="va">code</span>, formatter <span class="op">=</span> <span class="fu">styler</span><span class="fu">::</span><span class="va"><a href="https://styler.r-lib.org/reference/style_text.html" class="external-link">style_text</a></span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Here's a comment</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> x &lt;- sample(5) %&gt;% sum()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> x</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> var_1 &lt;- sample(5) %&gt;% sum()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> var_1</span>
 </code></pre></div>
     </div>
   </div>
@@ -146,15 +147,15 @@ The default <code>formatter</code>, <code>styleText()</code>, uses <code><a href
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

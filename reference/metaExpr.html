@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -40,20 +40,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/rstudio/shinymeta/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Mark an expression as a meta-expression</h1>
-    <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/HEAD/R/metareactive.R" class="external-link"><code>R/metareactive.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/rstudio/shinymeta/blob/main/R/metareactive.R" class="external-link"><code>R/metareactive.R</code></a></small>
     <div class="hidden name"><code>metaExpr.Rd</code></div>
     </div>
 
@@ -73,35 +73,35 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>expr</dt>
+
+
+<dl><dt id="arg-expr">expr<a class="anchor" aria-label="anchor" href="#arg-expr"></a></dt>
 <dd><p>An expression (quoted or unquoted).</p></dd>
 
 
-<dt>env</dt>
+<dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
 <dd><p>An environment.</p></dd>
 
 
-<dt>quoted</dt>
+<dt id="arg-quoted">quoted<a class="anchor" aria-label="anchor" href="#arg-quoted"></a></dt>
 <dd><p>Is the expression quoted? This is useful when you want to use an expression
 that is stored in a variable; to do so, it must be quoted with <code><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote()</a></code>.</p></dd>
 
 
-<dt>localize</dt>
+<dt id="arg-localize">localize<a class="anchor" aria-label="anchor" href="#arg-localize"></a></dt>
 <dd><p>Whether or not to wrap the returned expression in <code><a href="https://rdrr.io/r/base/eval.html" class="external-link">local()</a></code>.
 The default, <code>"auto"</code>, only wraps expressions with a top-level <code><a href="https://rdrr.io/r/base/function.html" class="external-link">return()</a></code>
 statement (i.e., return statements in anonymized functions are ignored).</p></dd>
 
 
-<dt>bindToReturn</dt>
+<dt id="arg-bindtoreturn">bindToReturn<a class="anchor" aria-label="anchor" href="#arg-bindtoreturn"></a></dt>
 <dd><p>For non-<code>localize</code>d expressions, should an assignment
 of a meta expression be applied to the <em>last child</em> of the top-level <code>\{</code> call?</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>If inside meta mode, a quoted form of <code>expr</code> for use inside of
+    <p>If inside meta mode, a quoted form of <code>expr</code> for use inside of
 <code><a href="metaReactive.html">metaReactive2()</a></code>, <code><a href="metaObserve.html">metaObserve2()</a></code>, or <code><a href="metaRender.html">metaRender2()</a></code>. Otherwise, in
 normal execution, the result of evaluating <code>expr</code>.</p>
     </div>
@@ -122,15 +122,15 @@ normal execution, the result of evaluating <code>expr</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
