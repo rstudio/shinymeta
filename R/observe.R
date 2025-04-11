@@ -1,14 +1,14 @@
 #' Create a meta-reactive observer
 #'
-#' Create a [observe()]r that, when invoked with meta-mode activated
-#' (i.e. called within [withMetaMode()] or [expandChain()]), returns a
-#' partially evaluated code expression. Outside of meta-mode,
-#' `metaObserve()` is equivalent to `observe()`
-#' (it fully evaluates the given expression).
+#' Create a [shiny::observe()]r that, when invoked with meta-mode activated
+#' (i.e. called within [withMetaMode()] or [expandChain()]), returns a partially
+#' evaluated code expression. Outside of meta-mode, `metaObserve()` is
+#' equivalent to `observe()` (it fully evaluates the given expression).
 #'
-#' @details If you wish to capture specific code inside of `expr` (e.g. ignore code
-#' that has no meaning outside shiny, like [req()]), use `metaObserve2()` in combination
-#' with `metaExpr()`. When using `metaObserve2()`, `expr` must return a `metaExpr()`.
+#' @details If you wish to capture specific code inside of `expr` (e.g. ignore
+#'   code that has no meaning outside shiny, like [shiny::req()]), use
+#'   `metaObserve2()` in combination with `metaExpr()`. When using
+#'   `metaObserve2()`, `expr` must return a `metaExpr()`.
 #'
 #' @inheritParams shiny::observe
 #' @inheritParams metaReactive

@@ -61,14 +61,15 @@ meta mode, it acts the same as a regular \code{\link[shiny:reactive]{shiny::reac
 call.
 }
 \description{
-Create a \code{\link[=reactive]{reactive()}} that, when invoked with meta-mode activated
-(i.e. called within \code{\link[=withMetaMode]{withMetaMode()}} or \code{\link[=expandChain]{expandChain()}}), returns a
-code expression (instead of evaluating that expression and returning the value).
+Create a \code{\link[shiny:reactive]{shiny::reactive()}} that, when invoked with meta-mode activated
+(i.e. called within \code{\link[=withMetaMode]{withMetaMode()}} or \code{\link[=expandChain]{expandChain()}}), returns a code
+expression (instead of evaluating that expression and returning the value).
 }
 \details{
-If you wish to capture specific code inside of \code{expr} (e.g. ignore code
-that has no meaning outside shiny, like \code{\link[=req]{req()}}), use \code{metaReactive2()} in combination
-with \code{metaExpr()}. When using \code{metaReactive2()}, \code{expr} must return a \code{metaExpr()}.
+If you wish to capture specific code inside of \code{expr} (e.g. ignore
+code that has no meaning outside shiny, like \code{\link[shiny:req]{shiny::req()}}), use
+\code{metaReactive2()} in combination with \code{metaExpr()}. When using
+\code{metaReactive2()}, \code{expr} must return a \code{metaExpr()}.
 
 If \code{varname} is unspecified, \link{srcref}s are used in attempt to infer the name
 bound to the meta-reactive object. In order for this inference to work, the

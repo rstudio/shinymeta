@@ -21,8 +21,8 @@ displayCodeModal(
 
 \item{title}{An optional title for the dialog.}
 
-\item{clip}{An \code{\link[=icon]{icon()}} \code{name} that a user can press to copy \code{code} to the clipboard.
-If you wish to not have an icon, specify \code{clip = NULL}.}
+\item{clip}{An \code{\link[shiny:icon]{shiny::icon()}} \code{name} that a user can press to copy \code{code} to
+the clipboard. If you wish to not have an icon, specify \code{clip = NULL}.}
 
 \item{footer}{UI for footer. Use \code{NULL} for no footer.}
 

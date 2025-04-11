@@ -54,16 +54,16 @@ ever called outside of meta mode, it throws an error, as it is definitely
 being called incorrectly.
 }
 \description{
-Create a \code{\link[=observe]{observe()}}r that, when invoked with meta-mode activated
-(i.e. called within \code{\link[=withMetaMode]{withMetaMode()}} or \code{\link[=expandChain]{expandChain()}}), returns a
-partially evaluated code expression. Outside of meta-mode,
-\code{metaObserve()} is equivalent to \code{observe()}
-(it fully evaluates the given expression).
+Create a \code{\link[shiny:observe]{shiny::observe()}}r that, when invoked with meta-mode activated
+(i.e. called within \code{\link[=withMetaMode]{withMetaMode()}} or \code{\link[=expandChain]{expandChain()}}), returns a partially
+evaluated code expression. Outside of meta-mode, \code{metaObserve()} is
+equivalent to \code{observe()} (it fully evaluates the given expression).
 }
 \details{
-If you wish to capture specific code inside of \code{expr} (e.g. ignore code
-that has no meaning outside shiny, like \code{\link[=req]{req()}}), use \code{metaObserve2()} in combination
-with \code{metaExpr()}. When using \code{metaObserve2()}, \code{expr} must return a \code{metaExpr()}.
+If you wish to capture specific code inside of \code{expr} (e.g. ignore
+code that has no meaning outside shiny, like \code{\link[shiny:req]{shiny::req()}}), use
+\code{metaObserve2()} in combination with \code{metaExpr()}. When using
+\code{metaObserve2()}, \code{expr} must return a \code{metaExpr()}.
 }
 \examples{
 
