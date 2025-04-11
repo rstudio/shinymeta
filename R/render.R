@@ -5,7 +5,7 @@
 #' code expression (instead of evaluating that expression and returning the value).
 #'
 #' @details If you wish to capture specific code inside of `expr` (e.g. ignore code
-#' that has no meaning outside shiny, like [req()]), use `metaRender2()` in combination
+#' that has no meaning outside shiny, like [shiny::req()]), use `metaRender2()` in combination
 #' with `metaExpr()`. When using `metaRender2()`, `expr` must return a `metaExpr()`.
 #'
 #' Since package authors are allowed to create their own output rendering functions,

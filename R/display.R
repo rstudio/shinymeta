@@ -3,8 +3,8 @@
 #' Show a `shinyAce::aceEditor()` in a `shiny::modalDialog()`.
 #'
 #' @param code Either a language object or a character string.
-#' @param clip An [icon()] `name` that a user can press to copy `code` to the clipboard.
-#' If you wish to not have an icon, specify `clip = NULL`.
+#' @param clip An [shiny::icon()] `name` that a user can press to copy `code` to
+#'   the clipboard. If you wish to not have an icon, specify `clip = NULL`.
 #' @param session a shiny session object (the default should almost always be used).
 #' @inheritParams shiny::modalDialog
 #' @param ... arguments passed along to `shinyAce::aceEditor()`

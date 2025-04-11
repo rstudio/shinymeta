@@ -12,13 +12,14 @@
 
 #' Create a meta-reactive expression
 #'
-#' Create a [reactive()] that, when invoked with meta-mode activated
-#' (i.e. called within [withMetaMode()] or [expandChain()]), returns a
-#' code expression (instead of evaluating that expression and returning the value).
+#' Create a [shiny::reactive()] that, when invoked with meta-mode activated
+#' (i.e. called within [withMetaMode()] or [expandChain()]), returns a code
+#' expression (instead of evaluating that expression and returning the value).
 #'
-#' @details If you wish to capture specific code inside of `expr` (e.g. ignore code
-#' that has no meaning outside shiny, like [req()]), use `metaReactive2()` in combination
-#' with `metaExpr()`. When using `metaReactive2()`, `expr` must return a `metaExpr()`.
+#' @details If you wish to capture specific code inside of `expr` (e.g. ignore
+#'   code that has no meaning outside shiny, like [shiny::req()]), use
+#'   `metaReactive2()` in combination with `metaExpr()`. When using
+#'   `metaReactive2()`, `expr` must return a `metaExpr()`.
 #'
 #' If `varname` is unspecified, [srcref]s are used in attempt to infer the name
 #' bound to the meta-reactive object. In order for this inference to work, the
