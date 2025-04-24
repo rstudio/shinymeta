@@ -1,6 +1,6 @@
 # 0.2.1.9000
 
-
+* Migrate GPL-3 license to MIT (#129)
 
 # 0.2.1
 

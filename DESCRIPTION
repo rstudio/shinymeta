@@ -9,7 +9,7 @@ Authors@R: c(
     )
 Description: Provides tools for capturing logic in a Shiny app and exposing it as code that can be run outside of Shiny (e.g., from an R console). It also provides tools for bundling both the code and results to the end user.
 URL: https://rstudio.github.io/shinymeta/, https://github.com/rstudio/shinymeta
-License: GPL-3
+License: MIT + file LICENSE
 Imports: 
   callr,
   fastmap,
