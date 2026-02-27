@@ -1,4 +1,4 @@
-# metaRender: works with a render pipeline
+# metaRender / works with a render pipeline
 
     # top-level comment
     data <- dplyr::sample_n(diamonds, 1000)
