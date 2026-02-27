@@ -1,5 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://rstudio.github.io/shinymeta/404.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/LICENSE-text.html</loc></url>
+<url><loc>https://rstudio.github.io/shinymeta/LICENSE.html</loc></url>
 <url><loc>https://rstudio.github.io/shinymeta/articles/code-distribution.html</loc></url>
 <url><loc>https://rstudio.github.io/shinymeta/articles/code-generation.html</loc></url>
 <url><loc>https://rstudio.github.io/shinymeta/articles/index.html</loc></url>

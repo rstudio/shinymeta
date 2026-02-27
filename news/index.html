@@ -56,6 +56,43 @@
       <small>Source: <a href="https://github.com/rstudio/shinymeta/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="development version" id="shinymeta-development-version">shinymeta (development version)<a class="anchor" aria-label="anchor" href="#shinymeta-development-version"></a></h2>
+<ul><li>Migrate GPL-3 license to MIT (<a href="https://github.com/rstudio/shinymeta/issues/129" class="external-link">#129</a>)</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.2.1" id="shinymeta-021">shinymeta 0.2.1<small>2025-04-11</small><a class="anchor" aria-label="anchor" href="#shinymeta-021"></a></h2>
+<ul><li><p>Tweak imports to avoid revdepcheck errors for styler. (<a href="https://github.com/rstudio/shinymeta/issues/119" class="external-link">#119</a>)</p></li>
+<li><p>Add <code>"reactive"</code> class to <code>metaReactive</code> objects, so <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">shiny::is.reactive()</a></code> returns <code>TRUE</code> for them. (<a href="https://github.com/rstudio/shinymeta/issues/120" class="external-link">#120</a>)</p></li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.2.0.3" id="shinymeta-0203">shinymeta 0.2.0.3<small>2021-11-17</small><a class="anchor" aria-label="anchor" href="#shinymeta-0203"></a></h2>
+<p>Small patch release to accommodate for changes made to <code><a href="https://rdrr.io/r/base/deparse.html" class="external-link">base::deparse()</a></code> in the next upcoming R release. (<a href="https://github.com/rstudio/shinymeta/issues/107" class="external-link">#107</a>)</p>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.2.0.2" id="shinymeta-0202">shinymeta 0.2.0.2<small>2021-09-20</small><a class="anchor" aria-label="anchor" href="#shinymeta-0202"></a></h2>
+<p>Small patch release to accommodate for changes made in testthat 3.1.0. (<a href="https://github.com/rstudio/shinymeta/issues/102" class="external-link">#102</a>)</p>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.2.0.1" id="shinymeta-0201">shinymeta 0.2.0.1<small>2021-06-15</small><a class="anchor" aria-label="anchor" href="#shinymeta-0201"></a></h2>
+<p>Small patch release to address unit test failures on Solaris. (<a href="https://github.com/rstudio/shinymeta/issues/101" class="external-link">#101</a>)</p>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.2.0" id="shinymeta-020">shinymeta 0.2.0<small>2021-06-15</small><a class="anchor" aria-label="anchor" href="#shinymeta-020"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
+<ul><li>A different operator, <code><a href="../reference/dotdot.html">..()</a></code> (instead of <code>!!</code>), is now expanded in meta-mode. In normal execution, this operator is not expanded, and is, instead stripped (i.e., <code>.,(data())</code> becomes <code><a href="https://rdrr.io/r/utils/data.html" class="external-link">data()</a></code>). See <a href="https://github.com/rstudio/shinymeta/wiki/Syntax-changes-for-shinymeta-0.2.0" class="external-link">this wiki page</a> for more information. (<a href="https://github.com/rstudio/shinymeta/pull/59" class="external-link">#59</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
+<ul><li>New <code>metaAction</code> function, intended for executing code for its side effects while also capturing the source for code generation. This is useful for app setup code, such as <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> calls, <code>source</code>-ing of supplemental .R files, loading static data sets, etc. (<a href="https://github.com/rstudio/shinymeta/pull/71" class="external-link">#71</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="known-issues-0-2-0">Known issues<a class="anchor" aria-label="anchor" href="#known-issues-0-2-0"></a></h3>
+<ul><li><p><code>bquote(splicing = TRUE)</code> can’t be used inside a <code><a href="../reference/metaExpr.html">metaExpr()</a></code> context since the <code><a href="../reference/dotdot.html">..()</a></code> operator is reserved for <a href="https://rstudio.github.io/shinymeta/">shinymeta</a>’s quasi-quotation rules. Use <a href="https://rlang.r-lib.org" class="external-link">rlang</a>’s <code>!!!</code> operator for splicing instead of <code><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote()</a></code>.</p></li>
+<li><p><code><a href="../reference/metaRender.html">metaRender()</a></code> will throw a warning about deprecated <code>env</code>/<code>quoted</code> arguments when <code>shiny::devmode(TRUE)</code>. This warning may be safely ignored and will be fixed in a future version.</p></li>
+</ul></div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -70,7 +107,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer></div>
