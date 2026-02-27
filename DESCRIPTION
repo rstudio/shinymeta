@@ -1,42 +1,47 @@
-Package: shinymeta
 Type: Package
+Package: shinymeta
 Title: Export Domain Logic from Shiny using Meta-Programming
 Version: 0.2.1.9000
 Authors@R: c(
-    person("Joe", "Cheng", email = "joe@rstudio.com", role = "aut"),
-    person("Carson", "Sievert", email = "carson@rstudio.com", role = c("cre", "aut"), comment = c(ORCID = "0000-0002-4958-2844")),
-    person(family = "RStudio", role = "cph")
-    )
-Description: Provides tools for capturing logic in a Shiny app and exposing it as code that can be run outside of Shiny (e.g., from an R console). It also provides tools for bundling both the code and results to the end user.
-URL: https://rstudio.github.io/shinymeta/, https://github.com/rstudio/shinymeta
+    person("Joe", "Cheng", , "joe@rstudio.com", role = "aut"),
+    person("Carson", "Sievert", , "carson@rstudio.com", role = c("cre", "aut"),
+           comment = c(ORCID = "0000-0002-4958-2844")),
+    person(, "RStudio", role = "cph")
+  )
+Description: Provides tools for capturing logic in a Shiny app and
+    exposing it as code that can be run outside of Shiny (e.g., from an R
+    console). It also provides tools for bundling both the code and
+    results to the end user.
 License: MIT + file LICENSE
+URL: https://rstudio.github.io/shinymeta/,
+    https://github.com/rstudio/shinymeta
 Imports: 
-  callr,
-  fastmap,
-  fs,
-  rlang,
-  htmltools,
-  shiny (>= 1.6.0),
-  sourcetools,
-  styler,
-  utils
-Encoding: UTF-8
-RoxygenNote: 7.3.2
+    callr,
+    fastmap,
+    fs,
+    htmltools,
+    rlang,
+    shiny (>= 1.6.0),
+    sourcetools,
+    styler,
+    utils
 Suggests: 
-    knitr,
-    stringr,
-    rmarkdown,
-    testthat (>= 3.0),
-    shinyAce,
     clipr,
+    cranlogs,
     dplyr,
     ggplot2,
-    cranlogs,
-    xfun,
+    knitr,
     magrittr,
+    rmarkdown,
+    shinyAce,
+    stringr,
+    testthat (>= 3.0),
+    xfun,
     zoo
-Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
 Collate: 
     'archive.R'
     'display.R'

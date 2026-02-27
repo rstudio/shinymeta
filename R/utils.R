@@ -73,24 +73,43 @@ mrexprSrcrefToLabel <- function(srcref, defaultLabel) {
   if (is.null(srcfile))
     return(defaultLabel)
 
-  if (is.null(srcfile$lines))
+  # When sourceUTF8() wraps code with a #line directive whose path differs from
+  # the srcfilecopy filename, R creates a srcfilealias whose $lines is NULL.
+  # The actual lines live in $original$lines.
+  lines <- srcfile$lines
+  if (is.null(lines) && inherits(srcfile, "srcfilealias")) {
+    lines <- srcfile$original$lines
+  }
+
+  if (is.null(lines))
     return(defaultLabel)
 
-  lines <- srcfile$lines
   # When pasting at the Console, srcfile$lines is not split
   if (length(lines) == 1) {
     lines <- strsplit(lines, "\n")[[1]]
   }
 
-  if (length(lines) < srcref[1]) {
+  # When a #line directive is present, R extends srcrefs to 8 elements.
+  # srcref[7] is the pre-remap line number — the actual position in the
+  # srcfilecopy's lines array.
+  lineIdx <- srcref[1]
+  if (length(srcref) >= 7 && srcref[7] != srcref[1]) {
+    lineIdx <- srcref[7]
+  }
+
+  if (length(lines) < lineIdx) {
     return(defaultLabel)
   }
 
-  firstLineIdx <- srcref[1]
+  firstLineIdx <- lineIdx
   firstLine <- substring(lines[firstLineIdx], 1, srcref[2] - 1)
-  while (!grepl("metaReactive", firstLine) & firstLineIdx >= 1) {
+  while (length(firstLine) > 0 && !grepl("metaReactive", firstLine) && firstLineIdx > 1) {
     firstLineIdx <- firstLineIdx - 1
     firstLine <- lines[firstLineIdx]
+  }
+
+  if (length(firstLine) == 0 || !grepl("metaReactive", firstLine)) {
+    return(defaultLabel)
   }
 
   m <- regexec("(.*)(<-|=)\\s*(?:shinymeta::)?metaReactive2?\\s*\\(", firstLine)
