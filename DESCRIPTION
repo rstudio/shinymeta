@@ -13,6 +13,7 @@ License: MIT + file LICENSE
 Imports: 
   callr,
   fastmap,
+  formatR,
   fs,
   rlang,
   htmltools,
