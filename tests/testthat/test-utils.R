@@ -1,4 +1,5 @@
 test_that("knit_expand_safe ignores calling environment", {
+  skip_if_not_installed("knitr")
 
   foo <- "bar"
   expect_error(

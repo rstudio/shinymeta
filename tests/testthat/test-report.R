@@ -1,6 +1,7 @@
 template_path <- test_path("assets/template.Rmd")
 
 test_that("buildRmdBundle works", {
+  skip_if_not_installed("rmarkdown")
   skip_if_not(
     rmarkdown::pandoc_available("1.12.3"),
     "Pandoc 1.12.3 or higher is required"
@@ -26,6 +27,7 @@ test_that("buildRmdBundle works", {
 })
 
 test_that("buildRmdBundle rejects unsafe knit_expand results", {
+  skip_if_not_installed("rmarkdown")
   output_zip_path <- tempfile("testbundle-", fileext = ".zip")
 
   # (Begin code chunk) fails
