@@ -93,7 +93,7 @@ mrexprSrcrefToLabel <- function(srcref, defaultLabel) {
   # srcref[7] is the pre-remap line number — the actual position in the
   # srcfilecopy's lines array.
   lineIdx <- srcref[1]
-  if (length(srcref) >= 7 && isTrue(srcref[7] != srcref[1])) {
+  if (length(srcref) >= 7 && isTRUE(srcref[7] != srcref[1])) {
     lineIdx <- srcref[7]
   }
 
