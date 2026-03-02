@@ -1,5 +1,7 @@
 # shinymeta (development version)
 
+* Fixed `mrexprSrcrefToLabel()` crash when Shiny's `sourceUTF8()` wraps app code with a `#line` directive. (#130)
+
 * Migrate GPL-3 license to MIT (#129)
 
 # shinymeta 0.2.1
