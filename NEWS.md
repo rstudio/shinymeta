@@ -1,3 +1,5 @@
+# shinymeta (development version)
+
 # shinymeta 0.2.2
 
 * Fixed `mrexprSrcrefToLabel()` crash when Shiny's `sourceUTF8()` wraps app code with a `#line` directive. (#130)
